@@ -3,17 +3,17 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.samples.unsafe
+package io.github.kotlinmania.io.samples.unsafe
 
-import kotlinx.io.Buffer
-import kotlinx.io.UnsafeIoApi
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.toHexString
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringApi
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringOperations
-import kotlinx.io.readString
-import kotlinx.io.unsafe.*
-import kotlinx.io.writeString
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.toHexString
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.unsafe.*
+import io.github.kotlinmania.io.writeString
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.Files

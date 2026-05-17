@@ -18,10 +18,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.encodeToByteString
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.encodeToByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails

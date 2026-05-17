@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * Supplies a stream of bytes. RawSource is a base interface for `kotlinx-io` data suppliers.
@@ -37,7 +37,7 @@ package kotlinx.io
  * [RawSource] implementations are not required to be thread safe.
  * However, if an implementation provides some thread safety guarantees, it is recommended to explicitly document them.
  *
- * @sample kotlinx.io.samples.RC4SourceSample.rc4
+ * @sample io.github.kotlinmania.io.samples.RC4SourceSample.rc4
  */
 public interface RawSource : AutoCloseable {
     /**
@@ -51,7 +51,7 @@ public interface RawSource : AutoCloseable {
      * @throws IllegalStateException when the source is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readAtMostToSink
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readAtMostToSink
      */
     public fun readAtMostTo(sink: Buffer, byteCount: Long): Long
 

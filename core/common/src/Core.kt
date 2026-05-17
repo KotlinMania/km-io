@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * Returns a new source that buffers reads from the source. The returned source will perform bulk

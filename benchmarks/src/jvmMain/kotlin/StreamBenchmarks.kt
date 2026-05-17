@@ -3,15 +3,15 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.benchmarks
+package io.github.kotlinmania.io.benchmarks
 
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Blackhole
 import kotlinx.benchmark.Param
 import kotlinx.benchmark.Setup
-import kotlinx.io.asInputStream
-import kotlinx.io.asOutputStream
-import kotlinx.io.readTo
+import io.github.kotlinmania.io.asInputStream
+import io.github.kotlinmania.io.asOutputStream
+import io.github.kotlinmania.io.readTo
 
 open class InputStreamByteRead : BufferRWBenchmarkBase() {
     private val stream = buffer.asInputStream()

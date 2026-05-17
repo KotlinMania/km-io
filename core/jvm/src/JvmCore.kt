@@ -19,9 +19,9 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -31,7 +31,7 @@ import java.io.OutputStream
  *
  * Use [RawSink.buffered] to create a buffered sink from it.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.outputStreamAsSink
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.outputStreamAsSink
  */
 public fun OutputStream.asSink(): RawSink = OutputStreamSink(this)
 
@@ -44,7 +44,7 @@ private open class OutputStreamSink(
         checkOffsetAndCount(source.size, 0, byteCount)
         var remaining = byteCount
         while (remaining > 0) {
-            // kotlinx.io TODO: detect Interruption.
+            // io.github.kotlinmania.io TODO: detect Interruption.
             remaining -= UnsafeBufferOperations.readFromHead(source) { data, pos, limit ->
                 val toCopy = minOf(remaining, limit - pos).toInt()
                 out.write(data, pos, toCopy)
@@ -65,7 +65,7 @@ private open class OutputStreamSink(
  *
  * Use [RawSource.buffered] to create a buffered source from it.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.inputStreamAsSource
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.inputStreamAsSource
  */
 public fun InputStream.asSource(): RawSource = InputStreamSource(this)
 

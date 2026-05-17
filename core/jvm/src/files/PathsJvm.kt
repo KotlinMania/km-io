@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.Sink
-import kotlinx.io.Source
-import kotlinx.io.buffered
+import io.github.kotlinmania.io.Sink
+import io.github.kotlinmania.io.Source
+import io.github.kotlinmania.io.buffered
 import java.io.File
 
 public actual class Path internal constructor(internal val file: File) {

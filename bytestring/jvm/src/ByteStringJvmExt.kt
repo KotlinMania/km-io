@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.bytestring
+package io.github.kotlinmania.io.bytestring
 
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringApi
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
 import java.nio.BufferOverflowException
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
@@ -28,7 +28,7 @@ public fun String.encodeToByteString(charset: Charset): ByteString = ByteString.
 /**
  * Returns a new read-only heap [ByteBuffer] wrapping [this] ByteString's content.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesJvm.toReadOnlyByteBuffer
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesJvm.toReadOnlyByteBuffer
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun ByteString.asReadOnlyByteBuffer(): ByteBuffer {
@@ -49,7 +49,7 @@ public fun ByteString.asReadOnlyByteBuffer(): ByteBuffer {
  *
  * @throws IndexOutOfBoundsException when [length] has negative value or its value exceeds [ByteBuffer.remaining]
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesJvm.getByteStringFromBuffer
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesJvm.getByteStringFromBuffer
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun ByteBuffer.getByteString(length: Int = remaining()): ByteString {
@@ -73,7 +73,7 @@ public fun ByteBuffer.getByteString(length: Int = remaining()): ByteString {
  * @throws IndexOutOfBoundsException when [at] is negative, greater or equal to [ByteBuffer.limit]
  * or [at] + [length] exceeds [ByteBuffer.limit].
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesJvm.getByteStringFromBufferAbsolute
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesJvm.getByteStringFromBufferAbsolute
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun ByteBuffer.getByteString(at: Int, length: Int): ByteString {
@@ -94,7 +94,7 @@ public fun ByteBuffer.getByteString(at: Int, length: Int): ByteString {
  * @throws java.nio.ReadOnlyBufferException when [this] buffer is read-only
  * @throws java.nio.BufferOverflowException when [string] can't fit into remaining space of this buffer
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesJvm.putByteStringToBuffer
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesJvm.putByteStringToBuffer
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun ByteBuffer.putByteString(string: ByteString) {
@@ -112,7 +112,7 @@ public fun ByteBuffer.putByteString(string: ByteString) {
  * @throws IndexOutOfBoundsException when [at] is negative, exceeds [ByteBuffer.limit], or
  * [at] + [ByteString.size] exceeds [ByteBuffer.limit]
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesJvm.putByteStringToBufferAbsolute
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesJvm.putByteStringToBufferAbsolute
  */
 public fun ByteBuffer.putByteString(at: Int, string: ByteString) {
     checkIndexAndCapacity(at, string.size)

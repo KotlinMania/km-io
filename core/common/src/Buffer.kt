@@ -18,12 +18,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import kotlin.jvm.JvmSynthetic
 
 /**
@@ -198,7 +198,7 @@ public class Buffer : Source, Sink {
      * (`[0..buffer.size)`).
      * @throws IllegalArgumentException when `startIndex > endIndex`.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.bufferCopy
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.bufferCopy
      */
     public fun copyTo(
         out: Buffer,
@@ -258,7 +258,7 @@ public class Buffer : Source, Sink {
      *
      * @throws IndexOutOfBoundsException when [position] is negative or greater or equal to [Buffer.size].
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.bufferGetByte
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.bufferGetByte
      */
     public operator fun get(position: Long): Byte {
         if (position < 0 || position >= size) {
@@ -277,7 +277,7 @@ public class Buffer : Source, Sink {
      *
      * Call to this method is equivalent to [skip] with `byteCount = size`.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.bufferClear
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.bufferClear
      */
     public fun clear(): Unit = skip(size)
 
@@ -552,7 +552,7 @@ public class Buffer : Source, Sink {
      * a string will contain its size and only a prefix of data, like `Buffer(size=1024 hex=01234…)`.
      * Thus, the string could not be used to compare buffers or verify buffer's content.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.bufferToString
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.bufferToString
      */
     @OptIn(UnsafeIoApi::class)
     override fun toString(): String {

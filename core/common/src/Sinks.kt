@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 
 private val HEX_DIGIT_BYTES = ByteArray(16) {
     ((if (it < 10) '0'.code else ('a'.code - 10)) + it).toByte()
@@ -22,7 +22,7 @@ private val HEX_DIGIT_BYTES = ByteArray(16) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeShortLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeShortLe
  */
 public fun Sink.writeShortLe(short: Short) {
     this.writeShort(short.reverseBytes())
@@ -36,7 +36,7 @@ public fun Sink.writeShortLe(short: Short) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeIntLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeIntLe
  */
 public fun Sink.writeIntLe(int: Int) {
     this.writeInt(int.reverseBytes())
@@ -50,7 +50,7 @@ public fun Sink.writeIntLe(int: Int) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeLongLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeLongLe
  */
 public fun Sink.writeLongLe(long: Long) {
     this.writeLong(long.reverseBytes())
@@ -66,7 +66,7 @@ public fun Sink.writeLongLe(long: Long) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeDecimalLong
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeDecimalLong
  */
 @OptIn(DelicateIoApi::class, UnsafeIoApi::class)
 public fun Sink.writeDecimalLong(long: Long) {
@@ -145,7 +145,7 @@ public fun Sink.writeDecimalLong(long: Long) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeHexLong
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeHexLong
  */
 @OptIn(DelicateIoApi::class, UnsafeIoApi::class)
 public fun Sink.writeHexadecimalUnsignedLong(long: Long) {
@@ -177,7 +177,7 @@ public fun Sink.writeHexadecimalUnsignedLong(long: Long) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUByte
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUByte
  */
 public fun Sink.writeUByte(byte: UByte) {
     writeByte(byte.toByte())
@@ -191,7 +191,7 @@ public fun Sink.writeUByte(byte: UByte) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUShort
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUShort
  */
 public fun Sink.writeUShort(short: UShort) {
     writeShort(short.toShort())
@@ -205,7 +205,7 @@ public fun Sink.writeUShort(short: UShort) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUInt
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUInt
  */
 public fun Sink.writeUInt(int: UInt) {
     writeInt(int.toInt())
@@ -219,7 +219,7 @@ public fun Sink.writeUInt(int: UInt) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeULong
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeULong
  */
 public fun Sink.writeULong(long: ULong) {
     writeLong(long.toLong())
@@ -233,7 +233,7 @@ public fun Sink.writeULong(long: ULong) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUShortLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUShortLe
  */
 public fun Sink.writeUShortLe(short: UShort) {
     writeShortLe(short.toShort())
@@ -247,7 +247,7 @@ public fun Sink.writeUShortLe(short: UShort) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUIntLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUIntLe
  */
 public fun Sink.writeUIntLe(int: UInt) {
     writeIntLe(int.toInt())
@@ -261,7 +261,7 @@ public fun Sink.writeUIntLe(int: UInt) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeULongLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeULongLe
  */
 public fun Sink.writeULongLe(long: ULong) {
     writeLongLe(long.toLong())
@@ -284,7 +284,7 @@ public fun Sink.writeULongLe(long: ULong) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeFloat
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeFloat
  */
 public fun Sink.writeFloat(float: Float) {
     writeInt(float.toBits())
@@ -303,7 +303,7 @@ public fun Sink.writeFloat(float: Float) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeDouble
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeDouble
  */
 public fun Sink.writeDouble(double: Double) {
     writeLong(double.toBits())
@@ -326,7 +326,7 @@ public fun Sink.writeDouble(double: Double) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeFloatLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeFloatLe
  */
 public fun Sink.writeFloatLe(float: Float) {
     writeIntLe(float.toBits())
@@ -345,7 +345,7 @@ public fun Sink.writeFloatLe(float: Float) {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeDoubleLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeDoubleLe
  */
 public fun Sink.writeDoubleLe(double: Double) {
     writeLongLe(double.toBits())

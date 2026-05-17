@@ -18,9 +18,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import java.io.EOFException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -58,7 +58,7 @@ private fun Buffer.readStringImpl(byteCount: Long, charset: Charset): String {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.readWriteStrings
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.readWriteStrings
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readString(charset: Charset): String {
@@ -80,7 +80,7 @@ public fun Source.readString(charset: Charset): String {
  * @throws IllegalArgumentException if [byteCount] is negative or its value is greater than [Int.MAX_VALUE].
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.readStringBounded
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.readStringBounded
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readString(byteCount: Long, charset: Charset): String {
@@ -91,7 +91,7 @@ public fun Source.readString(byteCount: Long, charset: Charset): String {
 /**
  * Returns an input stream that reads from this source. Closing the stream will also close this source.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.asStream
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.asStream
  */
 @OptIn(InternalIoApi::class)
 public fun Source.asInputStream(): InputStream {
@@ -137,7 +137,7 @@ public fun Source.asInputStream(): InputStream {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.readWriteByteBuffer
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.readWriteByteBuffer
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readAtMostTo(sink: ByteBuffer): Int {

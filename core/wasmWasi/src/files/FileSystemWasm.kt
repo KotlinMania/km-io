@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.*
-import kotlinx.io.wasi.*
+import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.wasi.*
 import kotlin.math.min
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi
 import kotlin.wasm.unsafe.withScopedMemoryAllocator

@@ -18,13 +18,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.SegmentPool.HASH_BUCKET_COUNT
-import kotlinx.io.SegmentPool.LOCK
-import kotlinx.io.SegmentPool.MAX_SIZE
-import kotlinx.io.SegmentPool.recycle
-import kotlinx.io.SegmentPool.take
+import io.github.kotlinmania.io.SegmentPool.HASH_BUCKET_COUNT
+import io.github.kotlinmania.io.SegmentPool.LOCK
+import io.github.kotlinmania.io.SegmentPool.MAX_SIZE
+import io.github.kotlinmania.io.SegmentPool.recycle
+import io.github.kotlinmania.io.SegmentPool.take
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater
 import java.util.concurrent.atomic.AtomicReferenceArray
 
@@ -90,7 +90,7 @@ internal class RefCountingCopyTracker : SegmentCopyTracker() {
  *
  * [MAX_SIZE] is kept relatively small to avoid excessive memory consumption in case of a large [HASH_BUCKET_COUNT].
  * For better handling of scenarios with high segments demand, an optional second-level pool could be enabled
- * by setting up a value of `kotlinx.io.pool.size.bytes` system property.
+ * by setting up a value of `io.github.kotlinmania.io.pool.size.bytes` system property.
  *
  * The second-level pool use half of the [HASH_BUCKET_COUNT] and if an initially selected bucket if empty on [take] or
  * full or [recycle], all other buckets will be inspected before finally giving up (which means allocating a new segment
@@ -128,7 +128,7 @@ internal actual object SegmentPool {
 
     // visible for testing
     internal val SECOND_LEVEL_POOL_TOTAL_SIZE =
-        System.getProperty("kotlinx.io.pool.size.bytes", DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE)
+        System.getProperty("io.github.kotlinmania.io.pool.size.bytes", DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE)
             .toIntOrNull()?.coerceAtLeast(0) ?: 0
 
     private val SECOND_LEVEL_POOL_BUCKET_SIZE =

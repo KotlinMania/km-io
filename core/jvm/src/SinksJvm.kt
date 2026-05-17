@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import java.io.IOException
 import java.io.OutputStream
@@ -40,7 +40,7 @@ import java.nio.charset.Charset
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.readWriteStrings
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.readWriteStrings
  */
 public fun Sink.writeString(string: String, charset: Charset, startIndex: Int = 0, endIndex: Int = string.length) {
     checkBounds(string.length, startIndex, endIndex)
@@ -52,7 +52,7 @@ public fun Sink.writeString(string: String, charset: Charset, startIndex: Int = 
 /**
  * Returns an output stream that writes to this sink. Closing the stream will also close this sink.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.asStream
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.asStream
  */
 @OptIn(DelicateIoApi::class)
 public fun Sink.asOutputStream(): OutputStream {
@@ -95,7 +95,7 @@ public fun Sink.asOutputStream(): OutputStream {
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.readWriteByteBuffer
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.readWriteByteBuffer
  */
 @OptIn(InternalIoApi::class)
 public fun Sink.write(source: ByteBuffer): Int {

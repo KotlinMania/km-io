@@ -3,9 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.*
+import io.github.kotlinmania.io.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.file.Files

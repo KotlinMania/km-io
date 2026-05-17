@@ -3,13 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.isEmpty
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringApi
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringOperations
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.isEmpty
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,7 +25,7 @@ import kotlin.math.min
  * @throws IllegalStateException if the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.ByteStringSamples.writeByteString
+ * @sample io.github.kotlinmania.io.samples.ByteStringSamples.writeByteString
  */
 @OptIn(DelicateIoApi::class, UnsafeByteStringApi::class, UnsafeIoApi::class)
 public fun Sink.write(byteString: ByteString, startIndex: Int = 0, endIndex: Int = byteString.size) {
@@ -56,7 +56,7 @@ public fun Sink.write(byteString: ByteString, startIndex: Int = 0, endIndex: Int
  * @throws IllegalStateException if the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.ByteStringSamples.readByteString
+ * @sample io.github.kotlinmania.io.samples.ByteStringSamples.readByteString
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun Source.readByteString(): ByteString {
@@ -73,7 +73,7 @@ public fun Source.readByteString(): ByteString {
  * @throws IllegalStateException if the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.ByteStringSamples.readByteString
+ * @sample io.github.kotlinmania.io.samples.ByteStringSamples.readByteString
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun Source.readByteString(byteCount: Int): ByteString {
@@ -96,7 +96,7 @@ public fun Source.readByteString(byteCount: Int): ByteString {
  * @throws IllegalStateException if the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.ByteStringSamples.indexOfByteString
+ * @sample io.github.kotlinmania.io.samples.ByteStringSamples.indexOfByteString
  */
 @OptIn(InternalIoApi::class, UnsafeByteStringApi::class)
 public fun Source.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
@@ -132,7 +132,7 @@ public fun Source.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
  * @param byteString the sequence of bytes to find within the buffer.
  * @param startIndex the index into the buffer to start searching from.
  *
- * @sample kotlinx.io.samples.ByteStringSamples.indexOfByteString
+ * @sample io.github.kotlinmania.io.samples.ByteStringSamples.indexOfByteString
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun Buffer.indexOf(byteString: ByteString, startIndex: Long = 0): Long {

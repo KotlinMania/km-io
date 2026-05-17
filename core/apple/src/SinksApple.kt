@@ -5,7 +5,7 @@
 
 @file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlinx.cinterop.*
 import platform.Foundation.*
@@ -29,7 +29,7 @@ import kotlin.native.ref.WeakReference
  * [NSOutputStream.initToFileAtPath](https://developer.apple.com/documentation/foundation/nsoutputstream/1416367-inittofileatpath)),
  * their use will result in a runtime error.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesApple.asStream
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesApple.asStream
  */
 public fun Sink.asNSOutputStream(): NSOutputStream = SinkNSOutputStream(this)
 

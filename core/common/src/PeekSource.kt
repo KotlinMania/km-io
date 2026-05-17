@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * A [RawSource] which peeks into an upstream [Source] and allows reading and expanding of the

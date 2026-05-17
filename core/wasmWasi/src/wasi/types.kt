@@ -5,12 +5,12 @@
 
 @file:OptIn(UnsafeWasmMemoryApi::class)
 
-package kotlinx.io.wasi
+package io.github.kotlinmania.io.wasi
 
-import kotlinx.io.loadByte
-import kotlinx.io.loadInt
-import kotlinx.io.loadLong
-import kotlinx.io.storeInt
+import io.github.kotlinmania.io.loadByte
+import io.github.kotlinmania.io.loadInt
+import io.github.kotlinmania.io.loadLong
+import io.github.kotlinmania.io.storeInt
 import kotlin.wasm.unsafe.MemoryAllocator
 import kotlin.wasm.unsafe.Pointer
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi

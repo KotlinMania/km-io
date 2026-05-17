@@ -19,10 +19,10 @@
  * limitations under the License.
  */
 
-package kotlinx.io.internal
+package io.github.kotlinmania.io.internal
 
-import kotlinx.io.and
-import kotlinx.io.shr
+import io.github.kotlinmania.io.and
+import io.github.kotlinmania.io.shr
 
 internal fun ByteArray.commonToUtf8String(beginIndex: Int = 0, endIndex: Int = size): String {
     if (beginIndex < 0 || endIndex > size || beginIndex > endIndex) {

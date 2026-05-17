@@ -3,22 +3,22 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.okio
+package io.github.kotlinmania.io.okio
 
-import kotlinx.io.Buffer
-import kotlinx.io.RawSink
-import kotlinx.io.RawSource
-import kotlinx.io.UnsafeIoApi
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.isEmpty
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringApi
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringOperations
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.isEmpty
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import okio.ByteString.Companion.toByteString
 import kotlin.math.min
 
 /**
- * Returns a [okio.Source] backed by this [kotlinx.io.RawSource].
+ * Returns a [okio.Source] backed by this [io.github.kotlinmania.io.RawSource].
  *
  * Closing one of these sources will also close another one.
  */
@@ -49,7 +49,7 @@ public fun RawSource.asOkioSource(): okio.Source = object : okio.Source {
 }
 
 /**
- * Returns a [okio.Sink] backed by this [kotlinx.io.RawSink].
+ * Returns a [okio.Sink] backed by this [io.github.kotlinmania.io.RawSink].
  *
  * Closing one of these sinks will also close another one.
  */
@@ -86,7 +86,7 @@ public fun RawSink.asOkioSink(): okio.Sink = object : okio.Sink {
 }
 
 /**
- * Returns a [kotlinx.io.RawSink] backed by this [okio.Sink].
+ * Returns a [io.github.kotlinmania.io.RawSink] backed by this [okio.Sink].
  *
  * Closing one of these sinks will also close another one.
  */
@@ -119,7 +119,7 @@ public fun okio.Sink.asKotlinxIoRawSink(): RawSink = object : RawSink {
 }
 
 /**
- * Returns a [kotlinx.io.RawSource] backed by this [okio.Source].
+ * Returns a [io.github.kotlinmania.io.RawSource] backed by this [okio.Source].
  *
  * Closing one of these sources will also close another one.
  */
@@ -150,7 +150,7 @@ public fun okio.Source.asKotlinxIoRawSource(): RawSource = object : RawSource {
 }
 
 /**
- * Returns a new [kotlinx.io.bytestring.ByteString] instance with
+ * Returns a new [io.github.kotlinmania.io.bytestring.ByteString] instance with
  * exactly the same content as this [okio.ByteString].
  */
 public fun okio.ByteString.toKotlinxIoByteString(): ByteString {
@@ -161,7 +161,7 @@ public fun okio.ByteString.toKotlinxIoByteString(): ByteString {
 
 /**
  * Returns a new [okio.ByteString] instance with
- * exactly the same content as this [kotlinx.io.bytestring.ByteString].
+ * exactly the same content as this [io.github.kotlinmania.io.bytestring.ByteString].
  */
 public fun ByteString.toOkioByteString(): okio.ByteString {
     if (isEmpty()) return okio.ByteString.EMPTY

@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.unsafe
+package io.github.kotlinmania.io.unsafe
 
-import kotlinx.io.Buffer
-import kotlinx.io.UnsafeIoApi
-import kotlinx.io.assertArrayEquals
-import kotlinx.io.writeString
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.assertArrayEquals
+import io.github.kotlinmania.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

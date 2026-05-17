@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.bytestring.benchmarks
+package io.github.kotlinmania.io.bytestring.benchmarks
 
 import kotlinx.benchmark.*
-import kotlinx.io.bytestring.*
+import io.github.kotlinmania.io.bytestring.*
 import kotlin.math.min
 
 const val TARGET_BYTE: Byte = 42

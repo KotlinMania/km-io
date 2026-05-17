@@ -21,7 +21,7 @@
 
 @file:Suppress("NOTHING_TO_INLINE")
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 internal val HEX_DIGIT_CHARS =
     charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')

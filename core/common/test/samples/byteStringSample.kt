@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.samples
+package io.github.kotlinmania.io.samples
 
-import kotlinx.io.*
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.encodeToByteString
+import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.encodeToByteString
 import kotlin.test.*
 
 class ByteStringSamples {

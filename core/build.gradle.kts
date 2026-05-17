@@ -31,7 +31,7 @@ kotlin {
                 useMocha {
                     timeout = "300s"
                 }
-                filter.setExcludePatterns("kotlinx.io.files.*")
+                filter.setExcludePatterns("io.github.kotlinmania.io.files.*")
             }
         }
     }
@@ -43,7 +43,7 @@ kotlin {
                 useKarma {
                     // how to configure browsers available in CI?
                 }
-                filter.setExcludePatterns("kotlinx.io.files.*")
+                filter.setExcludePatterns("io.github.kotlinmania.io.files.*")
             }
         }
          */
@@ -62,7 +62,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(project(":kotlinx-io-bytestring"))
+            api(project(":km-io-bytestring"))
         }
         appleTest.dependencies {
             implementation(libs.kotlinx.coroutines.core)
@@ -97,5 +97,5 @@ tasks.named("wasmWasiNodeTest") {
 }
 
 animalsniffer {
-    annotation = "kotlinx.io.files.AnimalSnifferIgnore"
+    annotation = "io.github.kotlinmania.io.files.AnimalSnifferIgnore"
 }

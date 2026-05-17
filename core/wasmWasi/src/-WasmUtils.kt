@@ -4,9 +4,9 @@
  */
 @file:OptIn(UnsafeWasmMemoryApi::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import kotlin.math.min
 import kotlin.wasm.unsafe.MemoryAllocator
 import kotlin.wasm.unsafe.Pointer

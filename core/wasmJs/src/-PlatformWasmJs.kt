@@ -5,7 +5,7 @@
 
 @file:OptIn(ExperimentalWasmJsInterop::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 internal class JsException(message: String) : RuntimeException(message)
 

@@ -5,10 +5,10 @@
 
 @file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlinx.cinterop.*
-import kotlinx.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import platform.Foundation.NSInputStream
 import platform.Foundation.NSOutputStream
 import platform.Foundation.NSStreamStatusClosed
@@ -20,7 +20,7 @@ import platform.posix.uint8_tVar
  *
  * Use [RawSink.buffered] to create a buffered sink from it.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesApple.outputStreamAsSink
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesApple.outputStreamAsSink
  */
 public fun NSOutputStream.asSink(): RawSink = OutputStreamSink(this)
 
@@ -72,7 +72,7 @@ private open class OutputStreamSink(
  *
  * Use [RawSource.buffered] to create a buffered source from it.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesApple.inputStreamAsSource
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesApple.inputStreamAsSource
  */
 public fun NSInputStream.asSource(): RawSource = NSInputStreamSource(this)
 

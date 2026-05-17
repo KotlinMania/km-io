@@ -3,14 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.IOException
-import kotlinx.io.RawSink
-import kotlinx.io.RawSource
-import kotlinx.io.node.fs
-import kotlinx.io.node.os
-import kotlinx.io.withCaughtException
+import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.node.fs
+import io.github.kotlinmania.io.node.os
+import io.github.kotlinmania.io.withCaughtException
 
 public actual val SystemFileSystem: FileSystem = object : SystemFileSystemImpl() {
     override fun exists(path: Path): Boolean {

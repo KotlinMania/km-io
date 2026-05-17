@@ -18,10 +18,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import kotlinx.io.unsafe.withData
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
@@ -34,7 +34,7 @@ import java.nio.channels.ByteChannel
  *
  * @param input the stream to read data from.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.bufferTransferToStream
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.bufferTransferToStream
  */
 @IgnorableReturnValue
 public fun Buffer.transferFrom(input: InputStream): Buffer {
@@ -52,7 +52,7 @@ public fun Buffer.transferFrom(input: InputStream): Buffer {
  * @throws IOException when [input] exhausted before reading [byteCount] bytes from it.
  * @throws IllegalArgumentException when [byteCount] is negative.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.writeInputStreamToBuffer
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.writeInputStreamToBuffer
  */
 @IgnorableReturnValue
 public fun Buffer.write(input: InputStream, byteCount: Long): Buffer {
@@ -91,7 +91,7 @@ private fun Buffer.write(input: InputStream, byteCount: Long, forever: Boolean) 
  *
  * @throws IllegalArgumentException when [byteCount] is negative or exceeds the buffer size.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.bufferTransferToStream
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.bufferTransferToStream
  */
 @OptIn(UnsafeIoApi::class)
 public fun Buffer.readTo(out: OutputStream, byteCount: Long = size) {
@@ -118,7 +118,7 @@ public fun Buffer.readTo(out: OutputStream, byteCount: Long = size) {
  * @throws IndexOutOfBoundsException when [startIndex] or [endIndex] is out of this buffer bounds (`[0..buffer.size)`).
  * @throws IllegalArgumentException when `startIndex > endIndex`.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.copyBufferToOutputStream
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.copyBufferToOutputStream
  */
 @OptIn(UnsafeIoApi::class)
 public fun Buffer.copyTo(
@@ -152,7 +152,7 @@ public fun Buffer.copyTo(
  *
  * @param sink the sink to write data to.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.readWriteByteBuffer
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.readWriteByteBuffer
  */
 @OptIn(UnsafeIoApi::class)
 public fun Buffer.readAtMostTo(sink: ByteBuffer): Int {
@@ -171,7 +171,7 @@ public fun Buffer.readAtMostTo(sink: ByteBuffer): Int {
  *
  * @return this buffer.
  *
- * @sample kotlinx.io.samples.KotlinxIoSamplesJvm.transferBufferFromByteBuffer
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesJvm.transferBufferFromByteBuffer
  */
 @IgnorableReturnValue
 @OptIn(UnsafeIoApi::class)

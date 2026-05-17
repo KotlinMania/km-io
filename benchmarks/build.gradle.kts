@@ -23,7 +23,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":kotlinx-io-core"))
+                implementation(project(":km-io-core"))
                 implementation(libs.kotlinx.benchmark.runtime)
             }
         }

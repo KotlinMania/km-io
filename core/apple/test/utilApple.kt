@@ -5,7 +5,7 @@
 
 @file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlinx.cinterop.*
 import kotlinx.coroutines.TimeoutCancellationException

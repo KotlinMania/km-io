@@ -19,13 +19,13 @@ allprojects {
 }
 
 dependencies {
-    kover(project(":kotlinx-io-core"))
-    kover(project(":kotlinx-io-bytestring"))
-    kover(project(":kotlinx-io-okio"))
+    kover(project(":km-io-core"))
+    kover(project(":km-io-bytestring"))
+    kover(project(":km-io-okio"))
 
-    dokka(project(":kotlinx-io-bytestring"))
-    dokka(project(":kotlinx-io-core"))
-    dokka(project(":kotlinx-io-okio"))
+    dokka(project(":km-io-bytestring"))
+    dokka(project(":km-io-core"))
+    dokka(project(":km-io-okio"))
 }
 
 kover {

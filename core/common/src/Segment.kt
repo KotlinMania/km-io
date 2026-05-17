@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmSynthetic
@@ -348,7 +348,7 @@ public class Segment {
     /**
      * The number of readable bytes contained in this segment.
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.readUleb128
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.readUleb128
      */
     public val size: Int
         get() = limit - pos
@@ -356,7 +356,7 @@ public class Segment {
     /**
      * The number of bytes that could be written into this segment.
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.writeUleb128Array
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.writeUleb128Array
      */
     public val remainingCapacity: Int
         get() = data.size - limit

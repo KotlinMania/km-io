@@ -3,9 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.*
+import io.github.kotlinmania.io.*
 import kotlin.jvm.JvmName
 
 /**
@@ -107,7 +107,7 @@ public fun Path(base: Path, vararg parts: String): Path {
     message = "Use FileSystem.source instead",
     replaceWith = ReplaceWith(
         expression = "SystemFileSystem.source(this).buffered()",
-        imports = arrayOf("kotlinx.io.files.FileSystem")
+        imports = arrayOf("io.github.kotlinmania.io.files.FileSystem")
     ),
     level = DeprecationLevel.ERROR
 )
@@ -125,7 +125,7 @@ public fun Path.source(): Source = SystemFileSystem.source(this).buffered()
     message = "Use FileSystem.sink instead",
     replaceWith = ReplaceWith(
         expression = "SystemFileSystem.sink(this).buffered()",
-        imports = arrayOf("kotlinx.io.files.FileSystem")
+        imports = arrayOf("io.github.kotlinmania.io.files.FileSystem")
     ),
     level = DeprecationLevel.ERROR
 )

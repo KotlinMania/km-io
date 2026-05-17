@@ -3,13 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.IOException
-import kotlinx.io.buffered
-import kotlinx.io.isWindows
-import kotlinx.io.readLine
-import kotlinx.io.writeString
+import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.isWindows
+import io.github.kotlinmania.io.readLine
+import io.github.kotlinmania.io.writeString
 import kotlin.test.*
 
 class WasiFsTest {

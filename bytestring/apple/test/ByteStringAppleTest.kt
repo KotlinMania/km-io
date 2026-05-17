@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.bytestring
+package io.github.kotlinmania.io.bytestring
 
 import kotlinx.cinterop.*
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringApi
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.posix.memset

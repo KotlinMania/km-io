@@ -3,15 +3,15 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.unsafe
+package io.github.kotlinmania.io.unsafe
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import kotlinx.io.Buffer
-import kotlinx.io.Segment
-import kotlinx.io.UnsafeIoApi
-import kotlinx.io.unsafe.UnsafeBufferOperations.maxSafeWriteCapacity
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Segment
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations.maxSafeWriteCapacity
 import java.nio.ByteBuffer
 
 /**
@@ -39,7 +39,7 @@ import java.nio.ByteBuffer
  *
  * @throws IllegalArgumentException when the [buffer] is empty.
  *
- * @sample kotlinx.io.samples.unsafe.UnsafeReadWriteSamplesJvm.writeToByteChannel
+ * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeReadWriteSamplesJvm.writeToByteChannel
  */
 @UnsafeIoApi
 @OptIn(ExperimentalContracts::class)
@@ -85,7 +85,7 @@ public inline fun UnsafeBufferOperations.readFromHead(buffer: Buffer, readAction
  *
  * @throws IllegalStateException when [minimumCapacity] is too large and could not be fulfilled.
  *
- * @sample kotlinx.io.samples.unsafe.UnsafeReadWriteSamplesJvm.readFromByteChannel
+ * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeReadWriteSamplesJvm.readFromByteChannel
  */
 @UnsafeIoApi
 @OptIn(ExperimentalContracts::class)
@@ -141,7 +141,7 @@ public inline fun UnsafeBufferOperations.writeToTail(
  * @throws IllegalArgumentException when the [buffer] is empty.
  * @throws IllegalArgumentException when the [iovec] is empty.
  *
- * @sample kotlinx.io.samples.unsafe.UnsafeReadWriteSamplesJvm.gatheringWrite
+ * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeReadWriteSamplesJvm.gatheringWrite
  *
  */
 @UnsafeIoApi

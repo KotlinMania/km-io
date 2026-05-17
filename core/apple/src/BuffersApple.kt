@@ -5,11 +5,11 @@
 
 @file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlinx.cinterop.*
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import kotlinx.io.unsafe.withData
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.Foundation.data

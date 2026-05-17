@@ -5,7 +5,7 @@
 
 @file:OptIn(ExperimentalWasmInterop::class)
 
-package kotlinx.io.wasi
+package io.github.kotlinmania.io.wasi
 
 import kotlin.wasm.WasmImport
 

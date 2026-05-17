@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * Sequence of characters used as a line separator by the underlying platform.

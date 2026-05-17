@@ -67,11 +67,11 @@
  * </table>
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.internal.*
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import kotlinx.io.unsafe.withData
+import io.github.kotlinmania.io.internal.*
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
 import kotlin.math.min
 
 /**
@@ -83,7 +83,7 @@ import kotlin.math.min
  * @throws IndexOutOfBoundsException when [startIndex] or [endIndex] is out of range of string indices.
  * @throws IllegalArgumentException when `startIndex > endIndex`.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.utf8SizeSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.utf8SizeSample
  */
 internal fun String.utf8Size(startIndex: Int = 0, endIndex: Int = length): Long {
     checkBounds(length, startIndex, endIndex)
@@ -145,8 +145,8 @@ internal fun String.utf8Size(startIndex: Int = 0, endIndex: Int = length): Long 
  * @throws IllegalArgumentException when [codePoint] value is negative, or greater than `U+10ffff`.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUtf8CodePointSample
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeSurrogatePair
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUtf8CodePointSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeSurrogatePair
  */
 @OptIn(DelicateIoApi::class)
 public fun Sink.writeCodePointValue(codePoint: Int): Unit =
@@ -164,7 +164,7 @@ public fun Sink.writeCodePointValue(codePoint: Int): Unit =
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUtf8Sample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUtf8Sample
  */
 @OptIn(DelicateIoApi::class)
 public fun Sink.writeString(string: String, startIndex: Int = 0, endIndex: Int = string.length) {
@@ -185,7 +185,7 @@ public fun Sink.writeString(string: String, startIndex: Int = 0, endIndex: Int =
  * @throws IllegalStateException when the sink is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeUtf8SeqSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeUtf8SeqSample
  */
 @OptIn(DelicateIoApi::class)
 public fun Sink.writeString(chars: CharSequence, startIndex: Int = 0, endIndex: Int = chars.length) {
@@ -202,7 +202,7 @@ public fun Sink.writeString(chars: CharSequence, startIndex: Int = 0, endIndex: 
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUtf8
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUtf8
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readString(): String {
@@ -215,7 +215,7 @@ public fun Source.readString(): String {
  *
  * Returns the empty string if this buffer is empty.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUtf8
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUtf8
  */
 public fun Buffer.readString(): String {
     return commonReadUtf8(size)
@@ -231,7 +231,7 @@ public fun Buffer.readString(): String {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUtf8
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUtf8
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readString(byteCount: Long): String {
@@ -261,8 +261,8 @@ public fun Source.readString(byteCount: Long): String {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUtf8CodePointSample
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.surrogatePairs
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUtf8CodePointSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.surrogatePairs
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readCodePointValue(): Int {
@@ -291,7 +291,7 @@ public fun Source.readCodePointValue(): Int {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readLinesSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readLinesSample
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readLine(): String? {
@@ -337,7 +337,7 @@ public fun Source.readLine(): String? {
  * @throws IllegalArgumentException when [limit] is negative.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readLinesSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readLinesSample
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readLineStrict(limit: Long = Long.MAX_VALUE): String {

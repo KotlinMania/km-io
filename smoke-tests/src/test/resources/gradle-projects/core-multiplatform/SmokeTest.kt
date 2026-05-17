@@ -3,13 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-import kotlinx.io.Buffer
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
-import kotlinx.io.readByteArray
-import kotlinx.io.readByteString
-import kotlinx.io.write
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.files.Path
+import io.github.kotlinmania.io.files.SystemFileSystem
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.readByteString
+import io.github.kotlinmania.io.write
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

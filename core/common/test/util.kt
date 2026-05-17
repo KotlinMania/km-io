@@ -18,9 +18,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.internal.REPLACEMENT_BYTE
+import io.github.kotlinmania.io.internal.REPLACEMENT_BYTE
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

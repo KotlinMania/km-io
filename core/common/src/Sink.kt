@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * A sink that facilitates typed data writes and keeps a buffer internally so that caller can write some data without
@@ -83,7 +83,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeByteArrayToSink
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeByteArrayToSink
      */
     public fun write(source: ByteArray, startIndex: Int = 0, endIndex: Int = source.size)
 
@@ -96,7 +96,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink or [source] is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.transferFrom
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.transferFrom
      */
     @IgnorableReturnValue
     public fun transferFrom(source: RawSource): Long
@@ -114,7 +114,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink or [source] is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeSourceToSink
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeSourceToSink
      */
     public fun write(source: RawSource, byteCount: Long)
 
@@ -126,7 +126,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeByte
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeByte
      */
     public fun writeByte(byte: Byte)
 
@@ -138,7 +138,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeShort
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeShort
      */
     public fun writeShort(short: Short)
 
@@ -150,7 +150,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeInt
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeInt
      */
     public fun writeInt(int: Int)
 
@@ -162,7 +162,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.writeLong
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.writeLong
      */
     public fun writeLong(long: Long)
 
@@ -173,7 +173,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.flush
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.flush
      */
     override fun flush()
 
@@ -187,7 +187,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      *
-     * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.emit
+     * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.emit
      */
     public fun emit()
 

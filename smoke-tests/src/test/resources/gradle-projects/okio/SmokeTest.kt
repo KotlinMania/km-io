@@ -5,14 +5,14 @@
 
 package org.example
 
-import kotlinx.io.okio.*
-import kotlinx.io.readByteArray
+import io.github.kotlinmania.io.okio.*
+import io.github.kotlinmania.io.readByteArray
 import kotlin.test.*
 
 public class SmokeTest {
     @Test
     fun testSinkAndSource() {
-        val kxioBuffer = kotlinx.io.Buffer()
+        val kxioBuffer = io.github.kotlinmania.io.Buffer()
         val okioBuffer = okio.Buffer()
 
         kxioBuffer.write(ByteArray(10) { it.toByte() })
@@ -24,7 +24,7 @@ public class SmokeTest {
 
     @Test
     fun testByteString() {
-        val kxio = kotlinx.io.bytestring.ByteString(1, 2, 3)
+        val kxio = io.github.kotlinmania.io.bytestring.ByteString(1, 2, 3)
         assertEquals(3, kxio.toOkioByteString().size)
 
         val okio = okio.ByteString.of(4, 5, 6, 7)

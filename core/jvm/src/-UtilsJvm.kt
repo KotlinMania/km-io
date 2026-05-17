@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 internal actual fun Short.reverseBytes(): Short = java.lang.Short.reverseBytes(this)
 internal actual fun Int.reverseBytes(): Int = java.lang.Integer.reverseBytes(this)

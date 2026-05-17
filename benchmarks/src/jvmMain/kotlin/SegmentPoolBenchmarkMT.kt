@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.benchmarks
+package io.github.kotlinmania.io.benchmarks
 
 import kotlinx.benchmark.*
-import kotlinx.io.*
+import io.github.kotlinmania.io.*
 import org.openjdk.jmh.annotations.Group
 import org.openjdk.jmh.annotations.GroupThreads
 

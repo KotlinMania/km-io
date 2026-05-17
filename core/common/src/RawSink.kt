@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * Receives a stream of bytes. RawSink is a base interface for `kotlinx-io` data receivers.
@@ -37,7 +37,7 @@ package kotlinx.io
  * [RawSink] implementations are not required to be thread safe.
  * However, if an implementation provides some thread safety guarantees, it is recommended to explicitly document them.
  *
- * @sample kotlinx.io.samples.Crc32Sample.crc32
+ * @sample io.github.kotlinmania.io.samples.Crc32Sample.crc32
  */
 public expect interface RawSink : AutoCloseable {
     /**

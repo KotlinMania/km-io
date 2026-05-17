@@ -5,7 +5,7 @@
 
 @file:OptIn(ExperimentalForeignApi::class)
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import kotlinx.atomicfu.atomic
 import kotlinx.cinterop.*

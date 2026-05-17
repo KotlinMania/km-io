@@ -3,13 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.get
 import kotlinx.cinterop.toKString
-import kotlinx.io.IOException
+import io.github.kotlinmania.io.IOException
 import platform.posix.DIR
 import platform.posix.closedir
 import platform.posix.errno

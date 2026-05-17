@@ -3,18 +3,18 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.bytestring
+package io.github.kotlinmania.io.bytestring
 
 import kotlinx.cinterop.*
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringApi
-import kotlinx.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
 import platform.Foundation.NSData
 import platform.Foundation.create
 
 /**
  * Returns a new [NSData] instance initialized with bytes copied from [this] ByteString.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesApple.nsDataConversion
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesApple.nsDataConversion
  */
 @OptIn(UnsafeNumber::class, BetaInteropApi::class, ExperimentalForeignApi::class)
 public fun ByteString.toNSData(): NSData {
@@ -30,7 +30,7 @@ public fun ByteString.toNSData(): NSData {
 /**
  * Returns a new [ByteString] holding data copied from [this] NSData.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamplesApple.nsDataConversion
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamplesApple.nsDataConversion
  */
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class, UnsafeByteStringApi::class)
 public fun NSData.toByteString(): ByteString {

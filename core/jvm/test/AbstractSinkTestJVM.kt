@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import java.io.OutputStream
 import java.nio.ByteBuffer

@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.okio
+package io.github.kotlinmania.io.okio
 
-import kotlinx.io.bytestring.isEmpty
-import kotlinx.io.readByteArray
+import io.github.kotlinmania.io.bytestring.isEmpty
+import io.github.kotlinmania.io.readByteArray
 import okio.Timeout
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -17,11 +17,11 @@ import kotlin.test.assertTrue
 class OkioAdaptersTest {
     @Test
     fun convertByteStrings() {
-        assertEquals(0, kotlinx.io.bytestring.ByteString().toOkioByteString().size)
+        assertEquals(0, io.github.kotlinmania.io.bytestring.ByteString().toOkioByteString().size)
         assertTrue(okio.ByteString.EMPTY.toKotlinxIoByteString().isEmpty())
 
         val data = ByteArray(42) { it.toByte() }
-        assertContentEquals(data, kotlinx.io.bytestring.ByteString(data).toOkioByteString().toByteArray())
+        assertContentEquals(data, io.github.kotlinmania.io.bytestring.ByteString(data).toOkioByteString().toByteArray())
         assertContentEquals(data, okio.ByteString.of(*data).toKotlinxIoByteString().toByteArray())
     }
 
@@ -31,7 +31,7 @@ class OkioAdaptersTest {
         val prefixLength = 30
 
         val data = ByteArray(arrayLength) { it.toByte() }
-        val kxBuffer = kotlinx.io.Buffer().also { it.write(data) }
+        val kxBuffer = io.github.kotlinmania.io.Buffer().also { it.write(data) }
 
         val okioBuffer = okio.Buffer()
         val okioSink = okioBuffer as okio.Sink
@@ -56,7 +56,7 @@ class OkioAdaptersTest {
     fun okioSinkLargeWrite() {
         val arrayLength = 8193
         val data = ByteArray(arrayLength) { it.toByte() }
-        val kxBuffer = kotlinx.io.Buffer().also { it.write(data) }
+        val kxBuffer = io.github.kotlinmania.io.Buffer().also { it.write(data) }
         val okioBuffer = okio.Buffer()
         val okioSink = okioBuffer as okio.Sink
         val wrapper = okioSink.asKotlinxIoRawSink()
@@ -100,15 +100,15 @@ class OkioAdaptersTest {
             override fun write(source: okio.Buffer, byteCount: Long) = throw okio.IOException()
         }.asKotlinxIoRawSink()
 
-        assertFailsWith<kotlinx.io.IOException> {
-            adapter.write(kotlinx.io.Buffer().also { it.writeByte(1) }, 1)
+        assertFailsWith<io.github.kotlinmania.io.IOException> {
+            adapter.write(io.github.kotlinmania.io.Buffer().also { it.writeByte(1) }, 1)
         }
 
-        assertFailsWith<kotlinx.io.IOException> {
+        assertFailsWith<io.github.kotlinmania.io.IOException> {
             adapter.flush()
         }
 
-        assertFailsWith<kotlinx.io.IOException> {
+        assertFailsWith<io.github.kotlinmania.io.IOException> {
             adapter.close()
         }
     }
@@ -122,7 +122,7 @@ class OkioAdaptersTest {
         val okioBuffer = okio.Buffer().also { it.write(data) }
         val okioSource = okioBuffer as okio.Source
 
-        val kxBuffer = kotlinx.io.Buffer()
+        val kxBuffer = io.github.kotlinmania.io.Buffer()
 
         val wrapper = okioSource.asKotlinxIoRawSource()
 
@@ -171,15 +171,15 @@ class OkioAdaptersTest {
             override fun timeout(): Timeout = TODO()
         }.asKotlinxIoRawSource()
 
-        assertFailsWith<kotlinx.io.IOException> {
-            adapter.readAtMostTo(kotlinx.io.Buffer(), 1)
+        assertFailsWith<io.github.kotlinmania.io.IOException> {
+            adapter.readAtMostTo(io.github.kotlinmania.io.Buffer(), 1)
         }
         throwEOF = true
-        assertFailsWith<kotlinx.io.EOFException> {
-            adapter.readAtMostTo(kotlinx.io.Buffer(), 1)
+        assertFailsWith<io.github.kotlinmania.io.EOFException> {
+            adapter.readAtMostTo(io.github.kotlinmania.io.Buffer(), 1)
         }
 
-        assertFailsWith<kotlinx.io.IOException> {
+        assertFailsWith<io.github.kotlinmania.io.IOException> {
             adapter.close()
         }
     }
@@ -190,8 +190,8 @@ class OkioAdaptersTest {
         val prefixLength = 30
 
         val data = ByteArray(arrayLength) { it.toByte() }
-        val kxBuffer = kotlinx.io.Buffer().also { it.write(data) }
-        val kxSource = kxBuffer as kotlinx.io.RawSource
+        val kxBuffer = io.github.kotlinmania.io.Buffer().also { it.write(data) }
+        val kxSource = kxBuffer as io.github.kotlinmania.io.RawSource
 
         val okioBuffer = okio.Buffer()
         val wrapper = kxSource.asOkioSource()
@@ -212,8 +212,8 @@ class OkioAdaptersTest {
     @Test
     fun kotlinxIoSourceViewDelegation() {
         var closed = false
-        val view = object : kotlinx.io.RawSource {
-            override fun readAtMostTo(sink: kotlinx.io.Buffer, byteCount: Long): Long = TODO()
+        val view = object : io.github.kotlinmania.io.RawSource {
+            override fun readAtMostTo(sink: io.github.kotlinmania.io.Buffer, byteCount: Long): Long = TODO()
 
             override fun close() {
                 closed = true
@@ -227,14 +227,14 @@ class OkioAdaptersTest {
     @Test
     fun kotlinxIoSourceAdapterExceptionTranslation() {
         var throwEOF = false
-        val adapter = object : kotlinx.io.RawSource {
-            override fun readAtMostTo(sink: kotlinx.io.Buffer, byteCount: Long): Long = if (throwEOF) {
-                throw kotlinx.io.EOFException()
+        val adapter = object : io.github.kotlinmania.io.RawSource {
+            override fun readAtMostTo(sink: io.github.kotlinmania.io.Buffer, byteCount: Long): Long = if (throwEOF) {
+                throw io.github.kotlinmania.io.EOFException()
             } else {
-                throw kotlinx.io.IOException()
+                throw io.github.kotlinmania.io.IOException()
             }
 
-            override fun close() = throw kotlinx.io.IOException()
+            override fun close() = throw io.github.kotlinmania.io.IOException()
         }.asOkioSource()
 
         assertFailsWith<okio.IOException> {
@@ -256,8 +256,8 @@ class OkioAdaptersTest {
         val prefixLength = 3
 
         val data = ByteArray(arrayLength) { it.toByte() }
-        val kxBuffer = kotlinx.io.Buffer()
-        val kxSink = kxBuffer as kotlinx.io.RawSink
+        val kxBuffer = io.github.kotlinmania.io.Buffer()
+        val kxSink = kxBuffer as io.github.kotlinmania.io.RawSink
 
         val okioBuffer = okio.Buffer().also { it.write(data) }
         val wrapper = kxSink.asOkioSink()
@@ -279,8 +279,8 @@ class OkioAdaptersTest {
     fun kotlinxIoSinkViewDelegation() {
         var closed = false
         var flushed = false
-        val view = object : kotlinx.io.RawSink {
-            override fun write(source: kotlinx.io.Buffer, byteCount: Long) = TODO()
+        val view = object : io.github.kotlinmania.io.RawSink {
+            override fun write(source: io.github.kotlinmania.io.Buffer, byteCount: Long) = TODO()
 
             override fun flush() {
                 flushed = true
@@ -300,10 +300,10 @@ class OkioAdaptersTest {
 
     @Test
     fun kotlinxIoSinkAdapterExceptionTranslation() {
-        val adapter = object : kotlinx.io.RawSink {
-            override fun write(source: kotlinx.io.Buffer, byteCount: Long) = throw kotlinx.io.IOException()
-            override fun flush() = throw kotlinx.io.IOException()
-            override fun close() = throw kotlinx.io.IOException()
+        val adapter = object : io.github.kotlinmania.io.RawSink {
+            override fun write(source: io.github.kotlinmania.io.Buffer, byteCount: Long) = throw io.github.kotlinmania.io.IOException()
+            override fun flush() = throw io.github.kotlinmania.io.IOException()
+            override fun close() = throw io.github.kotlinmania.io.IOException()
         }.asOkioSink()
 
         assertFailsWith<okio.IOException> {

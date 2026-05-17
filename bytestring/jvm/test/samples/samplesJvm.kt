@@ -3,9 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.bytestring.samples
+package io.github.kotlinmania.io.bytestring.samples
 
-import kotlinx.io.bytestring.*
+import io.github.kotlinmania.io.bytestring.*
 import java.nio.ByteBuffer
 import java.nio.ReadOnlyBufferException
 import kotlin.test.*
