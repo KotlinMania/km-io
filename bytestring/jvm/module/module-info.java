@@ -1,6 +1,6 @@
-module kotlinx.io.bytestring {
+module io.github.kotlinmania.io.bytestring {
     requires transitive kotlin.stdlib;
 
-    exports kotlinx.io.bytestring;
-    exports kotlinx.io.bytestring.unsafe;
+    exports io.github.kotlinmania.io.bytestring;
+    exports io.github.kotlinmania.io.bytestring.unsafe;
 }

@@ -1,9 +1,9 @@
-module kotlinx.io.okio {
+module io.github.kotlinmania.io.okio {
     requires transitive kotlin.stdlib;
-    requires transitive kotlinx.io.core;
-    requires transitive kotlinx.io.bytestring;
+    requires transitive io.github.kotlinmania.io.core;
+    requires transitive io.github.kotlinmania.io.bytestring;
     // okio's module is automatic, so don't require it
     // requires transitive okio;
 
-    exports kotlinx.io.okio;
+    exports io.github.kotlinmania.io.okio;
 }
