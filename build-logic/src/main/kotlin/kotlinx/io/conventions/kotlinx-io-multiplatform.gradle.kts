@@ -192,10 +192,12 @@ powerAssert {
 fun KotlinSourceSet.configureSourceSet() {
     val srcDir = if (name.endsWith("Main")) "src" else "test"
     val platform = name.dropLast(4)
-    // android-target source sets follow the standard src/<X>Main/kotlin
-    // layout (their srcDir is wired in the convention's kotlin block) rather
-    // than the legacy <platform>/src layout used by jvm/common/native/…
-    if (name.startsWith("android")) {
+    // The AGP `android` target source sets (androidMain, androidHostTest,
+    // androidDeviceTest) follow the standard src/<X>Main/kotlin layout —
+    // their srcDir is wired in the convention's kotlin block. The
+    // androidNative* native targets keep using the legacy <platform>/src
+    // layout shared with every other native target.
+    if (name == "androidMain" || name == "androidHostTest" || name == "androidDeviceTest") {
         languageSettings { progressiveMode = true }
         return
     }
