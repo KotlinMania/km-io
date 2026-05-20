@@ -3,12 +3,15 @@ kotlin = "2.3.0"
 java = "8"
 multi-release-toolchain = "17"
 dokka = "2.2.0-Beta"
-kover = "0.9.3"
+kover = "0.9.8"
 benchmark = "0.4.14"
 jmh = "1.37"
 coroutines = "1.10.2"
 animalsniffer = "2.0.1"
 okio = "3.10.2"
+# The com.android.kotlin.multiplatform.library plugin ships in AGP, and 9.2.1
+# is the version anyhow-kotlin tracks across the kotlinmania workspace.
+agp = "9.2.1"
 
 [libraries]
 
@@ -19,6 +22,10 @@ power-assert-plugin = { group = "org.jetbrains.kotlin.plugin.power-assert", name
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 animalsniffer-gradle-plugin = { group = "ru.vyarus", name = "gradle-animalsniffer-plugin", version.ref = "animalsniffer" }
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
+# Gradle plugin artifact for the Kotlin Multiplatform Android library, used
+# from the kotlinx-io-multiplatform convention plugin so the multiplatform
+# library plugin can be applied to every module.
+android-kmp-library-gradle-plugin = { group = "com.android.kotlin.multiplatform.library", name = "com.android.kotlin.multiplatform.library.gradle.plugin", version.ref = "agp" }
 
 [plugins]
 
@@ -26,3 +33,4 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 power-assert = { id = "org.jetbrains.kotlin.plugin.power-assert", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 kotlinx-benchmark-plugin = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "benchmark"}
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
