@@ -3,13 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.*
-import kotlinx.io.node.buffer
-import kotlinx.io.node.fs
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import kotlinx.io.node.path as nodeJsPath
+import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.node.buffer
+import io.github.kotlinmania.io.node.fs
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.node.path as nodeJsPath
 
 public actual class Path internal constructor(
     rawPath: String,
@@ -77,7 +77,7 @@ public actual fun Path(path: String): Path {
 }
 
 internal class FileSource(private val path: Path) : RawSource {
-    private var buffer: kotlinx.io.node.Buffer? = null
+    private var buffer: io.github.kotlinmania.io.node.Buffer? = null
     private var closed = false
     private var offset = 0
     private val fd = open(path)

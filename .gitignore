@@ -10,6 +10,10 @@ bin
 
 kotlinx-io-native/repo/
 
+# Project-local Android SDK (auto-installed by build.gradle.kts).
+.android-sdk
+local.properties
+
 !.idea/vcs.xml
 !.idea/dictionaries
 !.idea/dictionaries/*

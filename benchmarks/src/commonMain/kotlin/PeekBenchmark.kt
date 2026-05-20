@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.benchmarks
+package io.github.kotlinmania.io.benchmarks
 
 import kotlinx.benchmark.*
-import kotlinx.io.Buffer
-import kotlinx.io.Source
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Source
 
 const val OFFSET_TO_LAST_BYTE_IN_SEGMENT = (SEGMENT_SIZE_IN_BYTES - 1).toString()
 

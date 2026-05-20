@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.node.fs
-import kotlinx.io.node.os
-import kotlinx.io.node.path
+import io.github.kotlinmania.io.node.fs
+import io.github.kotlinmania.io.node.os
+import io.github.kotlinmania.io.node.path
 import kotlin.random.Random
 
 actual fun tempFileName(): String {

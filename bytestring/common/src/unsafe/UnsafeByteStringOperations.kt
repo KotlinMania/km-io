@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.bytestring.unsafe
+package io.github.kotlinmania.io.bytestring.unsafe
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import kotlinx.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.ByteString
 
 /**
  * Collection of helper functions providing unsafe access to the [ByteString]'s underlying byte sequence or allowing

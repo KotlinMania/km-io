@@ -3,9 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
-import kotlinx.io.*
+import io.github.kotlinmania.io.*
 import kotlin.test.*
 
 class SmokeFileTest {

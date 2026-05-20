@@ -17,16 +17,23 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.0")
 }
 
-rootProject.name = "kotlinx-io"
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
 
-include(":kotlinx-io-core")
-include(":kotlinx-io-benchmarks")
-include(":kotlinx-io-bytestring")
-include(":kotlinx-io-smoke-tests")
-include(":kotlinx-io-okio")
+rootProject.name = "km-io"
 
-project(":kotlinx-io-core").projectDir = file("./core")
-project(":kotlinx-io-benchmarks").projectDir = file("./benchmarks")
-project(":kotlinx-io-bytestring").projectDir = file("./bytestring")
-project(":kotlinx-io-smoke-tests").projectDir = file("./smoke-tests")
-project(":kotlinx-io-okio").projectDir = file("./integration/kotlinx-io-okio")
+include(":km-io-core")
+include(":km-io-benchmarks")
+include(":km-io-bytestring")
+include(":km-io-smoke-tests")
+include(":km-io-okio")
+
+project(":km-io-core").projectDir = file("./core")
+project(":km-io-benchmarks").projectDir = file("./benchmarks")
+project(":km-io-bytestring").projectDir = file("./bytestring")
+project(":km-io-smoke-tests").projectDir = file("./smoke-tests")
+project(":km-io-okio").projectDir = file("./integration/km-io-okio")

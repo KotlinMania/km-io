@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.benchmarks
+package io.github.kotlinmania.io.benchmarks
 
 import kotlinx.benchmark.*
-import kotlinx.io.*
-import kotlinx.io.bytestring.ByteString
+import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.bytestring.ByteString
 import kotlin.random.Random
 
 @State(Scope.Benchmark)

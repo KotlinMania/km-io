@@ -1,16 +1,16 @@
-package kotlinx.io.benchmarks
+package io.github.kotlinmania.io.benchmarks
 
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Param
 import kotlinx.benchmark.Scope
 import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
-import kotlinx.io.Buffer
-import kotlinx.io.Source
-import kotlinx.io.readCodePointValue
-import kotlinx.io.readString
-import kotlinx.io.writeCodePointValue
-import kotlinx.io.writeString
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Source
+import io.github.kotlinmania.io.readCodePointValue
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.writeCodePointValue
+import io.github.kotlinmania.io.writeString
 import kotlin.random.Random
 
 

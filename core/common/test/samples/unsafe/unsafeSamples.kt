@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.samples.unsafe
+package io.github.kotlinmania.io.samples.unsafe
 
-import kotlinx.io.*
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import kotlinx.io.unsafe.withData
+import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
 import kotlin.io.encoding.Base64
 import kotlin.math.min
 import kotlin.random.Random

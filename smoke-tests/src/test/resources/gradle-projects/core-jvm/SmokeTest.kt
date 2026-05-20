@@ -5,11 +5,11 @@
 
 package org.example
 
-import kotlinx.io.Buffer
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.readByteArray
-import kotlinx.io.readByteString
-import kotlinx.io.write
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.readByteString
+import io.github.kotlinmania.io.write
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

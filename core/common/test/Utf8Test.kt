@@ -19,11 +19,11 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.internal.REPLACEMENT_CHARACTER
-import kotlinx.io.internal.REPLACEMENT_CODE_POINT
-import kotlinx.io.internal.processUtf8CodePoints
+import io.github.kotlinmania.io.internal.REPLACEMENT_CHARACTER
+import io.github.kotlinmania.io.internal.REPLACEMENT_CODE_POINT
+import io.github.kotlinmania.io.internal.processUtf8CodePoints
 import kotlin.test.*
 
 class Utf8Test {

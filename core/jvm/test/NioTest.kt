@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import org.junit.jupiter.api.io.TempDir
 import java.io.File

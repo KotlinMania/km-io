@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.buildByteString
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import kotlinx.io.unsafe.withData
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.buildByteString
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
 
 /**
  * Creates a byte string containing a copy of all the data from this buffer.
@@ -41,7 +41,7 @@ public fun Buffer.snapshot(): ByteString {
  * @throws IllegalStateException when the source is closed.
  * @throws IllegalArgumentException when `startIndex > endIndex` or either of indices is negative.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.indexOfByteSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.indexOfByteSample
  */
 public fun Buffer.indexOf(byte: Byte, startIndex: Long = 0, endIndex: Long = size): Long {
     // For compatibility with Source.indexOf accept endIndices greater than size and truncate them.

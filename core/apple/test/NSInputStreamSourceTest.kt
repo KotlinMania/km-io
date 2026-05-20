@@ -3,10 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
-import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
+import io.github.kotlinmania.io.files.Path
+import io.github.kotlinmania.io.files.SystemFileSystem
 import platform.Foundation.NSInputStream
 import platform.Foundation.NSURL
 import kotlin.test.Test

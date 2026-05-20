@@ -1,8 +1,8 @@
-module kotlinx.io.core {
+module io.github.kotlinmania.io.core {
     requires transitive kotlin.stdlib;
-    requires transitive kotlinx.io.bytestring;
+    requires transitive io.github.kotlinmania.io.bytestring;
 
-    exports kotlinx.io;
-    exports kotlinx.io.files;
-    exports kotlinx.io.unsafe;
+    exports io.github.kotlinmania.io;
+    exports io.github.kotlinmania.io.files;
+    exports io.github.kotlinmania.io.unsafe;
 }

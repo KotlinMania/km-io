@@ -5,7 +5,7 @@
 
 package org.example
 
-import kotlinx.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.ByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

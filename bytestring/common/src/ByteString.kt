@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package kotlinx.io.bytestring
+package io.github.kotlinmania.io.bytestring
 
 import kotlin.js.JsName
 import kotlin.math.max
@@ -30,7 +30,7 @@ import kotlin.math.min
  *
  * @param bytes a sequence of bytes to be wrapped.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.constructionFromBytesSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.constructionFromBytesSample
  */
 public fun ByteString(vararg bytes: Byte): ByteString = if (bytes.isEmpty()) {
     ByteString.EMPTY
@@ -46,7 +46,7 @@ public fun ByteString(vararg bytes: Byte): ByteString = if (bytes.isEmpty()) {
  *
  * @param bytes a sequence of bytes to be wrapped.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.constructionFromUBytesSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.constructionFromUBytesSample
  */
 @OptIn(ExperimentalUnsignedTypes::class)
 public fun ByteString(vararg bytes: UByte): ByteString = if (bytes.isEmpty()) {
@@ -58,7 +58,7 @@ public fun ByteString(vararg bytes: UByte): ByteString = if (bytes.isEmpty()) {
 /**
  * Returns an empty [ByteString].
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.constructEmpty
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.constructEmpty
  */
 @JsName("EmptyByteString")
 public fun ByteString(): ByteString = ByteString.EMPTY
@@ -90,7 +90,7 @@ public class ByteString private constructor(
      * @throws IndexOutOfBoundsException when [startIndex] or [endIndex] is out of range of [data] array indices.
      * @throws IllegalArgumentException when `startIndex > endIndex`.
      *
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.constructionSample
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.constructionSample
      */
     public constructor(data: ByteArray, startIndex: Int = 0, endIndex: Int = data.size) :
             this(data.copyOfRange(startIndex, endIndex), null)
@@ -167,8 +167,8 @@ public class ByteString private constructor(
      * @throws IndexOutOfBoundsException when [startIndex] or [endIndex] is out of range of byte string indices.
      * @throws IllegalArgumentException when `startIndex > endIndex`.
      *
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.toByteArraySample
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.toByteArrayWithIndicesSample
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.toByteArraySample
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.toByteArrayWithIndicesSample
      */
     public fun toByteArray(startIndex: Int = 0, endIndex: Int = size): ByteArray {
         require(startIndex <= endIndex) { "startIndex ($startIndex) > endIndex ($endIndex)" }
@@ -189,7 +189,7 @@ public class ByteString private constructor(
      * the specified [destinationOffset], or when that index is out of the [destination] array indices range.
      * @throws IllegalArgumentException when `startIndex > endIndex`.
      *
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.copyToSample
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.copyToSample
      */
     public fun copyInto(
         destination: ByteArray, destinationOffset: Int = 0,
@@ -209,7 +209,7 @@ public class ByteString private constructor(
      * @throws IndexOutOfBoundsException when [startIndex] or [endIndex] is out of range of byte string indices.
      * @throws IllegalArgumentException when `startIndex > endIndex`.
      *
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.substringSample
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.substringSample
      */
     public fun substring(startIndex: Int, endIndex: Int = size): ByteString = if (startIndex == endIndex) {
         EMPTY
@@ -226,7 +226,7 @@ public class ByteString private constructor(
      *
      * @param other the byte string to compare this string to.
      *
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.compareTo
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.compareTo
      */
     override fun compareTo(other: ByteString): Int {
         if (other === this) return 0
@@ -251,7 +251,7 @@ public class ByteString private constructor(
      * Due to limitations exposed for the maximum string length, an attempt to return a string representation
      * of too long byte string may fail.
      *
-     * @sample kotlinx.io.bytestring.samples.ByteStringSamples.toStringSample
+     * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.toStringSample
      */
     override fun toString(): String {
         if (isEmpty()) {
@@ -300,7 +300,7 @@ public val ByteString.indices: IntRange
  * @param byte the value to search for.
  * @param startIndex the index (inclusive) starting from which the [byte] should be searched.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.indexOfByteSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.indexOfByteSample
  */
 public fun ByteString.indexOf(byte: Byte, startIndex: Int = 0): Int {
     val localData = getBackingArrayReference()
@@ -322,7 +322,7 @@ public fun ByteString.indexOf(byte: Byte, startIndex: Int = 0): Int {
  * @param byteString the value to search for.
  * @param startIndex the index (inclusive) starting from which the [byteString] should be searched.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.indexOfByteStringSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.indexOfByteStringSample
  */
 public fun ByteString.indexOf(byteString: ByteString, startIndex: Int = 0): Int {
     if (byteString.isEmpty()) return max(min(startIndex, size), 0)
@@ -346,7 +346,7 @@ public fun ByteString.indexOf(byteString: ByteString, startIndex: Int = 0): Int 
  * @param byteArray the value to search for.
  * @param startIndex the index (inclusive) starting from which the [byteArray] should be searched.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.indexOfByteArraySample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.indexOfByteArraySample
  */
 public fun ByteString.indexOf(byteArray: ByteArray, startIndex: Int = 0): Int {
     if (byteArray.isEmpty()) return max(min(startIndex, size), 0)
@@ -370,7 +370,7 @@ public fun ByteString.indexOf(byteArray: ByteArray, startIndex: Int = 0): Int {
  * @param byte the value to search for.
  * @param startIndex the index (inclusive) starting from which the [byte] should be searched.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.lastIndexOfByteSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.lastIndexOfByteSample
  */
 public fun ByteString.lastIndexOf(byte: Byte, startIndex: Int = 0): Int {
     val localData = getBackingArrayReference()
@@ -392,7 +392,7 @@ public fun ByteString.lastIndexOf(byte: Byte, startIndex: Int = 0): Int {
  * @param byteString the value to search for.
  * @param startIndex the index (inclusive) starting from which the [byteString] should be searched.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.lastIndexOfByteStringSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.lastIndexOfByteStringSample
  */
 public fun ByteString.lastIndexOf(byteString: ByteString, startIndex: Int = 0): Int {
     if (byteString.isEmpty()) return size
@@ -414,7 +414,7 @@ public fun ByteString.lastIndexOf(byteString: ByteString, startIndex: Int = 0): 
  * @param byteArray the value to search for.
  * @param startIndex the index (inclusive) starting from which the [byteArray] should be searched.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.lastIndexOfByteArraySample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.lastIndexOfByteArraySample
  */
 public fun ByteString.lastIndexOf(byteArray: ByteArray, startIndex: Int = 0): Int {
     if (byteArray.isEmpty()) return size
@@ -433,7 +433,7 @@ public fun ByteString.lastIndexOf(byteArray: ByteArray, startIndex: Int = 0): In
  *
  * @param byteArray the prefix to check for.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.startsWithByteArraySample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.startsWithByteArraySample
  */
 public fun ByteString.startsWith(byteArray: ByteArray): Boolean = when {
     byteArray.size > size -> false
@@ -447,7 +447,7 @@ public fun ByteString.startsWith(byteArray: ByteArray): Boolean = when {
  *
  * @param byteString the prefix to check for.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.startsWithByteStringSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.startsWithByteStringSample
  */
 public fun ByteString.startsWith(byteString: ByteString): Boolean = when {
     byteString.size > size -> false
@@ -462,7 +462,7 @@ public fun ByteString.startsWith(byteString: ByteString): Boolean = when {
  *
  * @param byteArray the suffix to check for.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.endsWithByteArraySample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.endsWithByteArraySample
  */
 public fun ByteString.endsWith(byteArray: ByteArray): Boolean = when {
     byteArray.size > size -> false
@@ -476,7 +476,7 @@ public fun ByteString.endsWith(byteArray: ByteArray): Boolean = when {
  *
  * @param byteString the suffix to check for.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.endsWithByteStringSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.endsWithByteStringSample
  */
 public fun ByteString.endsWith(byteString: ByteString): Boolean = when {
     byteString.size > size -> false
@@ -524,7 +524,7 @@ public fun ByteString.isNotEmpty(): Boolean = !isEmpty()
 /**
  * Decodes content of a byte string into a string using UTF-8 encoding.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.encodeAndDecodeUtf8String
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.encodeAndDecodeUtf8String
  */
 public fun ByteString.decodeToString(): String {
     return getBackingArrayReference().decodeToString()
@@ -533,7 +533,7 @@ public fun ByteString.decodeToString(): String {
 /**
  * Encodes a string into a byte sequence using UTF8-encoding and wraps it into a byte string.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.encodeAndDecodeUtf8String
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.encodeAndDecodeUtf8String
  */
 public fun String.encodeToByteString(): ByteString {
     return ByteString.wrap(encodeToByteArray())

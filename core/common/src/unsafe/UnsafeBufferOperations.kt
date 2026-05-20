@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.unsafe
+package io.github.kotlinmania.io.unsafe
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import kotlinx.io.*
+import io.github.kotlinmania.io.*
 import kotlin.jvm.JvmSynthetic
 
 @UnsafeIoApi
@@ -37,7 +37,7 @@ public object UnsafeBufferOperations {
      * @throws IndexOutOfBoundsException when [startIndex] or [endIndex] are not within [bytes] bounds
      * @throws IllegalArgumentException when `startIndex > endIndex`
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.moveToTail
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.moveToTail
      */
     public fun moveToTail(buffer: Buffer, bytes: ByteArray, startIndex: Int = 0, endIndex: Int = bytes.size) {
         checkBounds(bytes.size, startIndex, endIndex)
@@ -86,7 +86,7 @@ public object UnsafeBufferOperations {
      * the `endIndexExclusive - startIndexInclusive` value.
      * @throws IllegalArgumentException when the [buffer] is empty.
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.readByteArrayFromHead
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.readByteArrayFromHead
      */
     public inline fun readFromHead(
         buffer: Buffer,
@@ -133,7 +133,7 @@ public object UnsafeBufferOperations {
      * the [Segment.size] value.
      * @throws IllegalArgumentException when the [buffer] is empty.
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.readUleb128
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.readUleb128
      */
     public inline fun readFromHead(buffer: Buffer, readAction: (SegmentReadContext, Segment) -> Int): Int {
         contract {
@@ -182,7 +182,7 @@ public object UnsafeBufferOperations {
      * @throws IllegalStateException when [writeAction] returns a negative value or a value exceeding
      * the `endIndexExclusive - startIndexInclusive` value.
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.writeByteArrayToTail
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.writeByteArrayToTail
      */
     public inline fun writeToTail(
         buffer: Buffer, minimumCapacity: Int,
@@ -249,7 +249,7 @@ public object UnsafeBufferOperations {
      * @throws IllegalStateException when [writeAction] returns a negative value or a value exceeding
      * the [Segment.remainingCapacity] value for the provided segment.
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.writeUleb128
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.writeUleb128
      */
     public inline fun writeToTail(
         buffer: Buffer,
@@ -302,7 +302,7 @@ public object UnsafeBufferOperations {
      * @param buffer a buffer to iterate over
      * @param iterationAction a callback to invoke with the head reference and an iteration context instance
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32GetUnchecked
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32GetUnchecked
      */
     public inline fun iterate(
         buffer: Buffer,
@@ -368,8 +368,8 @@ public object UnsafeBufferOperations {
      *
      * @param buffer a buffer to iterate over
      * @param action a callback to invoke with the head reference and an iteration context instance
-     * @sample kotlinx.io.samples.unsafe.UnsafeReadWriteSamplesJvm.messageDigest
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32Unsafe
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeReadWriteSamplesJvm.messageDigest
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32Unsafe
      */
     public inline fun forEachSegment(
         buffer: Buffer,
@@ -397,7 +397,7 @@ public interface SegmentReadContext {
      * @param segment a segment to read from
      * @param offset an offset into segment data
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32GetUnchecked
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32GetUnchecked
      *
      */
     public fun getUnchecked(segment: Segment, offset: Int): Byte
@@ -418,8 +418,8 @@ public interface SegmentReadContext {
  * @param segment a segment to access data from
  * @param readAction an action to invoke on segment's data
  *
- * @sample kotlinx.io.samples.unsafe.UnsafeReadWriteSamplesJvm.messageDigest
- * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32Unsafe
+ * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeReadWriteSamplesJvm.messageDigest
+ * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32Unsafe
  */
 @UnsafeIoApi
 @JvmSynthetic
@@ -451,7 +451,7 @@ public interface SegmentWriteContext {
      * @param offset an offset inside [segment]'s uncommitted area to write to
      * @param value a value to be written
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.writeUleb128
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.writeUleb128
      */
     public fun setUnchecked(segment: Segment, offset: Int, value: Byte)
 
@@ -523,7 +523,7 @@ public interface BufferIterationContext : SegmentReadContext {
      *
      * @param segment a segment for which a successor needs to be found
      *
-     * @sample kotlinx.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32GetUnchecked
+     * @sample io.github.kotlinmania.io.samples.unsafe.UnsafeBufferOperationsSamples.crc32GetUnchecked
      */
     public fun next(segment: Segment): Segment?
 }

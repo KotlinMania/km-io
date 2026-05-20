@@ -4,12 +4,12 @@
  */
 @file:OptIn(UnsafeIoApi::class)
 
-package kotlinx.io.unsafe
+package io.github.kotlinmania.io.unsafe
 
-import kotlinx.io.Buffer
-import kotlinx.io.UnsafeIoApi
-import kotlinx.io.assertArrayEquals
-import kotlinx.io.writeString
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.assertArrayEquals
+import io.github.kotlinmania.io.writeString
 import kotlin.test.*
 
 class UnsafeBufferOperationsIterationTest {

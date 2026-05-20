@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.bytestring
+package io.github.kotlinmania.io.bytestring
 
 import kotlin.math.max
 
@@ -22,8 +22,8 @@ import kotlin.math.max
  *
  * @param initialCapacity the initial size of an underlying byte sequence.
  *
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.builderSample
- * @sample kotlinx.io.bytestring.samples.ByteStringSamples.builderSampleWithoutAdditionalAllocs
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.builderSample
+ * @sample io.github.kotlinmania.io.bytestring.samples.ByteStringSamples.builderSampleWithoutAdditionalAllocs
  */
 public class ByteStringBuilder(initialCapacity: Int = 0) {
     private var buffer = ByteArray(initialCapacity)

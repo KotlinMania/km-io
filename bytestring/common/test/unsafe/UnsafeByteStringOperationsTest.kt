@@ -3,11 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io.bytestring.unsafe
+package io.github.kotlinmania.io.bytestring.unsafe
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import kotlinx.io.bytestring.encodeToByteString
+import io.github.kotlinmania.io.bytestring.encodeToByteString
 
 @OptIn(UnsafeByteStringApi::class)
 class UnsafeByteStringOperationsTest {

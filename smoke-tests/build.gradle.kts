@@ -47,9 +47,9 @@ tasks {
             add("verify")
         }
         if (useLocalBuild) {
-            dependsOn(project(":kotlinx-io-core").tasks.named("publishToMavenLocal"))
-            dependsOn(project(":kotlinx-io-bytestring").tasks.named("publishToMavenLocal"))
-            dependsOn(project(":kotlinx-io-okio").tasks.named("publishToMavenLocal"))
+            dependsOn(project(":km-io-core").tasks.named("publishToMavenLocal"))
+            dependsOn(project(":km-io-bytestring").tasks.named("publishToMavenLocal"))
+            dependsOn(project(":km-io-okio").tasks.named("publishToMavenLocal"))
 
         }
     }
@@ -62,9 +62,9 @@ tasks {
     val verifyGradleProjects = create("verifyGradleProjects", Test::class) {
         useJUnit()
         if (useLocalBuild) {
-            dependsOn(project(":kotlinx-io-core").tasks.named("publishToMavenLocal"))
-            dependsOn(project(":kotlinx-io-bytestring").tasks.named("publishToMavenLocal"))
-            dependsOn(project(":kotlinx-io-okio").tasks.named("publishToMavenLocal"))
+            dependsOn(project(":km-io-core").tasks.named("publishToMavenLocal"))
+            dependsOn(project(":km-io-bytestring").tasks.named("publishToMavenLocal"))
+            dependsOn(project(":km-io-okio").tasks.named("publishToMavenLocal"))
 
         }
 

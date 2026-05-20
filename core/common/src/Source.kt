@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * A source that facilitates typed data reads and keeps a buffer internally so that callers can read chunks of data
@@ -84,7 +84,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.exhausted
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.exhausted
    */
   public fun exhausted(): Boolean
 
@@ -102,7 +102,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalArgumentException when [byteCount] is negative.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.require
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.require
    */
   public fun require(byteCount: Long)
 
@@ -119,7 +119,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.request
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.request
    */
   public fun request(byteCount: Long): Boolean
 
@@ -130,7 +130,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readByte
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readByte
    */
   public fun readByte(): Byte
 
@@ -141,7 +141,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readShort
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readShort
    */
   public fun readShort(): Short
 
@@ -152,7 +152,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readInt
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readInt
    */
   public fun readInt(): Int
 
@@ -163,7 +163,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readLong
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readLong
    */
   public fun readLong(): Long
 
@@ -177,7 +177,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.skip
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.skip
    */
   public fun skip(byteCount: Long)
 
@@ -194,7 +194,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readAtMostToByteArray
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readAtMostToByteArray
    */
   public fun readAtMostTo(sink: ByteArray, startIndex: Int = 0, endIndex: Int = sink.size): Int
 
@@ -209,7 +209,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source or [sink] is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readSourceToSink
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readSourceToSink
    */
   public fun readTo(sink: RawSink, byteCount: Long)
 
@@ -224,7 +224,7 @@ public sealed interface Source : RawSource {
    * @throws IllegalStateException when the source or [sink] is closed.
    * @throws IOException when some I/O error occurs.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.transferTo
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.transferTo
    */
   @IgnorableReturnValue
   public fun transferTo(sink: RawSink): Long
@@ -243,7 +243,7 @@ public sealed interface Source : RawSource {
    *
    * @throws IllegalStateException when the source is closed.
    *
-   * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.peekSample
+   * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.peekSample
    */
   public fun peek(): Source
 }

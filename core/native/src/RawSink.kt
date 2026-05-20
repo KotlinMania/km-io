@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kotlinx.io
+package io.github.kotlinmania.io
 
 public actual interface RawSink : AutoCloseable {
     public actual fun write(source: Buffer, byteCount: Long)

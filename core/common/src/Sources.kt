@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * Removes two bytes from this source and returns a short integer composed of it according to the little-endian order.
@@ -12,7 +12,7 @@ package kotlinx.io
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readShortLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readShortLe
  */
 public fun Source.readShortLe(): Short {
     return readShort().reverseBytes()
@@ -25,7 +25,7 @@ public fun Source.readShortLe(): Short {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readIntLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readIntLe
  */
 public fun Source.readIntLe(): Int {
     return readInt().reverseBytes()
@@ -38,7 +38,7 @@ public fun Source.readIntLe(): Int {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readLongLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readLongLe
  */
 public fun Source.readLongLe(): Long {
     return readLong().reverseBytes()
@@ -60,7 +60,7 @@ internal const val OVERFLOW_DIGIT_START = Long.MIN_VALUE % 10L + 1
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readDecimalLong
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readDecimalLong
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readDecimalLong(): Long {
@@ -140,7 +140,7 @@ public fun Source.readDecimalLong(): Long {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readHexLong
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readHexLong
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readHexadecimalUnsignedLong(): Long {
@@ -201,7 +201,7 @@ public fun Source.readHexadecimalUnsignedLong(): Long {
  * @throws IllegalArgumentException when `startIndex > endIndex` or either of indices is negative.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.indexOfByteSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.indexOfByteSample
  */
 @OptIn(InternalIoApi::class)
 public fun Source.indexOf(byte: Byte, startIndex: Long = 0L, endIndex: Long = Long.MAX_VALUE): Long {
@@ -231,7 +231,7 @@ public fun Source.indexOf(byte: Byte, startIndex: Long = 0L, endIndex: Long = Lo
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readToArraySample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readToArraySample
  */
 public fun Source.readByteArray(): ByteArray {
     return readByteArrayImpl(-1)
@@ -247,7 +247,7 @@ public fun Source.readByteArray(): ByteArray {
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readToArraySample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readToArraySample
  */
 public fun Source.readByteArray(byteCount: Int): ByteArray {
     checkByteCount(byteCount.toLong())
@@ -287,7 +287,7 @@ private fun Source.readByteArrayImpl(size: Int): ByteArray {
  * @throws IllegalArgumentException when `startIndex > endIndex`.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readToArraySample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readToArraySample
  */
 public fun Source.readTo(sink: ByteArray, startIndex: Int = 0, endIndex: Int = sink.size) {
     checkBounds(sink.size, startIndex, endIndex)
@@ -311,7 +311,7 @@ public fun Source.readTo(sink: ByteArray, startIndex: Int = 0, endIndex: Int = s
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUByte
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUByte
  */
 public fun Source.readUByte(): UByte = readByte().toUByte()
 
@@ -323,7 +323,7 @@ public fun Source.readUByte(): UByte = readByte().toUByte()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUShort
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUShort
  */
 public fun Source.readUShort(): UShort = readShort().toUShort()
 
@@ -335,7 +335,7 @@ public fun Source.readUShort(): UShort = readShort().toUShort()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUInt
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUInt
  */
 public fun Source.readUInt(): UInt = readInt().toUInt()
 
@@ -347,7 +347,7 @@ public fun Source.readUInt(): UInt = readInt().toUInt()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readULong
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readULong
  */
 public fun Source.readULong(): ULong = readLong().toULong()
 
@@ -359,7 +359,7 @@ public fun Source.readULong(): ULong = readLong().toULong()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUShortLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUShortLe
  */
 public fun Source.readUShortLe(): UShort = readShortLe().toUShort()
 
@@ -371,7 +371,7 @@ public fun Source.readUShortLe(): UShort = readShortLe().toUShort()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readUIntLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readUIntLe
  */
 public fun Source.readUIntLe(): UInt = readIntLe().toUInt()
 
@@ -383,7 +383,7 @@ public fun Source.readUIntLe(): UInt = readIntLe().toUInt()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readULongLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readULongLe
  */
 public fun Source.readULongLe(): ULong = readLongLe().toULong()
 
@@ -401,7 +401,7 @@ public fun Source.readULongLe(): ULong = readLongLe().toULong()
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readFloat
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readFloat
  */
 public fun Source.readFloat(): Float = Float.fromBits(readInt())
 
@@ -415,7 +415,7 @@ public fun Source.readFloat(): Float = Float.fromBits(readInt())
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readDouble
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readDouble
  */
 public fun Source.readDouble(): Double = Double.fromBits(readLong())
 
@@ -433,7 +433,7 @@ public fun Source.readDouble(): Double = Double.fromBits(readLong())
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readFloatLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readFloatLe
  */
 public fun Source.readFloatLe(): Float = Float.fromBits(readIntLe())
 
@@ -447,7 +447,7 @@ public fun Source.readFloatLe(): Float = Float.fromBits(readIntLe())
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.readDoubleLe
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.readDoubleLe
  */
 public fun Source.readDoubleLe(): Double = Double.fromBits(readLongLe())
 
@@ -460,7 +460,7 @@ public fun Source.readDoubleLe(): Double = Double.fromBits(readLongLe())
  * @throws IllegalStateException when the source is closed.
  * @throws IOException when some I/O error occurs.
  *
- * @sample kotlinx.io.samples.KotlinxIoCoreCommonSamples.startsWithSample
+ * @sample io.github.kotlinmania.io.samples.KotlinxIoCoreCommonSamples.startsWithSample
  */
 @OptIn(InternalIoApi::class)
 public fun Source.startsWith(byte: Byte): Boolean = request(1) && buffer[0] == byte

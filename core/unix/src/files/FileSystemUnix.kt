@@ -5,13 +5,13 @@
 
 @file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.toKString
-import kotlinx.io.IOException
+import io.github.kotlinmania.io.IOException
 import platform.posix.*
 
 internal actual fun atomicMoveImpl(source: Path, destination: Path) {

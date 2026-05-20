@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 /**
  * Signals about a general issue occurred during I/O operation.

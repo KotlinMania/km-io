@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package kotlinx.io
+package io.github.kotlinmania.io
 
 import java.io.InputStream
 import java.nio.Buffer
@@ -124,7 +124,7 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
 
     @Test
     fun inputStreamForClosedSource() {
-        if (source is kotlinx.io.Buffer) {
+        if (source is io.github.kotlinmania.io.Buffer) {
             return
         }
 
@@ -140,7 +140,7 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
 
     @Test
     fun inputStreamClosesSource() {
-        if (source is kotlinx.io.Buffer) {
+        if (source is io.github.kotlinmania.io.Buffer) {
             return
         }
 
@@ -173,7 +173,7 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
         sink.writeByte(0)
         sink.emit()
 
-        val expectedBytes = if (source is kotlinx.io.Buffer) {
+        val expectedBytes = if (source is io.github.kotlinmania.io.Buffer) {
             3
         } else {
             2
@@ -183,7 +183,7 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
 
     @Test
     fun inputStreamAvailableForClosedSource() {
-        if (source is kotlinx.io.Buffer) {
+        if (source is io.github.kotlinmania.io.Buffer) {
             return
         }
 

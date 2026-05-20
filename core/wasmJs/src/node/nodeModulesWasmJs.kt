@@ -5,7 +5,7 @@
 
 @file:OptIn(ExperimentalWasmJsInterop::class)
 
-package kotlinx.io.node
+package io.github.kotlinmania.io.node
 
 @JsFun("""
     (globalThis.module = (typeof process !== 'undefined') && (process.release.name === 'node') ?

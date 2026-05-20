@@ -5,10 +5,10 @@
 
 @file:OptIn(ExperimentalForeignApi::class)
 
-package kotlinx.io.files
+package io.github.kotlinmania.io.files
 
 import kotlinx.cinterop.*
-import kotlinx.io.*
+import io.github.kotlinmania.io.*
 import platform.posix.*
 
 /*
