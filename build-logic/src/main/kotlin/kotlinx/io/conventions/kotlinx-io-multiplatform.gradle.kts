@@ -154,7 +154,16 @@ kotlin {
     // a thin file-system implementation) live next to the JVM actuals and
     // cost roughly one file per `actual class` exposed by commonMain.
     sourceSets.findByName("androidMain")?.kotlin?.srcDir("android/src")
+    // androidHostTest and androidDeviceTest both compile against commonTest,
+    // so both need the Android-target `actual` declarations that mirror the
+    // JVM ones. They share a single `android/test/` directory; if device
+    // tests need device-only code in the future, add it next to the shared
+    // actuals and gate it with appropriate runtime checks. The AGP source
+    // sets resolve `androidDeviceTest` only when the `android` block is
+    // configured with `withDeviceTestBuilder { ... }`, so `findByName` is
+    // the right call shape.
     sourceSets.findByName("androidHostTest")?.kotlin?.srcDir("android/test")
+    sourceSets.findByName("androidDeviceTest")?.kotlin?.srcDir("android/test")
 
     tasks {
         val jvmJar by existing(Jar::class) {
