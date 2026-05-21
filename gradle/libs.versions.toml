@@ -1,14 +1,14 @@
 [versions]
-kotlin = "2.3.0"
+kotlin = "2.3.21"
 java = "8"
 multi-release-toolchain = "17"
-dokka = "2.2.0-Beta"
+dokka = "2.2.0"
 kover = "0.9.8"
-benchmark = "0.4.14"
+benchmark = "0.4.17"
 jmh = "1.37"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 animalsniffer = "2.0.1"
-okio = "3.10.2"
+okio = "3.17.0"
 # The com.android.kotlin.multiplatform.library plugin ships in AGP, and 9.2.1
 # is the version anyhow-kotlin tracks across the kotlinmania workspace.
 agp = "9.2.1"
