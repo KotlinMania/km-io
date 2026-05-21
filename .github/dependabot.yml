@@ -1,0 +1,62 @@
+# Dependabot configuration for km-io.
+#
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Covers three ecosystems present in this repo:
+#
+#   1. Gradle (root) -- the multi-module build at /. Picks up the
+#      kotlin("multiplatform") / kotlin("plugin.serialization") /
+#      com.android.kotlin.multiplatform.library / com.vanniktech.maven.publish
+#      plugin pins, plus every runtime dependency declared in core/,
+#      bytestring/, benchmarks/, and integration/km-io-okio/ via the
+#      shared version catalog at gradle/libs.versions.toml.
+#
+#   2. Gradle (build-logic) -- the included build under /build-logic
+#      (settings.gradle.kts > includeBuild("build-logic")). Dependabot's
+#      gradle ecosystem does not recurse into included builds from the
+#      root directory entry, so build-logic's convention-plugin
+#      dependencies (org.jetbrains.kotlin:kotlin-gradle-plugin,
+#      com.android.kotlin.multiplatform.library, dokka, animalsniffer,
+#      power-assert) need this second entry.
+#
+#   3. GitHub Actions -- the actions pinned across the workflow files in
+#      .github/workflows/. Versions are not enumerated here: Dependabot
+#      reads them straight from the workflow files, and a hand-kept list
+#      in this comment would silently drift from the actual pins.
+#
+# The yarn lockfiles under kotlin-js-store/ and kotlin-js-store/wasm/ are
+# NOT covered: they are managed by the Kotlin/JS Gradle plugin and
+# regenerated via explicit `kotlinUpgradeYarnLock` and
+# `kotlinWasmUpgradeYarnLock` tasks, never by hand. Letting Dependabot
+# touch them would fight the workspace's documented JS-toolchain security
+# patching procedure.
+
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "gradle"
+
+  - package-ecosystem: gradle
+    directory: "/build-logic"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "gradle"
+      - "build-logic"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
