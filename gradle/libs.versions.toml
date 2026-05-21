@@ -8,7 +8,7 @@ benchmark = "0.4.14"
 jmh = "1.37"
 coroutines = "1.10.2"
 animalsniffer = "2.0.1"
-okio = "3.10.2"
+okio = "3.17.0"
 # The com.android.kotlin.multiplatform.library plugin ships in AGP, and 9.2.1
 # is the version anyhow-kotlin tracks across the kotlinmania workspace.
 agp = "9.2.1"
