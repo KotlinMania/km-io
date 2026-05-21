@@ -1,0 +1,48 @@
+name: Build (macOS)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and Test (macOS)
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: zulu
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.1.0
+
+      # km-io declares both macosArm64 and macosX64 in the convention
+      # plugin's nativeTargets(); both need compile coverage. Only
+      # macosArm64Test runs natively on the macos-latest runner.
+      - name: Build and test macOS targets
+        run: >
+          ./gradlew
+          compileKotlinMacosArm64
+          compileKotlinMacosX64
+          macosArm64Test
+          --no-configuration-cache
+
+      - name: Upload test reports (macOS)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-macos
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
