@@ -1,0 +1,95 @@
+name: Publish
+
+# km-io still ships with the legacy `kotlinx-io-publish` convention plugin
+# (build-logic/.../kotlinx-io-publish.gradle.kts) rather than the
+# `com.vanniktech.maven.publish` plugin most other kotlinmania repos use.
+# That convention reads target Maven repository URL/user/password from
+# the `libs.repo.url` / `libs.repo.user` / `libs.repo.password` Gradle
+# properties (or matching env vars via getSensitiveProperty), plus the
+# in-memory PGP signing key from `libs.sign.key.id` / `libs.sign.key.private`
+# / `libs.sign.passphrase`. The standard `publish` task posts to whatever
+# repository is configured. No automatic Sonatype-Central Promote is wired
+# up — that step still happens manually against the Central Portal until
+# the publish convention is replaced.
+#
+# Publishing is opt-in only:
+#   * `release: [released]`   — auto-publish on a real GitHub Release.
+#   * `workflow_dispatch`     — manual run; `publish: true` actually
+#                               publishes, `publish: false` (default) does
+#                               a dry-run that only compiles the artifacts.
+# There is no `push:` or `pull_request:` trigger here on purpose: pushing
+# to main must never publish.
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to the configured Maven repository (requires secrets)"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: macos-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: zulu
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '24'
+          check-latest: true
+
+      - name: Set up Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+
+      - name: Install project-local Android SDK
+        run: ./gradlew setupAndroidSdk --no-configuration-cache
+
+      - name: Build (dry run)
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.publish }}
+        # Keep workflow_dispatch safe by default: just compile the Android
+        # and JVM publication-feeding outputs so a misclick can't publish.
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: ./gradlew compileAndroidMain compileKotlinJvm --no-configuration-cache
+
+      - name: Publish
+        if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+        # `publish` runs the standard `maven-publish` plugin's publish task
+        # against the repositories declared in
+        # build-logic/.../kotlinx-io-publish.gradle.kts. The `libs.repo.url`
+        # / `libs.repo.user` / `libs.repo.password` env vars below feed
+        # getSensitiveProperty in that file; `libs.sign.*` feed signing.
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+          libs_repo_url: ${{ secrets.MAVEN_CENTRAL_URL }}
+          libs_repo_user: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          libs_repo_password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          libs_sign_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          libs_sign_key_private: ${{ secrets.SIGNING_KEY }}
+          libs_sign_passphrase: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew publish --no-configuration-cache

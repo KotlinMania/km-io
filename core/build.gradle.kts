@@ -80,12 +80,21 @@ kotlin {
 
 tasks.named("wasmWasiNodeTest") {
     // TODO: remove once https://youtrack.jetbrains.com/issue/KT-65179 solved
+    val rootName = rootProject.name
+    val moduleName = project.name
     doFirst {
         val layout = project.layout
         val templateFile = layout.projectDirectory.file("wasmWasi/test/test-driver.mjs.template").asFile
 
+        // The Kotlin/Wasm test runner names the generated mjs entry-point
+        // `<rootProject.name>-<project.name>-test.mjs`. Before the kotlinx-io
+        // -> km-io rebrand this was the hard-coded
+        // `kotlinx-io-kotlinx-io-core-test.mjs`; afterwards it is
+        // `km-io-km-io-core-test.mjs`. Compute it from the project metadata so
+        // future renames don't leave the patch writing to a stale, unloaded
+        // file while the real driver runs unpatched.
         val driverFile = layout.buildDirectory.file(
-            "compileSync/wasmWasi/test/testDevelopmentExecutable/kotlin/kotlinx-io-kotlinx-io-core-test.mjs"
+            "compileSync/wasmWasi/test/testDevelopmentExecutable/kotlin/$rootName-$moduleName-test.mjs"
         )
 
         fun File.mkdirsAndEscape(): String {
@@ -93,12 +102,13 @@ tasks.named("wasmWasiNodeTest") {
             return absolutePath.replace("\\", "\\\\")
         }
 
-        val tmpDir = temporaryDir.resolve("kotlinx-io-core-wasi-test").mkdirsAndEscape()
-        val tmpDir2 = temporaryDir.resolve("kotlinx-io-core-wasi-test-2").mkdirsAndEscape()
+        val tmpDir = temporaryDir.resolve("km-io-core-wasi-test").mkdirsAndEscape()
+        val tmpDir2 = temporaryDir.resolve("km-io-core-wasi-test-2").mkdirsAndEscape()
 
         val newDriver = templateFile.readText()
             .replace("<SYSTEM_TEMP_DIR>", tmpDir, false)
             .replace("<SYSTEM_TEMP_DIR2>", tmpDir2, false)
+            .replace("<WASM_FILE>", "$rootName-$moduleName-test.wasm", false)
 
         driverFile.get().asFile.writeText(newDriver)
     }
