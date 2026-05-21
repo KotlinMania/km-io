@@ -6,7 +6,7 @@ dokka = "2.2.0"
 kover = "0.9.8"
 benchmark = "0.4.14"
 jmh = "1.37"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 animalsniffer = "2.0.1"
 okio = "3.17.0"
 # The com.android.kotlin.multiplatform.library plugin ships in AGP, and 9.2.1
