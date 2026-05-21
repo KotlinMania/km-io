@@ -26,3 +26,6 @@ local.properties
 
 logs
 
+
+# CI proxy log captured by local ./gradlew build runs; not part of the source tree.
+/build-log.txt
