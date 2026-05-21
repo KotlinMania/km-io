@@ -7,11 +7,34 @@ package io.github.kotlinmania.io.files
 
 import kotlinx.cinterop.*
 import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.isWindows
 import platform.posix.*
 
 @OptIn(ExperimentalForeignApi::class)
 public actual val SystemTemporaryDirectory: Path
-    get() = Path(getenv("TMPDIR")?.toKString() ?: getenv("TMP")?.toKString() ?: "")
+    get() = Path(
+        systemTemporaryDirectoryPath(
+            tmpDir = getenv("TMPDIR")?.toKString(),
+            tmp = getenv("TMP")?.toKString(),
+            temp = getenv("TEMP")?.toKString(),
+            tempDir = getenv("TEMPDIR")?.toKString(),
+        ),
+    )
+
+internal fun systemTemporaryDirectoryPath(
+    tmpDir: String?,
+    tmp: String?,
+    temp: String?,
+    tempDir: String?,
+    isWindowsHost: Boolean = isWindows,
+): String =
+    sequenceOf(tmpDir, tmp, temp, tempDir)
+        .firstOrNull { !it.isNullOrEmpty() }
+        ?: if (isWindowsHost) {
+            "C:/Windows/Temp"
+        } else {
+            "/tmp"
+        }
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 internal actual fun metadataOrNullImpl(path: Path): FileMetadata? {
