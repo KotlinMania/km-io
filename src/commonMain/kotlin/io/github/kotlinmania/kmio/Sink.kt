@@ -24,7 +24,7 @@ package io.github.kotlinmania.kmio
  * A sink that facilitates typed data writes and keeps a buffer internally so that caller can write some data without
  * sending it directly to an upstream.
  *
- * [Sink] is the main `kotlinx-io` interface to write data in client's code,
+ * [Sink] is the main `km-io` interface to write data in client's code,
  * any [RawSink] could be turned into [Sink] using [RawSink.buffered].
  *
  * Depending on the kind of upstream and the number of bytes written, buffering may improve the performance

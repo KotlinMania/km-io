@@ -44,7 +44,7 @@ private open class OutputStreamSink(
         checkOffsetAndCount(source.size, 0, byteCount)
         var remaining = byteCount
         while (remaining > 0) {
-            // io.github.kotlinmania.io TODO: detect Interruption.
+            // TODO: detect Interruption.
             remaining -= UnsafeBufferOperations.readFromHead(source) { data, pos, limit ->
                 val toCopy = minOf(remaining, limit - pos).toInt()
                 out.write(data, pos, toCopy)

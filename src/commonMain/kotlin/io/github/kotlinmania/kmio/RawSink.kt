@@ -21,7 +21,7 @@
 package io.github.kotlinmania.kmio
 
 /**
- * Receives a stream of bytes. RawSink is a base interface for `kotlinx-io` data receivers.
+ * Receives a stream of bytes. RawSink is a base interface for `km-io` data receivers.
  *
  * This interface should be implemented to write data wherever it's needed: to the network, storage,
  * or a buffer in memory. Sinks may be layered to transform received data, such as to compress, encrypt, throttle,

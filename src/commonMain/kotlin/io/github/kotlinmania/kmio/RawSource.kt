@@ -21,7 +21,7 @@
 package io.github.kotlinmania.kmio
 
 /**
- * Supplies a stream of bytes. RawSource is a base interface for `kotlinx-io` data suppliers.
+ * Supplies a stream of bytes. RawSource is a base interface for `km-io` data suppliers.
  *
  * The interface should be implemented to read data from wherever it's located: from the network, storage,
  * or a buffer in memory. Sources may be layered to transform supplied data, such as to decompress, decrypt,

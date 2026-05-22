@@ -29,3 +29,7 @@ logs
 
 # CI proxy log captured by local ./gradlew build runs; not part of the source tree.
 /build-log.txt
+
+# macOS Finder metadata. These get sprinkled into directories as a side effect
+# of opening folders in Finder; never part of the source tree.
+.DS_Store

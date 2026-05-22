@@ -24,7 +24,7 @@ package io.github.kotlinmania.kmio
  * A source that facilitates typed data reads and keeps a buffer internally so that callers can read chunks of data
  * without requesting it from a downstream on every call.
  *
- * [Source] is the main `kotlinx-io` interface to read data in client's code,
+ * [Source] is the main `km-io` interface to read data in client's code,
  * any [RawSource] could be converted into [Source] using [RawSource.buffered].
  *
  * Depending on the kind of downstream and the number of bytes read, buffering may improve the performance by hiding
