@@ -25,15 +25,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.1.0
 
-      # km-io declares watchosArm32, watchosArm64, watchosX64,
-      # watchosDeviceArm64, and watchosSimulatorArm64. Only the simulator
-      # variant tests run on the runner.
       - name: Build and test watchOS targets
         run: >
           ./gradlew
           compileKotlinWatchosArm32
           compileKotlinWatchosArm64
-          compileKotlinWatchosX64
           compileKotlinWatchosDeviceArm64
           compileKotlinWatchosSimulatorArm64
           watchosSimulatorArm64Test
@@ -45,7 +41,7 @@ jobs:
         with:
           name: test-reports-watchos
           path: |
-            **/build/reports/tests/
-            **/build/test-results/
+            build/reports/tests/
+            build/test-results/
           retention-days: 7
           if-no-files-found: warn

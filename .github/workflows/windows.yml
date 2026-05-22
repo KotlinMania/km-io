@@ -27,10 +27,6 @@ jobs:
         with:
           cache-provider: basic
 
-      # The project-local Android SDK installer is a Kotlin/Gradle task
-      # (root build.gradle.kts > installProjectAndroidSdk), so calling
-      # setupAndroidSdk explicitly here is the Windows-runner proof that
-      # the installer works without WSL / batch helpers / a host SDK.
       - name: Build and test Windows target
         run: >
           ./gradlew
@@ -44,7 +40,7 @@ jobs:
         with:
           name: test-reports-windows
           path: |
-            **/build/reports/tests/
-            **/build/test-results/
+            build/reports/tests/
+            build/test-results/
           retention-days: 7
           if-no-files-found: warn
