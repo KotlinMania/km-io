@@ -33,3 +33,4 @@ logs
 # macOS Finder metadata. These get sprinkled into directories as a side effect
 # of opening folders in Finder; never part of the source tree.
 .DS_Store
+/tmp/
