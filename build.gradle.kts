@@ -371,6 +371,17 @@ kotlin {
                 implementation("org.junit.jupiter:junit-jupiter:5.12.0")
             }
         }
+        val androidHostTest by getting {
+            kotlin.srcDir("src/androidTest/kotlin")
+            resources.srcDir("src/androidTest/resources")
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter:5.12.0")
+            }
+        }
+        val androidDeviceTest by getting {
+            kotlin.srcDir("src/androidTest/kotlin")
+            resources.srcDir("src/androidTest/resources")
+        }
     }
 }
 

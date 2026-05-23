@@ -13,7 +13,7 @@ package io.github.kotlinmania.kmio
 """)
 internal external fun persistModule()
 
-@JsFun("""() => { 
+@JsFun("""() => {
     const importMeta = import.meta;
     return globalThis.module.default.createRequire(importMeta.url);
 }
