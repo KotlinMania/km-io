@@ -12,6 +12,7 @@ import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
@@ -238,21 +239,48 @@ kotlin {
     android {
         namespace = "io.github.kotlinmania.kmio"
         compileSdk = 34
+        minSdk = 21
+        withHostTestBuilder {}.configure {}
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+        }
     }
 
-    macosArm64()
+    val xcf = XCFramework("Kmio")
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    macosArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
 
-    tvosArm64()
-    tvosSimulatorArm64()
+    iosArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+    iosSimulatorArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+    iosX64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
 
-    watchosArm32()
-    watchosArm64()
-    watchosSimulatorArm64()
-    watchosDeviceArm64()
+    tvosArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+    tvosSimulatorArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+
+    watchosArm32 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+    watchosArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+    watchosDeviceArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
+    watchosSimulatorArm64 {
+        binaries.framework { baseName = "Kmio"; xcf.add(this) }
+    }
 
     androidNativeArm32()
     androidNativeArm64()
@@ -262,6 +290,11 @@ kotlin {
     linuxArm64()
 
     mingwX64()
+
+    swiftExport {
+        moduleName = "Kmio"
+        flattenPackage = "io.github.kotlinmania.kmio"
+    }
 
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
     applyDefaultHierarchyTemplate {
@@ -397,6 +430,92 @@ tasks.named("wasmWasiNodeTest") {
             )
         }
         driverFile.writeText(patched)
+    }
+}
+
+// Workspace-canonical full-target build gate. The default Kotlin Multiplatform
+// `build` task only aggregates a subset of the configured target output:
+// `mainClasses` for JVM / JS / Wasm, `assemble` for Android, and some test
+// reports — but NOT every native target's `*Binaries` aggregator, not the
+// device-target test link tasks (iosArm64, tvosArm64, watchosDeviceArm64,
+// androidNative*), and not the XCFramework assembly. So `./gradlew build`
+// can report SUCCESS while leaving substantial slices of the configured
+// surface unlinked — fake-green. Pattern documented in the workspace runbook
+// under the async-channel-kotlin incident.
+//
+// Two passes:
+//   1. An explicit set of canonical task names that must always be in the
+//      `build` graph. Listing them by name keeps missing target work visible
+//      to reviewers.
+//   2. An `afterEvaluate` matcher catches any future-registered tasks whose
+//      names end in MainClasses / TestClasses / Binaries / XCFramework, so
+//      the gate doesn't regress when a target is added or renamed.
+val fullTargetBuildTaskNames = setOf(
+    "compileAndroidMain",
+    "compileAndroidHostTest",
+    "compileAndroidDeviceTest",
+    "assembleAndroidMain",
+    "assembleUnitTest",
+    "assembleAndroidTest",
+    "jvmMainClasses",
+    "jvmTestClasses",
+    "jsMainClasses",
+    "jsTestClasses",
+    "wasmJsMainClasses",
+    "wasmJsTestClasses",
+    "wasmWasiMainClasses",
+    "wasmWasiTestClasses",
+    "androidNativeArm32Binaries",
+    "androidNativeArm32TestBinaries",
+    "androidNativeArm64Binaries",
+    "androidNativeArm64TestBinaries",
+    "androidNativeX64Binaries",
+    "androidNativeX64TestBinaries",
+    "androidNativeX86Binaries",
+    "androidNativeX86TestBinaries",
+    "iosArm64Binaries",
+    "iosArm64TestBinaries",
+    "iosSimulatorArm64Binaries",
+    "iosSimulatorArm64TestBinaries",
+    "iosX64Binaries",
+    "iosX64TestBinaries",
+    "linuxArm64Binaries",
+    "linuxArm64TestBinaries",
+    "linuxX64Binaries",
+    "linuxX64TestBinaries",
+    "macosArm64Binaries",
+    "macosArm64TestBinaries",
+    "mingwX64Binaries",
+    "mingwX64TestBinaries",
+    "tvosArm64Binaries",
+    "tvosArm64TestBinaries",
+    "tvosSimulatorArm64Binaries",
+    "tvosSimulatorArm64TestBinaries",
+    "watchosArm32Binaries",
+    "watchosArm32TestBinaries",
+    "watchosArm64Binaries",
+    "watchosArm64TestBinaries",
+    "watchosDeviceArm64Binaries",
+    "watchosDeviceArm64TestBinaries",
+    "watchosSimulatorArm64Binaries",
+    "watchosSimulatorArm64TestBinaries",
+    "assembleKmioXCFramework",
+)
+
+tasks.named("build") {
+    dependsOn(fullTargetBuildTaskNames)
+}
+
+afterEvaluate {
+    tasks.named("build") {
+        dependsOn(
+            tasks.matching {
+                name.endsWith("MainClasses") ||
+                    name.endsWith("TestClasses") ||
+                    name.endsWith("Binaries") ||
+                    name.endsWith("XCFramework")
+            },
+        )
     }
 }
 
