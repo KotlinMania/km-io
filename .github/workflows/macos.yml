@@ -25,14 +25,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.1.0
 
-      # km-io declares both macosArm64 and macosX64 in the convention
-      # plugin's nativeTargets(); both need compile coverage. Only
-      # macosArm64Test runs natively on the macos-latest runner.
       - name: Build and test macOS targets
         run: >
           ./gradlew
           compileKotlinMacosArm64
-          compileKotlinMacosX64
           macosArm64Test
           --no-configuration-cache
 
@@ -42,7 +38,7 @@ jobs:
         with:
           name: test-reports-macos
           path: |
-            **/build/reports/tests/
-            **/build/test-results/
+            build/reports/tests/
+            build/test-results/
           retention-days: 7
           if-no-files-found: warn

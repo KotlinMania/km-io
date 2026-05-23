@@ -25,12 +25,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.1.0
 
-      # km-io declares tvosArm64, tvosX64, and tvosSimulatorArm64.
       - name: Build and test tvOS targets
         run: >
           ./gradlew
           compileKotlinTvosArm64
-          compileKotlinTvosX64
           compileKotlinTvosSimulatorArm64
           tvosSimulatorArm64Test
           --no-configuration-cache
@@ -41,7 +39,7 @@ jobs:
         with:
           name: test-reports-tvos
           path: |
-            **/build/reports/tests/
-            **/build/test-results/
+            build/reports/tests/
+            build/test-results/
           retention-days: 7
           if-no-files-found: warn

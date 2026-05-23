@@ -42,18 +42,17 @@ jobs:
           npm --version
           yarn --version
 
-      # km-io's wasmJs.browser() target is currently disabled in
-      # core/build.gradle.kts (KT-58291 filter-exclude workaround), so
-      # wasmJsBrowserTest is not invoked here. wasmJsNodeTest and
-      # wasmWasiNodeTest both exercise the wasi-preview1 shim under Node
-      # 24+. The runner is pinned to 24.x because the generated
-      # wasmWasiNodeTest driver calls APIs that only exist on Node 24+
-      # ("Krypton" LTS).
       - name: Build and test WASM targets
+        # wasmJs runs under both Chrome (browser) and Node; wasmWasi runs
+        # under Node with the wasi-preview1 shim. The generated
+        # wasmWasiNodeTest runner calls `wasi.finalizeBindings(...)` which
+        # only exists on Node 24+ — that's why build.gradle.kts pins
+        # `kotlinWasmNodeJsSpec` to 24.15.0 (Active LTS "Krypton").
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
+          wasmJsBrowserTest
           wasmJsNodeTest
           wasmWasiNodeTest
           --no-configuration-cache
@@ -64,7 +63,7 @@ jobs:
         with:
           name: test-reports-wasm
           path: |
-            **/build/reports/tests/
-            **/build/test-results/
+            build/reports/tests/
+            build/test-results/
           retention-days: 7
           if-no-files-found: warn

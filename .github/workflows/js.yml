@@ -57,7 +57,7 @@ jobs:
         with:
           name: test-reports-js
           path: |
-            **/build/reports/tests/
-            **/build/test-results/
+            build/reports/tests/
+            build/test-results/
           retention-days: 7
           if-no-files-found: warn
