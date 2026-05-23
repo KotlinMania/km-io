@@ -98,23 +98,33 @@ public actual val SystemFileSystem: FileSystem = object : SystemFileSystemImpl()
 
     override fun resolve(path: Path): Path {
         if (!exists(path)) throw FileNotFoundException(path.pathString)
-        return Path(fs.realpathSync.native(path.pathString))
+        val resolvedPath = try {
+            fs.realpathSync.native(path.pathString)
+        } catch (e: Throwable) {
+            fs.realpathSyncFunc(path.pathString)
+        }
+        return Path(resolvedPath)
     }
 
     override fun list(directory: Path): Collection<Path> {
         val metadata = metadataOrNull(directory) ?: throw FileNotFoundException(directory.pathString)
         if (!metadata.isDirectory) throw IOException("Not a directory: ${directory.pathString}")
-        val dir = fs.opendirSync(directory.pathString) ?: throw IOException("Unable to read directory: ${directory.pathString}")
         try {
-            return buildList {
-                var child = dir.readSync()
-                while (child != null) {
-                    add(Path(directory, child.name))
-                    child = dir.readSync()
+            val dir = fs.opendirSync(directory.pathString) ?: throw IOException("Unable to read directory: ${directory.pathString}")
+            try {
+                return buildList {
+                    var child = dir.readSync()
+                    while (child != null) {
+                        add(Path(directory, child.name))
+                        child = dir.readSync()
+                    }
                 }
+            } finally {
+                dir.closeSync()
             }
-        } finally {
-            dir.closeSync()
+        } catch (e: Throwable) {
+            val children = callReaddirSync(directory.pathString)
+            return children.map { Path(directory, it) }
         }
     }
 }

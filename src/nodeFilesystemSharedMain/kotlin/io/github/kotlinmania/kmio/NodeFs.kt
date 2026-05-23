@@ -56,15 +56,19 @@ internal external interface Fs {
      */
     fun writeFileSync(fd: Int, buffer: NodeJsBuffer)
 
-    /**
-     * See https://nodejs.org/api/fs.html#fsopendirsyncpath-options
-     */
     fun opendirSync(path: String): Dir?
+
+    fun writeSync(fd: Int, buffer: NodeJsBuffer)
 
     val realpathSync: realpathSync
 
+    @JsName("realpathSync")
+    fun realpathSyncFunc(path: String): String
+
     val constants: constants
 }
+
+internal expect fun callReaddirSync(directory: String): List<String>
 
 /**
  * Partial declaration of a class mirroring [node:fs.Stats](https://nodejs.org/api/fs.html#class-fsstats)

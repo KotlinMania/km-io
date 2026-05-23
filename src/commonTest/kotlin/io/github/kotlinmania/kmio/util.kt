@@ -42,6 +42,13 @@ fun assertNoEmptySegments(buffer: Buffer) {
 
 expect fun tempFileName(): String
 
+val isFileSystemSupported: Boolean by lazy {
+    runCatching { SystemFileSystem.exists(Path(".")) }
+        .map { true }
+        .recover { e -> e !is UnsupportedOperationException }
+        .getOrThrow()
+}
+
 private fun fromHexChar(char: Char): Int {
     val code = char.code
     return when (code) {

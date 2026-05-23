@@ -12,30 +12,24 @@ import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec
 
 plugins {
-    id("kotlinx-io-publish") apply false
-    id("kotlinx-io-dokka")
+    kotlin("multiplatform") version "2.3.21"
+    id("com.android.kotlin.multiplatform.library") version "9.2.1"
+    id("com.vanniktech.maven.publish") version "0.36.0"
     alias(libs.plugins.kover)
 }
 
-allprojects {
-    properties["DeployVersion"]?.let { version = it }
-    repositories {
-        mavenCentral()
-        google()
-    }
-}
+group = "io.github.kotlinmania"
+version = "0.1.1"
 
-dependencies {
-    kover(project(":km-io-core"))
-    kover(project(":km-io-bytestring"))
-    kover(project(":km-io-okio"))
 
-    dokka(project(":km-io-bytestring"))
-    dokka(project(":km-io-core"))
-    dokka(project(":km-io-okio"))
-}
 
 kover {
     reports {
@@ -210,4 +204,201 @@ tasks.register("setupAndroidSdk") {
     doLast {
         installProjectAndroidSdk(androidSdkExecOperations)
     }
+}
+
+kotlin {
+    compilerOptions {
+        allWarningsAsErrors.set(true)
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+        freeCompilerArgs.add("-Xreturn-value-checker=full")
+        freeCompilerArgs.add("-XXLanguage:+UnnamedLocalVariables")
+    }
+    
+    jvm {
+        compilerOptions {
+            jvmDefault = org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode.NO_COMPATIBILITY
+        }
+    }
+    js {
+        browser()
+        nodejs()
+    }
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        // 'moduleName' is deprecated in Kotlin 2.3+
+        // outputModuleName.set("kmio")
+        nodejs()
+        browser()
+    }
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmWasi {
+        nodejs()
+    }
+
+    android {
+        namespace = "io.github.kotlinmania.kmio"
+        compileSdk = 34
+    }
+
+    macosArm64()
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    tvosArm64()
+    tvosSimulatorArm64()
+
+    watchosArm32()
+    watchosArm64()
+    watchosSimulatorArm64()
+    watchosDeviceArm64()
+
+    androidNativeArm32()
+    androidNativeArm64()
+    androidNativeX64()
+    androidNativeX86()
+    linuxX64()
+    linuxArm64()
+
+    mingwX64()
+
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("native") {
+                group("nativeNonApple") {
+                    group("mingw")
+                    group("unix") {
+                        group("linux")
+                        group("androidNative")
+                    }
+                }
+
+                group("nativeNonAndroid") {
+                    group("apple")
+                    group("mingw")
+                    group("linux")
+                }
+            }
+            group("nodeFilesystemShared") {
+                withJs()
+                withWasmJs()
+            }
+            group("wasm") {
+                withWasmJs()
+                withWasmWasi()
+            }
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+        val wasmJsTest by getting {
+            dependencies {
+                implementation(npm("memfs", "4.9.2"))
+                // Webpack 5 dropped Node.js core module polyfills.
+                // These restore them for the browser test bundle so memfs and its transitive deps can resolve.
+                implementation(npm("path-browserify", "1.0.1"))
+                implementation(npm("os-browserify", "0.3.0"))
+                implementation(npm("buffer", "6.0.3"))
+                implementation(npm("stream-browserify", "3.0.0"))
+                implementation(npm("util", "0.12.5"))
+                implementation(npm("url", "0.11.3"))
+                implementation(npm("process", "0.11.10"))
+                implementation(npm("assert", "2.1.0"))
+            }
+        }
+        val jsTest by getting {
+            dependencies {
+                implementation(npm("memfs", "4.9.2"))
+                // Webpack 5 dropped Node.js core module polyfills.
+                // These restore them for the browser test bundle so memfs and its transitive deps can resolve.
+                implementation(npm("path-browserify", "1.0.1"))
+                implementation(npm("os-browserify", "0.3.0"))
+                implementation(npm("buffer", "6.0.3"))
+                implementation(npm("stream-browserify", "3.0.0"))
+                implementation(npm("util", "0.12.5"))
+                implementation(npm("url", "0.11.3"))
+                implementation(npm("process", "0.11.10"))
+                implementation(npm("assert", "2.1.0"))
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter:5.12.0")
+            }
+        }
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") {
+    version.set("24.15.0")
+}
+
+rootProject.extensions.configure<WasmNodeJsEnvSpec>("kotlinWasmNodeJsSpec") {
+    version.set("24.15.0")
+}
+
+rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") {
+    version.set("1.22.22")
+}
+
+rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") {
+    version.set("1.22.22")
+}
+
+rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
+    resolution("diff", "8.0.3")
+    resolution("**/diff", "8.0.3")
+    resolution("fast-uri", "3.1.2")
+    resolution("**/fast-uri", "3.1.2")
+    resolution("serialize-javascript", "7.0.5")
+    resolution("**/serialize-javascript", "7.0.5")
+    resolution("webpack", "5.106.2")
+    resolution("**/webpack", "5.106.2")
+    resolution("follow-redirects", "1.16.0")
+    resolution("**/follow-redirects", "1.16.0")
+    resolution("lodash", "4.18.1")
+    resolution("**/lodash", "4.18.1")
+    resolution("ajv", "8.20.0")
+    resolution("**/ajv", "8.20.0")
+    resolution("brace-expansion", "5.0.6")
+    resolution("**/brace-expansion", "5.0.6")
+    resolution("flatted", "3.4.2")
+    resolution("**/flatted", "3.4.2")
+    resolution("minimatch", "10.2.5")
+    resolution("**/minimatch", "10.2.5")
+    resolution("picomatch", "4.0.4")
+    resolution("**/picomatch", "4.0.4")
+    resolution("qs", "6.15.1")
+    resolution("**/qs", "6.15.1")
+    resolution("socket.io-parser", "4.2.6")
+    resolution("**/socket.io-parser", "4.2.6")
+    resolution("ws", "8.20.1")
+    resolution("**/ws", "8.20.1")
+}
+
+val patchedKarmaWebpackPackage = rootProject.layout.projectDirectory.dir("gradle/npm/karma-webpack").asFile.absolutePath.replace("\\", "/")
+
+rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
+    versions.webpack.version = "5.106.2"
+    versions.webpackCli.version = "7.0.2"
+    versions.karma.version = "npm:karma-maintained@6.4.7"
+    versions.karmaWebpack.version = "file:$patchedKarmaWebpackPackage"
+    versions.mocha.version = "12.0.0-beta-10"
+    versions.kotlinWebHelpers.version = "3.1.0"
 }

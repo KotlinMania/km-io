@@ -159,7 +159,7 @@ internal class FileSink(path: Path, append: Boolean) : RawSink {
                     buf.writeInt8(headData[headPos + offset], offset)
                 }
                 withCaughtException {
-                    fs.writeFileSync(fd, buf)
+                    fs.writeSync(fd, buf)
                 }?.also {
                     throw IOException("Write failed", it)
                 }

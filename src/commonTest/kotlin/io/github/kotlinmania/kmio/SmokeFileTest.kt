@@ -11,6 +11,25 @@ import kotlin.test.*
 class SmokeFileTest {
     private val files: MutableList<Path> = arrayListOf()
 
+    @BeforeTest
+    fun setup() {
+        try {
+            val parts = arrayListOf<String>()
+            var curr: Path? = SystemTemporaryDirectory
+            while (curr != null) {
+                if (curr.toString().isNotEmpty()) {
+                    parts.add(curr.toString())
+                }
+                curr = curr.parent
+            }
+            parts.asReversed().forEach {
+                try {
+                    SystemFileSystem.createDirectories(Path(it))
+                } catch (e: Throwable) {}
+            }
+        } catch (e: Throwable) {}
+    }
+
     @AfterTest
     fun cleanup() {
         var lastException: Throwable? = null

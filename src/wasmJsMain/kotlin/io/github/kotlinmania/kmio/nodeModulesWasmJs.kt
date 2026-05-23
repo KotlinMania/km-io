@@ -55,6 +55,18 @@ internal actual val path: NodeJsPathInterface by lazy {
     loadModule("path") as NodeJsPathInterface
 }
 
+@JsFun("(directory, fsModule) => fsModule.readdirSync(directory)")
+private external fun jsReaddirSync(directory: String, fsModule: Fs): JsArray<JsString>
+
+internal actual fun callReaddirSync(directory: String): List<String> {
+    val children = jsReaddirSync(directory, fs)
+    val list = mutableListOf<String>()
+    for (i in 0 until children.length) {
+        list.add(children[i]!!.toString())
+    }
+    return list
+}
+
 internal actual val fs: Fs by lazy {
     @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
     loadModule("fs") as Fs
