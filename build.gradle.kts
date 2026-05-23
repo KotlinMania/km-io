@@ -345,6 +345,61 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+// Patch the generated Wasm-WASI Node test runner so that the WASI instance is
+// constructed with preopens for "/tmp" and "/var/log". The Kotlin/Wasm plugin
+// emits a runner that calls `new WASI({ version: 'preview1', args, env })`
+// with no preopens — every filesystem syscall then fails because no virtual
+// path is mapped, which is exactly the regression that surfaced after the
+// modular -> flat restructure dropped the original `core/build.gradle.kts`
+// doFirst block + test-driver.mjs.template. WasiFsTest.hasTemp expects fd 3
+// to be "/tmp" (preopens are assigned fds starting at 3 in declaration order),
+// WasiFsTest.multiplePreOpens expects both "/tmp" and "/var/log" to be
+// reachable, and the SmokeFileTest suite expects relative paths to resolve
+// under "/tmp". The host-side targets are fresh temp directories created
+// inside `temporaryDir` so cleanup happens with the task's own state.
+tasks.named("wasmWasiNodeTest") {
+    val rootName = rootProject.name
+    val moduleName = project.name
+    doFirst {
+        val driverFile = layout.buildDirectory.file(
+            "compileSync/wasmWasi/test/testDevelopmentExecutable/kotlin/$rootName-test.mjs"
+        ).get().asFile
+
+        if (!driverFile.exists()) {
+            // No Wasm-WASI test runner was generated (e.g. no wasmWasi test
+            // sources). Nothing to patch.
+            return@doFirst
+        }
+
+        fun File.mkdirsAndEscape(): String {
+            mkdirs()
+            return absolutePath.replace("\\", "\\\\")
+        }
+
+        val tmpDir = temporaryDir.resolve("km-io-wasi-test-tmp").mkdirsAndEscape()
+        val tmpDir2 = temporaryDir.resolve("km-io-wasi-test-var-log").mkdirsAndEscape()
+
+        val text = driverFile.readText()
+        val patched = text.replace(
+            "const wasi = new WASI({ version: 'preview1', args: argv, env, });",
+            "const wasi = new WASI({ version: 'preview1', args: argv, env, " +
+                "preopens: { '/tmp': '$tmpDir', '/var/log': '$tmpDir2' } });"
+        )
+        if (patched == text) {
+            // The runner template changed shape; fail loudly instead of
+            // silently leaving the tests with no preopens.
+            throw GradleException(
+                "Failed to patch wasmWasi test runner with WASI preopens. " +
+                    "The generated $driverFile did not match the expected " +
+                    "`new WASI({ version: 'preview1', args: argv, env, });` " +
+                    "constructor shape. Update the patch in build.gradle.kts " +
+                    "to match the new generated runner."
+            )
+        }
+        driverFile.writeText(patched)
+    }
+}
+
 rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") {
     version.set("24.15.0")
 }
