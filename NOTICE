@@ -1,8 +1,27 @@
    =========================================================================
    ==  NOTICE file corresponding to the section 4 d of                    ==
    ==  the Apache License, Version 2.0,                                   ==
-   ==  in this case for the kotlinx-io library.                            ==
+   ==  in this case for the km-io library.                                ==
    =========================================================================
 
+   km-io library.
+   Copyright 2026 Sydney Renee and The Solace Project
+   (https://github.com/sydneyrenee, sydney@solace.ofharmony.ai)
+
+   km-io is derived from the kotlinx-io library, with substantial changes
+   to platform coverage, build infrastructure, packaging, and namespace.
+
+   This product includes software developed by third parties:
+
+   --- Upstream: kotlinx-io ---
    kotlinx-io library.
    Copyright 2017-2023 JetBrains s.r.o and respective authors and developers
+   (https://github.com/Kotlin/kotlinx-io)
+   Licensed under the Apache License, Version 2.0.
+
+   --- Upstream of upstream: Okio ---
+   Okio served as the foundation for kotlinx-io and remains a conceptual
+   ancestor of this library's Buffer, Source, and Sink design.
+   Copyright (C) 2014 Square, Inc.
+   (https://square.github.io/okio/)
+   Licensed under the Apache License, Version 2.0.
