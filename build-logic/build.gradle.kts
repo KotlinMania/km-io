@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.power.assert.plugin)
     implementation(libs.dokka.gradle.plugin)
     implementation(libs.animalsniffer.gradle.plugin)
+    implementation(libs.maven.publish.gradle.plugin)
     // Needed so the kotlinx-io-multiplatform convention plugin can apply the
     // com.android.kotlin.multiplatform.library plugin id at the consumer site.
     implementation(libs.android.kmp.library.gradle.plugin)
