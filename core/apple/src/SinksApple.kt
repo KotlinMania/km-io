@@ -3,7 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
+@file:OptIn(
+    ExperimentalForeignApi::class,
+    ExperimentalNativeApi::class,
+    kotlin.experimental.ExperimentalObjCRefinement::class,
+)
 
 package io.github.kotlinmania.io
 
@@ -13,6 +17,7 @@ import platform.darwin.NSInteger
 import platform.darwin.NSUInteger
 import platform.posix.uint8_tVar
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.native.HiddenFromObjC
 import kotlin.native.ref.WeakReference
 
 /**
@@ -31,6 +36,7 @@ import kotlin.native.ref.WeakReference
  *
  * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesApple.asStream
  */
+@HiddenFromObjC
 public fun Sink.asNSOutputStream(): NSOutputStream = SinkNSOutputStream(this)
 
 @OptIn(UnsafeNumber::class)

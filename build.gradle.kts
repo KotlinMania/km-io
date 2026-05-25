@@ -10,6 +10,7 @@ import java.nio.file.StandardCopyOption
 import java.util.zip.ZipInputStream
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 
@@ -210,4 +211,52 @@ tasks.register("setupAndroidSdk") {
     doLast {
         installProjectAndroidSdk(androidSdkExecOperations)
     }
+}
+
+val swiftExportBuildDir = project(":km-io-core").layout.buildDirectory.dir("swift-test")
+val swiftExportPackageDir = project(":km-io-core").layout.buildDirectory.dir("SPMPackage/macosArm64/Debug")
+val swiftExportEnvironment = mapOf(
+    "BUILT_PRODUCTS_DIR" to swiftExportBuildDir.get().asFile.absolutePath,
+    "TARGET_BUILD_DIR" to swiftExportBuildDir.get().asFile.absolutePath,
+    "SDK_NAME" to "macosx",
+    "CONFIGURATION" to "Debug",
+    "ARCHS" to "arm64",
+    "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+    "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+    "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+)
+
+val buildSwiftExportForSwiftTest = tasks.register<Exec>("buildSwiftExportForSwiftTest") {
+    group = "verification"
+    description = "Builds the Kotlin Swift Export SPM package for the local Swift test harness."
+    commandLine(
+        "./gradlew",
+        "--no-daemon",
+        "--console=plain",
+        "--no-configuration-cache",
+        ":km-io-core:embedSwiftExportForXcode",
+    )
+    environment(swiftExportEnvironment)
+    outputs.dir(swiftExportBuildDir)
+    outputs.dir(swiftExportPackageDir)
+    outputs.upToDateWhen { false }
+}
+
+val swiftExportTest = tasks.register<Exec>("swiftExportTest") {
+    group = "verification"
+    description = "Runs swift test against the Kotlin Swift Export package."
+    dependsOn(buildSwiftExportForSwiftTest)
+    workingDir(layout.projectDirectory.dir("swift-test-harness"))
+    commandLine("swift", "test")
+    outputs.upToDateWhen { false }
+}
+
+tasks.register("test") {
+    group = "verification"
+    description = "Runs Swift Export tests for the locally generated Swift package."
+    dependsOn(swiftExportTest)
+}
+
+tasks.named("build") {
+    dependsOn(swiftExportTest)
 }

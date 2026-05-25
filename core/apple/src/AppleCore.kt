@@ -3,7 +3,11 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-@file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
+@file:OptIn(
+    UnsafeNumber::class,
+    ExperimentalForeignApi::class,
+    kotlin.experimental.ExperimentalObjCRefinement::class,
+)
 
 package io.github.kotlinmania.io
 
@@ -14,6 +18,7 @@ import platform.Foundation.NSOutputStream
 import platform.Foundation.NSStreamStatusClosed
 import platform.Foundation.NSStreamStatusNotOpen
 import platform.posix.uint8_tVar
+import kotlin.native.HiddenFromObjC
 
 /**
  * Returns [RawSink] that writes to an output stream.
@@ -22,6 +27,7 @@ import platform.posix.uint8_tVar
  *
  * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesApple.outputStreamAsSink
  */
+@HiddenFromObjC
 public fun NSOutputStream.asSink(): RawSink = OutputStreamSink(this)
 
 private open class OutputStreamSink(
@@ -74,6 +80,7 @@ private open class OutputStreamSink(
  *
  * @sample io.github.kotlinmania.io.samples.KotlinxIoSamplesApple.inputStreamAsSource
  */
+@HiddenFromObjC
 public fun NSInputStream.asSource(): RawSource = NSInputStreamSource(this)
 
 private open class NSInputStreamSource(

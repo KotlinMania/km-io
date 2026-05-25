@@ -80,9 +80,8 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
+        browser()
         nodejs()
-        //  Disabled because we can't exclude some tests: https://youtrack.jetbrains.com/issue/KT-58291
-        // browser()
     }
 
     @OptIn(ExperimentalWasmDsl::class)

@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io.unsafe
 
 import kotlin.contracts.ExperimentalContracts
@@ -10,8 +12,10 @@ import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
 import io.github.kotlinmania.io.*
 import kotlin.jvm.JvmSynthetic
+import kotlin.native.HiddenFromObjC
 
 @UnsafeIoApi
+@HiddenFromObjC
 @OptIn(ExperimentalContracts::class)
 public object UnsafeBufferOperations {
     /**
@@ -387,6 +391,7 @@ public object UnsafeBufferOperations {
  * Provides read access to [Segment]'s data.
  */
 @UnsafeIoApi
+@HiddenFromObjC
 public interface SegmentReadContext {
     /**
      * Reads [offset]'s byte from [segment].
@@ -438,6 +443,7 @@ public inline fun SegmentReadContext.withData(
  * Provides write access to [Segment]'s data.
  */
 @UnsafeIoApi
+@HiddenFromObjC
 public interface SegmentWriteContext {
     /**
      * Writes [value] to an uncommitted portion of the [segment] at [offset].
@@ -516,6 +522,7 @@ public interface SegmentWriteContext {
  * Allows iterating over [Buffer]'s segments and reading its data.
  */
 @UnsafeIoApi
+@HiddenFromObjC
 public interface BufferIterationContext : SegmentReadContext {
     /**
      * Return a segment succeeding [segment] in the buffer, or `null`, if there is no such segment (meaning that the

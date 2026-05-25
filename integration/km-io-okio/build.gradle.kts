@@ -169,16 +169,28 @@ val fullTargetBuildTasks = listOf(
     "compileAndroidHostTest",
     "compileAndroidDeviceTest",
     "assembleAndroidMain",
+    "assembleAndroidHostTest",
+    "assembleAndroidDeviceTest",
     "assembleUnitTest",
     "assembleAndroidTest",
+    "testAndroidHostTest",
     "jvmMainClasses",
     "jvmTestClasses",
+    "jvmTest",
     "jsMainClasses",
     "jsTestClasses",
+    "jsBrowserTest",
+    "jsNodeTest",
+    "jsTest",
     "wasmJsMainClasses",
     "wasmJsTestClasses",
+    "wasmJsBrowserTest",
+    "wasmJsNodeTest",
+    "wasmJsTest",
     "wasmWasiMainClasses",
     "wasmWasiTestClasses",
+    "wasmWasiNodeTest",
+    "wasmWasiTest",
     "androidNativeArm32Binaries",
     "androidNativeArm32TestBinaries",
     "androidNativeArm64Binaries",
@@ -222,10 +234,8 @@ val fullTargetBuildTasks = listOf(
 )
 
 tasks.named("build") {
-    // `kotlinx.io.okio.compat.targets=true` (in this module's gradle.properties)
-    // disables the androidNative and linuxArm32Hfp targets, so a few of the
-    // canonical fullTargetBuildTasks aren't actually registered as tasks
-    // here. Filter through findByName so the build task only depends on
-    // tasks that exist.
+    // Okio 3.17.0 does not publish androidNative or linuxArm32Hfp variants.
+    // Keep km-io-okio on the largest resolvable target set until that upstream
+    // artifact exists or KotlinMania owns an equivalent Okio-compatible port.
     dependsOn(fullTargetBuildTasks.mapNotNull { tasks.findByName(it) })
 }

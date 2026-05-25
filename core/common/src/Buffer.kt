@@ -18,6 +18,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io
 
 import kotlin.contracts.ExperimentalContracts
@@ -25,6 +27,7 @@ import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
 import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import kotlin.jvm.JvmSynthetic
+import kotlin.native.HiddenFromObjC
 
 /**
  * A collection of bytes in memory.
@@ -73,6 +76,7 @@ public class Buffer : Source, Sink {
     /**
      * Returns the buffer itself.
      */
+    @HiddenFromObjC
     @InternalIoApi
     override val buffer: Buffer get() = this
 
@@ -172,6 +176,7 @@ public class Buffer : Source, Sink {
     /**
      * This method does not affect the buffer's content as there is no upstream to write data to.
      */
+    @HiddenFromObjC
     @InternalIoApi
     override fun hintEmit(): Unit = Unit
 

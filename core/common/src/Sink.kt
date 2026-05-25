@@ -18,7 +18,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io
+
+import kotlin.native.HiddenFromObjC
 
 /**
  * A sink that facilitates typed data writes and keeps a buffer internally so that caller can write some data without
@@ -68,6 +72,7 @@ public sealed interface Sink : RawSink {
      *
      * If there is an actual need to write data directly into the buffer, consider using [Sink.writeToInternalBuffer] instead.
      */
+    @HiddenFromObjC
     @InternalIoApi
     public val buffer: Buffer
 
@@ -206,6 +211,7 @@ public sealed interface Sink : RawSink {
      * @throws IllegalStateException when the sink is closed.
      * @throws IOException when some I/O error occurs.
      */
+    @HiddenFromObjC
     @InternalIoApi
     public fun hintEmit()
 }

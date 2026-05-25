@@ -3,11 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io.files
 
 import io.github.kotlinmania.io.IOException
 import io.github.kotlinmania.io.RawSink
 import io.github.kotlinmania.io.RawSource
+import kotlin.native.HiddenFromObjC
 
 /**
  * An interface providing basic operations on a filesystem, such as reading and writing files,
@@ -210,6 +213,7 @@ public class FileMetadata(
 /**
  * Signals an I/O operation's failure due to a missing file or directory.
  */
+@HiddenFromObjC
 public expect class FileNotFoundException(message: String?) : IOException
 
 internal const val WindowsPathSeparator: Char = '\\'

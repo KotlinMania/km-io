@@ -3,12 +3,15 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io.bytestring.unsafe
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
 import io.github.kotlinmania.io.bytestring.ByteString
+import kotlin.native.HiddenFromObjC
 
 /**
  * Collection of helper functions providing unsafe access to the [ByteString]'s underlying byte sequence or allowing
@@ -19,6 +22,7 @@ import io.github.kotlinmania.io.bytestring.ByteString
  * consequences in the code using the byte string and should be avoided at all costs.
  */
 @UnsafeByteStringApi
+@HiddenFromObjC
 @OptIn(ExperimentalContracts::class)
 public object UnsafeByteStringOperations {
     /**

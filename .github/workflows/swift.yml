@@ -68,23 +68,23 @@ jobs:
       #     `property 'deploymentTargetSettingName' doesn't have a
       #     configured value`.
       #
-      # Output lands in `build/swift-test/`:
-      #   * `libHttp.a` — the merged static archive containing
+      # Output lands in `core/build/swift-test/`:
+      #   * `libKmIo.a` — the merged static archive containing
       #     every `@ExportedBridge`-annotated function emitted by
-      #     `build/SwiftExport/macosArm64/Debug/**/*.kt`.
-      #   * Four `.swiftmodule/` directories: Http,
+      #     `core/build/SwiftExport/macosArm64/Debug/**/*.kt`.
+      #   * `.swiftmodule/` directories: KmIo, KmIoByteString,
       #     KotlinRuntimeSupport, ExportedKotlinPackages, KotlinRuntime.
       - name: Build Swift Export package
         env:
-          BUILT_PRODUCTS_DIR: ${{ github.workspace }}/build/swift-test
-          TARGET_BUILD_DIR: ${{ github.workspace }}/build/swift-test
+          BUILT_PRODUCTS_DIR: ${{ github.workspace }}/core/build/swift-test
+          TARGET_BUILD_DIR: ${{ github.workspace }}/core/build/swift-test
           SDK_NAME: macosx
           CONFIGURATION: Debug
           ARCHS: arm64
           FRAMEWORKS_FOLDER_PATH: Frameworks
           MACOSX_DEPLOYMENT_TARGET: "14.0"
           DEPLOYMENT_TARGET_SETTING_NAME: MACOSX_DEPLOYMENT_TARGET
-        run: ./gradlew embedSwiftExportForXcode --no-configuration-cache
+        run: ./gradlew :km-io-core:embedSwiftExportForXcode --no-configuration-cache
 
       - name: Run swift test against Kotlin-exported module
         working-directory: swift-test-harness
@@ -96,8 +96,8 @@ jobs:
         with:
           name: swift-export-artifacts
           path: |
-            build/swift-test/libHttp.a
-            build/swift-test/*.swiftmodule/
-            build/SPMPackage/macosArm64/Debug/
+            core/build/swift-test/libKmIo.a
+            core/build/swift-test/*.swiftmodule/
+            core/build/SPMPackage/macosArm64/Debug/
           retention-days: 7
           if-no-files-found: warn

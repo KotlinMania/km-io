@@ -52,9 +52,15 @@ jobs:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
-          wasmJsBrowserTest
-          wasmJsNodeTest
-          wasmWasiNodeTest
+          :km-io-core:wasmJsBrowserTest
+          :km-io-core:wasmJsNodeTest
+          :km-io-core:wasmWasiNodeTest
+          :km-io-bytestring:wasmJsBrowserTest
+          :km-io-bytestring:wasmJsNodeTest
+          :km-io-bytestring:wasmWasiNodeTest
+          :km-io-okio:wasmJsBrowserTest
+          :km-io-okio:wasmJsNodeTest
+          :km-io-okio:wasmWasiNodeTest
           --no-configuration-cache
 
       - name: Upload test reports (WASM)
