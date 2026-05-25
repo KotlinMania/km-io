@@ -8,7 +8,7 @@
 #      kotlin("multiplatform") / kotlin("plugin.serialization") /
 #      com.android.kotlin.multiplatform.library / com.vanniktech.maven.publish
 #      plugin pins, plus every runtime dependency declared in core/,
-#      bytestring/, benchmarks/, and integration/km-io-okio/ via the
+#      bytestring/, and benchmarks/ via the
 #      shared version catalog at gradle/libs.versions.toml.
 #
 #   2. Gradle (build-logic) -- the included build under /build-logic

@@ -1,9 +1,0 @@
-public final class io/github/kotlinmania/io/okio/OkioAdaptersKt {
-	public static final fun asKotlinxIoRawSink (Lokio/Sink;)Lio/github/kotlinmania/io/RawSink;
-	public static final fun asKotlinxIoRawSource (Lokio/Source;)Lio/github/kotlinmania/io/RawSource;
-	public static final fun asOkioSink (Lio/github/kotlinmania/io/RawSink;)Lokio/Sink;
-	public static final fun asOkioSource (Lio/github/kotlinmania/io/RawSource;)Lokio/Source;
-	public static final fun toKotlinxIoByteString (Lokio/ByteString;)Lio/github/kotlinmania/io/bytestring/ByteString;
-	public static final fun toOkioByteString (Lio/github/kotlinmania/io/bytestring/ByteString;)Lokio/ByteString;
-}
-

@@ -29,9 +29,7 @@ rootProject.name = "km-io"
 include(":km-io-core")
 include(":km-io-benchmarks")
 include(":km-io-bytestring")
-include(":km-io-okio")
 
 project(":km-io-core").projectDir = file("./core")
 project(":km-io-benchmarks").projectDir = file("./benchmarks")
 project(":km-io-bytestring").projectDir = file("./bytestring")
-project(":km-io-okio").projectDir = file("./integration/km-io-okio")
