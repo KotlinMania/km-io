@@ -3,8 +3,6 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-import org.gradle.api.GradleException
-
 plugins {
     id("com.vanniktech.maven.publish")
 }
@@ -59,40 +57,6 @@ tasks.matching {
     it.name == "publishToMavenLocal" || it.name.endsWith("PublicationToMavenLocal")
 }.configureEach {
     enabled = false
-}
-
-val centralPublishTaskNames = setOf(
-    "publishToMavenCentral",
-    "publishAllPublicationsToMavenCentralRepository",
-    "publishAndReleaseToMavenCentral",
-)
-val unqualifiedCentralPublishRequested =
-    gradle.startParameter.taskNames.any { it in centralPublishTaskNames }
-val centralPublishProjectsRequested =
-    gradle.startParameter.taskNames
-        .mapNotNull { taskName ->
-            centralPublishTaskNames
-                .firstOrNull { taskName.endsWith(":$it") }
-                ?.let { taskName.substringBeforeLast(":") }
-        }
-        .distinct()
-val combinedCentralPublishRequested = centralPublishProjectsRequested.size > 1
-
-if (unqualifiedCentralPublishRequested || combinedCentralPublishRequested) {
-    val guardRegisteredProperty = "kmIoCentralPublishGuardRegistered"
-    val rootExtraProperties = rootProject.extensions.extraProperties
-    if (!rootExtraProperties.has(guardRegisteredProperty)) {
-        rootExtraProperties.set(guardRegisteredProperty, true)
-        gradle.taskGraph.whenReady {
-            throw GradleException(
-                "Do not publish multiple km-io modules in one Gradle invocation. " +
-                    "Run each publishable module separately so Central Portal deployments " +
-                    "are named <group>-<artifact>-<version>: " +
-                    "./gradlew :km-io-bytestring:publishAndReleaseToMavenCentral and " +
-                    "./gradlew :km-io-core:publishAndReleaseToMavenCentral."
-            )
-        }
-    }
 }
 
 fun Project.hasSigningKey(): Boolean =
