@@ -53,12 +53,6 @@ mavenPublishing {
     }
 }
 
-tasks.matching {
-    it.name == "publishToMavenLocal" || it.name.endsWith("PublicationToMavenLocal")
-}.configureEach {
-    enabled = false
-}
-
 fun Project.hasSigningKey(): Boolean =
     !(findProperty("signingInMemoryKey") as? String).isNullOrBlank() ||
         !System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKey").isNullOrBlank()
