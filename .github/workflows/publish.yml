@@ -57,16 +57,23 @@ jobs:
       - name: Build (dry run)
         if: ${{ github.event_name == 'workflow_dispatch' && !inputs.publish }}
         # Keep workflow_dispatch safe (no publishing), but still build the
-        # full module/target matrix before checking the Central publish graph.
+        # full module/target matrix before checking each Central publish graph.
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: |
           ./gradlew setupAndroidSdk build --no-configuration-cache
-          ./gradlew publishAndReleaseToMavenCentral --dry-run --no-configuration-cache
+          ./gradlew :km-io-bytestring:publishAndReleaseToMavenCentral --dry-run --no-configuration-cache
+          ./gradlew :km-io-core:publishAndReleaseToMavenCentral --dry-run --no-configuration-cache
 
       - name: Publish to Maven Central
         if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
-        run: ./gradlew setupAndroidSdk publishAndReleaseToMavenCentral --no-configuration-cache
+        # Vanniktech names a multi-project Central Portal deployment as
+        # "<group>-<version>". Publishing each public module in its own Gradle
+        # invocation keeps the deployment labels aligned with the single-module
+        # kotlinmania pattern: "<group>-<artifact>-<version>".
+        run: |
+          ./gradlew setupAndroidSdk :km-io-bytestring:publishAndReleaseToMavenCentral --no-configuration-cache
+          ./gradlew setupAndroidSdk :km-io-core:publishAndReleaseToMavenCentral --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
