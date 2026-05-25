@@ -47,7 +47,7 @@ repositories {
 Add the library to dependencies:
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:km-io:0.1.1")
+    implementation("io.github.kotlinmania:km-io:0.1.2")
 }
 ```
 
@@ -57,7 +57,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.kotlinmania:km-io:0.1.1")
+                implementation("io.github.kotlinmania:km-io:0.1.2")
             }
         }
     }
@@ -71,7 +71,7 @@ Add the library to dependencies:
 <dependency>
     <groupId>io.github.kotlinmania</groupId>
     <artifactId>km-io-jvm</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
 </dependency>
 ```
 

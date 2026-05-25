@@ -151,16 +151,28 @@ val fullTargetBuildTasks = listOf(
     "compileAndroidHostTest",
     "compileAndroidDeviceTest",
     "assembleAndroidMain",
+    "assembleAndroidHostTest",
+    "assembleAndroidDeviceTest",
     "assembleUnitTest",
     "assembleAndroidTest",
+    "testAndroidHostTest",
     "jvmMainClasses",
     "jvmTestClasses",
+    "jvmTest",
     "jsMainClasses",
     "jsTestClasses",
+    "jsBrowserTest",
+    "jsNodeTest",
+    "jsTest",
     "wasmJsMainClasses",
     "wasmJsTestClasses",
+    "wasmJsBrowserTest",
+    "wasmJsNodeTest",
+    "wasmJsTest",
     "wasmWasiMainClasses",
     "wasmWasiTestClasses",
+    "wasmWasiNodeTest",
+    "wasmWasiTest",
     "androidNativeArm32Binaries",
     "androidNativeArm32TestBinaries",
     "androidNativeArm64Binaries",
@@ -206,7 +218,6 @@ val fullTargetBuildTasks = listOf(
 tasks.named("build") {
     dependsOn(fullTargetBuildTasks)
 }
-
 
 
 

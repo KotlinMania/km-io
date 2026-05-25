@@ -18,10 +18,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io
 
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public actual open class IOException : Exception {
     public actual constructor() : super()
 
@@ -32,6 +36,7 @@ public actual open class IOException : Exception {
     public actual constructor(message: String?, cause: Throwable?) : super(message, cause)
 }
 
+@HiddenFromObjC
 public actual open class EOFException : IOException {
     public actual constructor() : super()
 

@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io.files
 
 import kotlinx.cinterop.CPointer
@@ -13,6 +15,7 @@ import io.github.kotlinmania.io.RawSink
 import io.github.kotlinmania.io.RawSource
 import platform.posix.*
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalForeignApi::class)
 public actual val SystemFileSystem: FileSystem = object : SystemFileSystemImpl() {
@@ -114,6 +117,7 @@ internal expect fun mkdirImpl(path: String)
 
 internal expect fun realpathImpl(path: String): String
 
+@HiddenFromObjC
 public actual open class FileNotFoundException actual constructor(
     message: String?
 ) : IOException(message)

@@ -3,9 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE.txt file.
  */
 
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io.bytestring
 
 import kotlin.io.encoding.Base64
+import kotlin.native.HiddenFromObjC
 
 /**
  * Encodes bytes from the specified [source] byte string or its subrange.
@@ -105,6 +108,7 @@ public fun Base64.encode(
  * @return the destination appendable.
  */
 @IgnorableReturnValue
+@HiddenFromObjC
 public fun <A : Appendable> Base64.encodeToAppendable(
     source: ByteString,
     destination: A,

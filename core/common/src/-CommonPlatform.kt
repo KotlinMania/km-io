@@ -19,11 +19,16 @@
  * limitations under the License.
  */
 
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io
+
+import kotlin.native.HiddenFromObjC
 
 /**
  * Signals about a general issue occurred during I/O operation.
  */
+@HiddenFromObjC
 public expect open class IOException : Exception {
     public constructor()
     public constructor(message: String?)
@@ -34,6 +39,7 @@ public expect open class IOException : Exception {
 /**
  * Signals that the end of the file or stream was reached unexpectedly during an input operation.
  */
+@HiddenFromObjC
 public expect open class EOFException : IOException {
     public constructor()
     public constructor(message: String?)

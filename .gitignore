@@ -4,6 +4,7 @@ bin
 *.iml
 .gradle
 *.swp
+.DS_Store
 .project
 
 .kotlin
@@ -29,3 +30,8 @@ logs
 
 # CI proxy log captured by local ./gradlew build runs; not part of the source tree.
 /build-log.txt
+
+# Swift Package Manager state for the local Swift Export smoke harness.
+swift-test-harness/.build/
+swift-test-harness/.swiftpm/
+swift-test-harness/Package.resolved

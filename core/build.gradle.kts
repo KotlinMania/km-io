@@ -3,12 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-@file:OptIn(ExperimentalWasmDsl::class)
+@file:OptIn(ExperimentalSwiftExportDsl::class, ExperimentalWasmDsl::class)
 
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl
 
 plugins {
     id("kotlinx-io-multiplatform")
@@ -20,6 +22,37 @@ plugins {
 }
 
 kotlin {
+    val xcf = XCFramework("KmIo")
+
+    macosArm64 {
+        binaries.framework {
+            baseName = "KmIo"
+            isStatic = true
+            xcf.add(this)
+        }
+    }
+    iosArm64 {
+        binaries.framework {
+            baseName = "KmIo"
+            isStatic = true
+            xcf.add(this)
+        }
+    }
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = "KmIo"
+            isStatic = true
+            xcf.add(this)
+        }
+    }
+    iosX64 {
+        binaries.framework {
+            baseName = "KmIo"
+            isStatic = true
+            xcf.add(this)
+        }
+    }
+
     js {
         nodejs {
             testTask {
@@ -38,17 +71,12 @@ kotlin {
         }
     }
     wasmJs {
-        nodejs()
-        /*
         browser {
             testTask {
-                useKarma {
-                    // how to configure browsers available in CI?
-                }
                 filter.setExcludePatterns("io.github.kotlinmania.io.files.*")
             }
         }
-         */
+        nodejs()
     }
     wasmWasi {
         nodejs {
@@ -75,6 +103,18 @@ kotlin {
     // shared kotlinx-io-multiplatform convention configures compileSdk/minSdk.
     android {
         namespace = "io.github.kotlinmania.io"
+    }
+
+    swiftExport {
+        moduleName = "KmIo"
+        flattenPackage = "io.github.kotlinmania.io"
+        export(project(":km-io-bytestring")) {
+            moduleName = "KmIoByteString"
+            flattenPackage = "io.github.kotlinmania.io.bytestring"
+        }
+        configure {
+            freeCompilerArgs.add("-Xexpect-actual-classes")
+        }
     }
 }
 
@@ -229,16 +269,28 @@ val fullTargetBuildTasks = listOf(
     "compileAndroidHostTest",
     "compileAndroidDeviceTest",
     "assembleAndroidMain",
+    "assembleAndroidHostTest",
+    "assembleAndroidDeviceTest",
     "assembleUnitTest",
     "assembleAndroidTest",
+    "testAndroidHostTest",
     "jvmMainClasses",
     "jvmTestClasses",
+    "jvmTest",
     "jsMainClasses",
     "jsTestClasses",
+    "jsBrowserTest",
+    "jsNodeTest",
+    "jsTest",
     "wasmJsMainClasses",
     "wasmJsTestClasses",
+    "wasmJsBrowserTest",
+    "wasmJsNodeTest",
+    "wasmJsTest",
     "wasmWasiMainClasses",
     "wasmWasiTestClasses",
+    "wasmWasiNodeTest",
+    "wasmWasiTest",
     "androidNativeArm32Binaries",
     "androidNativeArm32TestBinaries",
     "androidNativeArm64Binaries",

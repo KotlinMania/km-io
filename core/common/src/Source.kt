@@ -18,7 +18,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package io.github.kotlinmania.io
+
+import kotlin.native.HiddenFromObjC
 
 /**
  * A source that facilitates typed data reads and keeps a buffer internally so that callers can read chunks of data
@@ -73,6 +77,7 @@ public sealed interface Source : RawSource {
    * - use [peek] for lookahead into a source;
    * - implement [RawSource] and wrap a downstream source into it to intercept data being read.
    */
+  @HiddenFromObjC
   @InternalIoApi
   public val buffer: Buffer
 
