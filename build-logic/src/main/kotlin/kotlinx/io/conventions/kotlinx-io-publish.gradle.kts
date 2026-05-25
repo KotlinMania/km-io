@@ -24,7 +24,7 @@ mavenPublishing {
 
     pom {
         name.set(publishedArtifactId)
-        description.set("Multiplatform Kotlin IO primitives, ByteString support, and Okio adapters")
+        description.set("Multiplatform Kotlin IO primitives and ByteString support")
         inceptionYear.set("2026")
         url.set("https://github.com/KotlinMania/km-io")
 

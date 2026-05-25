@@ -29,7 +29,6 @@ which includes the `FileSystem` interface and its default implementation - `Syst
 There are several `km-io` modules:
 - [km-io-bytestring](./bytestring) - provides `ByteString`.
 - [km-io](./core) - provides IO primitives (`Buffer`, `Source`, `Sink`), filesystems support, depends on `km-io-bytestring`.
-- [km-io-okio](./integration/km-io-okio) - bridges `km-io` and `Okio` `ByteString`, `io.github.kotlinmania.io.RawSource` and `okio.Source`, `io.github.kotlinmania.io.RawSink` and `okio.Sink`.
 
 ## Using in your projects
 
@@ -47,7 +46,7 @@ repositories {
 Add the library to dependencies:
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:km-io:0.1.2")
+    implementation("io.github.kotlinmania:km-io:0.1.3")
 }
 ```
 
@@ -57,7 +56,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.kotlinmania:km-io:0.1.2")
+                implementation("io.github.kotlinmania:km-io:0.1.3")
             }
         }
     }
@@ -71,7 +70,7 @@ Add the library to dependencies:
 <dependency>
     <groupId>io.github.kotlinmania</groupId>
     <artifactId>km-io-jvm</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 </dependency>
 ```
 
@@ -80,7 +79,6 @@ Add the library to dependencies:
 On JVM, `km-io` supports Java Modules:
 - `km-io-bytestring` library provides `io.github.kotlinmania.io.bytestring` module;
 - `km-io` library provides `io.github.kotlinmania.io.core` module.
-- `km-io-okio` library provides `io.github.kotlinmania.io.okio` module.
 
 Read [this](https://kotlinlang.org/docs/gradle-configure-project.html#configure-with-java-modules-jpms-enabled) article
 for details on how to configure a Gradle project to utilize JPMS.

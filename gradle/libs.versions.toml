@@ -8,7 +8,6 @@ benchmark = "0.4.17"
 jmh = "1.37"
 coroutines = "1.11.0"
 animalsniffer = "2.0.1"
-okio = "3.17.0"
 maven-publish = "0.36.0"
 # The com.android.kotlin.multiplatform.library plugin ships in AGP, and 9.2.1
 # is the version anyhow-kotlin tracks across the kotlinmania workspace.
@@ -22,7 +21,6 @@ dokka-gradle-plugin = { group = "org.jetbrains.dokka", name = "dokka-gradle-plug
 power-assert-plugin = { group = "org.jetbrains.kotlin.plugin.power-assert", name = "org.jetbrains.kotlin.plugin.power-assert.gradle.plugin", version.ref = "kotlin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 animalsniffer-gradle-plugin = { group = "ru.vyarus", name = "gradle-animalsniffer-plugin", version.ref = "animalsniffer" }
-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 maven-publish-gradle-plugin = { group = "com.vanniktech", name = "gradle-maven-publish-plugin", version.ref = "maven-publish" }
 # Gradle plugin artifact for the Kotlin Multiplatform Android library, used
 # from the kotlinx-io-multiplatform convention plugin so the multiplatform

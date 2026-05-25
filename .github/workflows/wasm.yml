@@ -58,9 +58,6 @@ jobs:
           :km-io-bytestring:wasmJsBrowserTest
           :km-io-bytestring:wasmJsNodeTest
           :km-io-bytestring:wasmWasiNodeTest
-          :km-io-okio:wasmJsBrowserTest
-          :km-io-okio:wasmJsNodeTest
-          :km-io-okio:wasmWasiNodeTest
           --no-configuration-cache
 
       - name: Upload test reports (WASM)

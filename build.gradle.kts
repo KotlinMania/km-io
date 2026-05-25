@@ -31,11 +31,9 @@ allprojects {
 dependencies {
     kover(project(":km-io-core"))
     kover(project(":km-io-bytestring"))
-    kover(project(":km-io-okio"))
 
     dokka(project(":km-io-bytestring"))
     dokka(project(":km-io-core"))
-    dokka(project(":km-io-okio"))
 }
 
 kover {
