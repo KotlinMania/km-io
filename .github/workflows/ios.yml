@@ -29,19 +29,20 @@ jobs:
         # The XCFramework name is derived per-repo from the
         # `XCFramework("<Name>")` declaration in build.gradle.kts so this
         # workflow stays portable across the kotlinmania workspace.
+        # For multi-module projects, search in module build files.
         run: |
-          XCF_NAME=$(grep -oE 'XCFramework\("[^"]+"\)' build.gradle.kts | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          XCF_NAME=$(grep -rh -oE 'XCFramework\("[^"]+"\)' */build.gradle.kts build.gradle.kts 2>/dev/null | head -1 | sed 's/.*"\(.*\)".*/\1/')
           if [ -z "$XCF_NAME" ]; then
-            echo "::error::No XCFramework(\"<Name>\") declaration found in build.gradle.kts"
+            echo "::error::No XCFramework(\"<Name>\") declaration found in build.gradle.kts or module build files"
             exit 1
           fi
           echo "XCFramework name: $XCF_NAME → task: assemble${XCF_NAME}XCFramework"
           ./gradlew \
-            compileKotlinIosArm64 \
-            compileKotlinIosSimulatorArm64 \
-            compileKotlinIosX64 \
-            iosSimulatorArm64Test \
-            "assemble${XCF_NAME}XCFramework" \
+            :km-io-core:compileKotlinIosArm64 \
+            :km-io-core:compileKotlinIosSimulatorArm64 \
+            :km-io-core:compileKotlinIosX64 \
+            :km-io-core:iosSimulatorArm64Test \
+            ":km-io-core:assemble${XCF_NAME}XCFramework" \
             --no-configuration-cache
 
       # Native upload-artifact (GitHub-published) makes the test reports
@@ -55,7 +56,7 @@ jobs:
         with:
           name: test-reports-ios
           path: |
-            build/reports/tests/
-            build/test-results/
+            core/build/reports/tests/
+            core/build/test-results/
           retention-days: 7
           if-no-files-found: warn
