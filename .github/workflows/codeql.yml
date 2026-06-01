@@ -7,10 +7,13 @@ name: "CodeQL Advanced"
 # from those names produces orphan configuration cards in the UI that
 # can't be cleaned up via API (PR-merge analyses are non-deletable).
 #
-# Three matrix entries cover the languages CodeQL detects in this repo:
+# Two matrix entries cover the languages CodeQL detects in this repo:
 #   - actions             (source-only)
 #   - java-kotlin         (manual build via codeqlCompileJvm — see note below)
-#   - javascript-typescript (source-only)
+#
+# javascript-typescript is intentionally excluded: this repository contains
+# no .js or .ts source files, so CodeQL would fail with "only found files
+# that were empty or contained syntax errors".
 #
 # For java-kotlin, the matrix-shared `Initialize CodeQL → Perform CodeQL
 # Analysis` flow is augmented with two conditional steps that run ONLY
@@ -61,9 +64,6 @@ jobs:
             build-mode: none
           - language: java-kotlin
             build-mode: manual
-          - language: javascript-typescript
-            build-mode: none
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
