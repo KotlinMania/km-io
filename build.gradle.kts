@@ -430,7 +430,11 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
+        browser {
+            testTask {
+                filter.setExcludePatterns("*SmokeFileTest*")
+            }
+        }
         nodejs()
     }
 
@@ -510,6 +514,9 @@ tasks.register("swiftExportSmokeTest") {
     group = "verification"
     description = "Builds the Swift Export SPM package and runs swift test against it."
     outputs.upToDateWhen { false }
+    onlyIf {
+        System.getProperty("os.name").contains("Mac", ignoreCase = true)
+    }
 
     doLast {
         val execOperations = serviceOf<ExecOperations>()
@@ -777,6 +784,51 @@ tasks.register("hostTests") {
         "wasmWasiNodeTest",
         "testAndroidHostTest",
     )
+}
+
+tasks.register("test") {
+    group = "verification"
+    description = "Runs the project test suite (alias for hostTests + swift export smoke test)."
+    dependsOn(
+        "hostTests",
+        "swiftExportSmokeTest",
+    )
+}
+
+tasks.named("wasmWasiNodeTest") {
+    // TODO: remove once https://youtrack.jetbrains.com/issue/KT-65179 solved
+    val rootName = rootProject.name
+    val moduleName = project.name
+    doFirst {
+        val entryName =
+            if (moduleName == rootName) {
+                rootName
+            } else {
+                "$rootName-$moduleName"
+            }
+        val templateFile = layout.projectDirectory.file("core/wasmWasi/test/test-driver.mjs.template").asFile
+        val driverFile =
+            layout.buildDirectory.file(
+                "compileSync/wasmWasi/test/testDevelopmentExecutable/kotlin/$entryName-test.mjs",
+            )
+
+        fun File.mkdirsAndEscape(): String {
+            mkdirs()
+            return absolutePath.replace("\\", "\\\\")
+        }
+
+        val tmpDir = temporaryDir.resolve("km-io-wasi-test").mkdirsAndEscape()
+        val tmpDir2 = temporaryDir.resolve("km-io-wasi-test-2").mkdirsAndEscape()
+
+        val newDriver =
+            templateFile
+                .readText()
+                .replace("<SYSTEM_TEMP_DIR>", tmpDir, false)
+                .replace("<SYSTEM_TEMP_DIR2>", tmpDir2, false)
+                .replace("<WASM_FILE>", "$entryName-test.wasm", false)
+
+        driverFile.get().asFile.writeText(newDriver)
+    }
 }
 
 // ============================================================================

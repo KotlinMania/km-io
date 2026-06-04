@@ -14,11 +14,8 @@ kotlin {
     abiValidation()
 }
 
-val checkTask = tasks.named("check")
-listOf("checkAbi", "checkLegacyAbi").forEach { abiTaskName ->
-    tasks.matching { it.name == abiTaskName }.configureEach {
-        checkTask.configure {
-            dependsOn(this@configureEach)
-        }
-    }
+tasks.named("check") {
+    dependsOn(
+        tasks.matching { it.name == "checkAbi" || it.name == "checkLegacyAbi" },
+    )
 }
