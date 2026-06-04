@@ -35,3 +35,10 @@ logs
 swift-test-harness/.build/
 swift-test-harness/.swiftpm/
 swift-test-harness/Package.resolved
+
+# Swift / Xcode workspace state
+.swiftpm/
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
