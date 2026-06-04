@@ -5,10 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.IOException
-import io.github.kotlinmania.io.RawSink
-import io.github.kotlinmania.io.RawSource
-
 /**
  * An interface providing basic operations on a filesystem, such as reading and writing files,
  * creating directories, gathering file metadata and so on.

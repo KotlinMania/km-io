@@ -8,6 +8,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -339,11 +340,38 @@ val jvmToolchainVersion = providers.gradleProperty("jvm.toolchain").getOrElse("2
 kotlin {
     jvmToolchain(jvmToolchainVersion)
 
-    applyDefaultHierarchyTemplate()
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("native") {
+                group("nativeNonApple") {
+                    group("mingw")
+                    group("unix") {
+                        group("linux")
+                        group("androidNative")
+                    }
+                }
+
+                group("nativeNonAndroid") {
+                    group("apple")
+                    group("mingw")
+                    group("linux")
+                }
+            }
+            group("nodeFilesystemShared") {
+                withJs()
+                withWasmJs()
+            }
+            group("wasm") {
+                withWasmJs()
+                withWasmWasi()
+            }
+        }
+    }
 
     compilerOptions {
-        languageVersion.set(KotlinVersion.KOTLIN_2_3)
-        apiVersion.set(KotlinVersion.KOTLIN_2_3)
+        languageVersion.set(KotlinVersion.KOTLIN_2_4)
+        apiVersion.set(KotlinVersion.KOTLIN_2_4)
         allWarningsAsErrors.set(!isCodeqlBuild)
         optIn.addAll(commonOptIns)
         freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -383,8 +411,21 @@ kotlin {
     androidNativeX64()
 
     js {
-        browser()
-        nodejs()
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "30s"
+                }
+            }
+        }
+        browser {
+            testTask {
+                useMocha {
+                    timeout = "30s"
+                }
+                filter.setExcludePatterns("*SmokeFileTest*")
+            }
+        }
     }
 
     @OptIn(ExperimentalWasmDsl::class)
@@ -428,6 +469,10 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
+
+        val sharedAndroidTestSources = files("src/androidTest/kotlin")
+        findByName("androidHostTest")?.kotlin?.srcDir(sharedAndroidTestSources)
+        findByName("androidDeviceTest")?.kotlin?.srcDir(sharedAndroidTestSources)
     }
 }
 

@@ -16,6 +16,7 @@ import kotlin.wasm.unsafe.Pointer
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi
 
 // https://github.com/WebAssembly/WASI/blob/main/legacy/preview1/docs.md
+@Suppress("EnumNaming")
 internal enum class Errno(val description: String) {
     success("No error occurred. System call completed successfully"),
     toobig("Argument list too long"),
@@ -101,6 +102,7 @@ internal fun Errno(errno: Int): Errno {
     return Errno.entries[errno]
 }
 
+@Suppress("EnumNaming")
 internal enum class FileType {
     unknown,
     block_device,

@@ -30,8 +30,8 @@ kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         allWarningsAsErrors.set(!isCodeqlBuild)
-        languageVersion.set(KotlinVersion.KOTLIN_2_3)
-        apiVersion.set(KotlinVersion.KOTLIN_2_3)
+        languageVersion.set(KotlinVersion.KOTLIN_2_4)
+        apiVersion.set(KotlinVersion.KOTLIN_2_4)
         freeCompilerArgs.add("-Xexpect-actual-classes")
         freeCompilerArgs.add("-Xreturn-value-checker=full")
     }

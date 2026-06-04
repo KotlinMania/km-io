@@ -5,13 +5,12 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
-internal annotation class AnimalSnifferIgnore()
+internal annotation class AnimalSnifferIgnore
 
 private interface Mover {
     fun move(source: Path, destination: Path)

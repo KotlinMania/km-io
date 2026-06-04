@@ -21,7 +21,6 @@
 
 package io.github.kotlinmania.io
 
-import org.junit.jupiter.api.io.TempDir
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -37,8 +36,17 @@ import kotlin.io.path.outputStream
 import kotlin.test.*
 
 class JvmPlatformTest {
-    @TempDir
-    lateinit var tempDir: File
+    private lateinit var tempDir: File
+
+    @BeforeTest
+    fun setUp() {
+        tempDir = Files.createTempDirectory("km-io-test").toFile()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        tempDir.deleteRecursively()
+    }
 
     @Test
     fun outputStreamSink() {

@@ -305,6 +305,8 @@ internal object WasiFileSystem : SystemFileSystemImpl() {
             if (res != Errno.success) throw IOException("Can't open directory ${directory.path}: ${res.description}")
             fdPtr.loadInt()
         }
+        var failure: Throwable? = null
+        val closeResult: Errno
         try {
             withScopedMemoryAllocator { allocator ->
                 val resultSizePtr = allocator.allocateInt()
@@ -342,13 +344,16 @@ internal object WasiFileSystem : SystemFileSystemImpl() {
                     }
                 }
             }
-            return children
+        } catch (t: Throwable) {
+            failure = t
         } finally {
-            val res = Errno(fd_close(dir_fd))
-            if (res != Errno.success) {
-                throw IOException("fd_close failed for directory '$directory': ${res.description}")
-            }
+            closeResult = Errno(fd_close(dir_fd))
         }
+        if (failure != null) throw failure
+        if (closeResult != Errno.success) {
+            throw IOException("fd_close failed for directory '$directory': ${closeResult.description}")
+        }
+        return children
     }
 }
 
