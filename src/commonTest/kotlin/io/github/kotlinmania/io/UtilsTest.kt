@@ -10,8 +10,8 @@ import kotlin.test.assertEquals
 
 class PathsUtilsTest {
     private fun removeTrailingSeparatorsU(path: String): String = removeTrailingSeparators(path, false)
-    private fun removeTrailingSeparatorsW(path: String): String = removeTrailingSeparators(path, true)
 
+    private fun removeTrailingSeparatorsW(path: String): String = removeTrailingSeparators(path, true)
 
     @Test
     fun testPathTrimmingUnix() {

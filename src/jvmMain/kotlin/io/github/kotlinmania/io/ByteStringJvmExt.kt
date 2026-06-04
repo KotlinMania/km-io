@@ -5,9 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.UnsafeByteStringApi
-import io.github.kotlinmania.io.UnsafeByteStringOperations
-import java.nio.BufferOverflowException
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
@@ -130,7 +127,9 @@ private fun ByteBuffer.checkIndexAndCapacity(idx: Int, length: Int) {
         throw IndexOutOfBoundsException("length should be non-negative (was $length)")
     }
     if (idx + length > limit()) {
-        throw IndexOutOfBoundsException("There's not enough space to put ByteString of length $length starting" +
-                " from index $idx")
+        throw IndexOutOfBoundsException(
+            "There's not enough space to put ByteString of length $length starting" +
+                " from index $idx",
+        )
     }
 }

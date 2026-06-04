@@ -56,12 +56,13 @@ public fun Sink.writeString(string: String, charset: Charset, startIndex: Int = 
  */
 @OptIn(DelicateIoApi::class)
 public fun Sink.asOutputStream(): OutputStream {
-    val isClosed: () -> Boolean = when (this) {
-        is RealSink -> this::closed
-        is Buffer -> {
-            { false }
+    val isClosed: () -> Boolean =
+        when (this) {
+            is RealSink -> this::closed
+            is Buffer -> {
+                { false }
+            }
         }
-    }
 
     return object : OutputStream() {
         override fun write(byte: Int) {
@@ -110,12 +111,13 @@ public fun Sink.write(source: ByteBuffer): Int {
  * Returns [WritableByteChannel] backed by this sink. Closing the channel will also close the sink.
  */
 public fun Sink.asByteChannel(): WritableByteChannel {
-    val isClosed: () -> Boolean = when (this) {
-        is RealSink -> this::closed
-        is Buffer -> {
-            { false }
+    val isClosed: () -> Boolean =
+        when (this) {
+            is RealSink -> this::closed
+            is Buffer -> {
+                { false }
+            }
         }
-    }
 
     return object : WritableByteChannel {
         override fun close() {

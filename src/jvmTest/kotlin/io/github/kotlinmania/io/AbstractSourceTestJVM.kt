@@ -33,12 +33,20 @@ import kotlin.test.assertTrue
 private const val SEGMENT_SIZE = Segment.SIZE
 
 class BufferSourceTestJVM : AbstractSourceTestJVM(SourceFactory.BUFFER)
+
 class RealBufferedSourceTestJVM : AbstractSourceTestJVM(SourceFactory.REAL_BUFFERED_SOURCE)
+
 class OneByteAtATimeBufferedSourceTestJVM : AbstractSourceTestJVM(SourceFactory.ONE_BYTE_AT_A_TIME_BUFFERED_SOURCE)
+
 class OneByteAtATimeBufferTestJVM : AbstractSourceTestJVM(SourceFactory.ONE_BYTE_AT_A_TIME_BUFFER)
+
 class PeekBufferTestJVM : AbstractSourceTestJVM(SourceFactory.PEEK_BUFFER)
+
 class PeekBufferedSourceTestJVM : AbstractSourceTestJVM(SourceFactory.PEEK_BUFFERED_SOURCE)
-abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
+
+abstract class AbstractSourceTestJVM(
+    private val factory: SourceFactory,
+) {
     private var sink: Sink
     private var source: Source
 
@@ -173,11 +181,12 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
         sink.writeByte(0)
         sink.emit()
 
-        val expectedBytes = if (source is io.github.kotlinmania.io.Buffer) {
-            3
-        } else {
-            2
-        }
+        val expectedBytes =
+            if (source is io.github.kotlinmania.io.Buffer) {
+                3
+            } else {
+                2
+            }
         assertEquals(expectedBytes, input.available())
     }
 
@@ -234,8 +243,10 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
     @Test
     fun readSpecificCharsetPartial() {
         sink.write(
-            ("0000007600000259000002c80000006c000000e40000007300000259000002" +
-                    "cc000000720000006100000070000000740000025900000072").decodeHex()
+            (
+                "0000007600000259000002c80000006c000000e40000007300000259000002" +
+                    "cc000000720000006100000070000000740000025900000072"
+            ).decodeHex(),
         )
         sink.emit()
         assertEquals("vəˈläsə", source.readString(7 * 4, Charset.forName("utf-32")))
@@ -244,8 +255,10 @@ abstract class AbstractSourceTestJVM(private val factory: SourceFactory) {
     @Test
     fun readSpecificCharset() {
         sink.write(
-            ("0000007600000259000002c80000006c000000e40000007300000259000002" +
-                    "cc000000720000006100000070000000740000025900000072").decodeHex()
+            (
+                "0000007600000259000002c80000006c000000e40000007300000259000002" +
+                    "cc000000720000006100000070000000740000025900000072"
+            ).decodeHex(),
         )
 
         sink.emit()

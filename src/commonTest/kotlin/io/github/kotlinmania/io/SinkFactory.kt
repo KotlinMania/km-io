@@ -22,20 +22,17 @@
 package io.github.kotlinmania.io
 
 internal interface SinkFactory {
-
     fun create(data: Buffer): Sink
 
     companion object {
-        val BUFFER: SinkFactory = object : SinkFactory {
-            override fun create(data: Buffer): Sink {
-                return data
+        val BUFFER: SinkFactory =
+            object : SinkFactory {
+                override fun create(data: Buffer): Sink = data
             }
-        }
 
-        val REAL_BUFFERED_SINK: SinkFactory = object : SinkFactory {
-            override fun create(data: Buffer): Sink {
-                return (data as RawSink).buffered()
+        val REAL_BUFFERED_SINK: SinkFactory =
+            object : SinkFactory {
+                override fun create(data: Buffer): Sink = (data as RawSink).buffered()
             }
-        }
     }
 }

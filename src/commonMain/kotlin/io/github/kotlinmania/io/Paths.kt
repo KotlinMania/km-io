@@ -5,7 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
 import kotlin.jvm.JvmName
 
 /**
@@ -79,23 +78,24 @@ public expect fun Path(path: String): Path
  */
 public fun Path(base: String, vararg parts: String): Path {
     // Parameter name has to be specified explicitly to overcome https://youtrack.jetbrains.com/issue/KT-22520
-    return Path(path = buildString {
-        append(base)
-        parts.forEach {
-            if (isNotEmpty() && !endsWith(SystemPathSeparator)) {
-                append(SystemPathSeparator)
-            }
-            append(it)
-        }
-    })
+    return Path(
+        path =
+            buildString {
+                append(base)
+                parts.forEach {
+                    if (isNotEmpty() && !endsWith(SystemPathSeparator)) {
+                        append(SystemPathSeparator)
+                    }
+                    append(it)
+                }
+            },
+    )
 }
 
 /**
  * Returns Path for the given [base] path concatenated with [parts] using [SystemPathSeparator].
  */
-public fun Path(base: Path, vararg parts: String): Path {
-    return Path(base.toString(), *parts)
-}
+public fun Path(base: Path, vararg parts: String): Path = Path(base.toString(), *parts)
 
 /**
  * Returns [RawSource] for the given file or throws if path is not a file or does not exist
@@ -105,11 +105,12 @@ public fun Path(base: Path, vararg parts: String): Path {
  */
 @Deprecated(
     message = "Use FileSystem.source instead",
-    replaceWith = ReplaceWith(
-        expression = "SystemFileSystem.source(this).buffered()",
-        imports = arrayOf("io.github.kotlinmania.io.FileSystem")
-    ),
-    level = DeprecationLevel.ERROR
+    replaceWith =
+        ReplaceWith(
+            expression = "SystemFileSystem.source(this).buffered()",
+            imports = arrayOf("io.github.kotlinmania.io.FileSystem"),
+        ),
+    level = DeprecationLevel.ERROR,
 )
 @JvmName("sourceDeprecated")
 public fun Path.source(): Source = SystemFileSystem.source(this).buffered()
@@ -123,11 +124,12 @@ public fun Path.source(): Source = SystemFileSystem.source(this).buffered()
  */
 @Deprecated(
     message = "Use FileSystem.sink instead",
-    replaceWith = ReplaceWith(
-        expression = "SystemFileSystem.sink(this).buffered()",
-        imports = arrayOf("io.github.kotlinmania.io.FileSystem")
-    ),
-    level = DeprecationLevel.ERROR
+    replaceWith =
+        ReplaceWith(
+            expression = "SystemFileSystem.sink(this).buffered()",
+            imports = arrayOf("io.github.kotlinmania.io.FileSystem"),
+        ),
+    level = DeprecationLevel.ERROR,
 )
 @JvmName("sinkDeprecated")
 public fun Path.sink(): Sink = SystemFileSystem.sink(this).buffered()
@@ -135,17 +137,18 @@ public fun Path.sink(): Sink = SystemFileSystem.sink(this).buffered()
 internal fun removeTrailingSeparators(path: String, /* only for testing */ isWindows_: Boolean = isWindows): String {
     if (isWindows_) {
         // don't trim the path separator right after the drive name
-        val limit = if (path.length > 1) {
-            if (path[1] == ':') {
-                3
-            } else if (isUnc(path)) {
-                2
+        val limit =
+            if (path.length > 1) {
+                if (path[1] == ':') {
+                    3
+                } else if (isUnc(path)) {
+                    2
+                } else {
+                    1
+                }
             } else {
                 1
             }
-        } else {
-            1
-        }
         return removeTrailingSeparatorsWindows(limit, path)
     }
     return removeTrailingSeparatorsUnix(path)

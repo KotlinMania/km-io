@@ -8,15 +8,40 @@
 package io.github.kotlinmania.io
 
 import kotlinx.atomicfu.atomic
-import kotlinx.cinterop.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.usePinned
+import kotlinx.cinterop.value
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import platform.CoreFoundation.CFRunLoopStop
-import platform.Foundation.*
+import platform.Foundation.NSData
+import platform.Foundation.NSDefaultRunLoopMode
+import platform.Foundation.NSOutputStream
+import platform.Foundation.NSStream
+import platform.Foundation.NSStreamDataWrittenToMemoryStreamKey
+import platform.Foundation.NSStreamDelegateProtocol
+import platform.Foundation.NSStreamEvent
+import platform.Foundation.NSStreamEventHasSpaceAvailable
+import platform.Foundation.NSStreamEventOpenCompleted
+import platform.Foundation.NSStreamStatusClosed
+import platform.Foundation.NSStreamStatusNotOpen
+import platform.Foundation.NSStreamStatusOpen
+import platform.Foundation.NSThread
+import platform.Foundation.data
 import platform.darwin.NSObject
 import platform.darwin.NSUInteger
 import platform.posix.uint8_tVar
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 private fun NSOutputStream.write(vararg strings: String) {
     for (str in strings) {
@@ -28,7 +53,6 @@ private fun NSOutputStream.write(vararg strings: String) {
 
 @OptIn(UnsafeNumber::class)
 class SinkNSOutputStreamTest {
-
     @Test
     fun multipleWrites() {
         val buffer = Buffer()
@@ -118,34 +142,36 @@ class SinkNSOutputStreamTest {
             val written = atomic(0)
             val completed = Mutex(true)
 
-            out.delegate = object : NSObject(), NSStreamDelegateProtocol {
-                val source = data.encodeToByteArray()
-                override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
-                    assertEquals("run-loop", NSThread.currentThread.name)
-                    when (handleEvent) {
-                        NSStreamEventOpenCompleted -> opened.unlock()
-                        NSStreamEventHasSpaceAvailable -> {
-                            if (source.isNotEmpty()) {
-                                source.usePinned {
-                                    assertEquals(
-                                        data.length.convert(),
-                                        out.write(
-                                            it.addressOf(written.getAndAdd(data.length)).reinterpret(),
-                                            data.length.convert()
-                                        )
-                                    )
-                                }
-                            }
-                            val writtenData = out.propertyForKey(NSStreamDataWrittenToMemoryStreamKey) as NSData
-                            assertEquals(data, writtenData.toByteArray().decodeToString())
-                            out.close()
-                            completed.unlock()
-                        }
+            out.delegate =
+                object : NSObject(), NSStreamDelegateProtocol {
+                    val source = data.encodeToByteArray()
 
-                        else -> fail("unexpected event ${handleEvent.asString()}")
+                    override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
+                        assertEquals("run-loop", NSThread.currentThread.name)
+                        when (handleEvent) {
+                            NSStreamEventOpenCompleted -> opened.unlock()
+                            NSStreamEventHasSpaceAvailable -> {
+                                if (source.isNotEmpty()) {
+                                    source.usePinned {
+                                        assertEquals(
+                                            data.length.convert(),
+                                            out.write(
+                                                it.addressOf(written.getAndAdd(data.length)).reinterpret(),
+                                                data.length.convert(),
+                                            ),
+                                        )
+                                    }
+                                }
+                                val writtenData = out.propertyForKey(NSStreamDataWrittenToMemoryStreamKey) as NSData
+                                assertEquals(data, writtenData.toByteArray().decodeToString())
+                                out.close()
+                                completed.unlock()
+                            }
+
+                            else -> fail("unexpected event ${handleEvent.asString()}")
+                        }
                     }
                 }
-            }
             out.scheduleInRunLoop(runLoop, NSDefaultRunLoopMode)
             out.open()
             runBlocking {
@@ -167,16 +193,17 @@ class SinkNSOutputStreamTest {
         fun subscribeAfterOpen(out: NSOutputStream) {
             val available = Mutex(true)
 
-            out.delegate = object : NSObject(), NSStreamDelegateProtocol {
-                override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
-                    assertEquals("run-loop", NSThread.currentThread.name)
-                    when (handleEvent) {
-                        NSStreamEventOpenCompleted -> fail("opened before subscribe")
-                        NSStreamEventHasSpaceAvailable -> available.unlock()
-                        else -> fail("unexpected event ${handleEvent.asString()}")
+            out.delegate =
+                object : NSObject(), NSStreamDelegateProtocol {
+                    override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
+                        assertEquals("run-loop", NSThread.currentThread.name)
+                        when (handleEvent) {
+                            NSStreamEventOpenCompleted -> fail("opened before subscribe")
+                            NSStreamEventHasSpaceAvailable -> available.unlock()
+                            else -> fail("unexpected event ${handleEvent.asString()}")
+                        }
                     }
                 }
-            }
             out.open()
             out.scheduleInRunLoop(runLoop, NSDefaultRunLoopMode)
             runBlocking {

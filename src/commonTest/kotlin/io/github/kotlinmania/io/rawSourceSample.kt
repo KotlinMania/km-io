@@ -5,8 +5,8 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class RC4SourceSample {
     @Test
@@ -19,7 +19,10 @@ class RC4SourceSample {
          * Implementation of RC4 stream cypher based on http://cypherpunks.venona.com/archive/1994/09/msg00304.html
          */
         @OptIn(ExperimentalUnsignedTypes::class)
-        class RC4DecryptingSource(private val downstream: RawSource, key: String): RawSource {
+        class RC4DecryptingSource(
+            private val downstream: RawSource,
+            key: String,
+        ) : RawSource {
             private val buffer = Buffer()
             private val key = RC4Key(key)
 
@@ -39,7 +42,9 @@ class RC4SourceSample {
 
             override fun close() = downstream.close()
 
-            private inner class RC4Key(key: String) {
+            private inner class RC4Key(
+                key: String,
+            ) {
                 private var keyState: UByteArray
                 private var keyX: Int = 0
                 private var keyY: Int = 0

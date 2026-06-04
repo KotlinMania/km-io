@@ -7,22 +7,27 @@
 
 package io.github.kotlinmania.io
 
-@JsFun("""
+@JsFun(
+    """
     (globalThis.module = (typeof process !== 'undefined') && (process.release.name === 'node') ?
         await import(/* webpackIgnore: true */'node:module') : void 0, () => {})
-""")
+""",
+)
 internal external fun persistModule()
 
-@JsFun("""() => { 
+@JsFun(
+    """() => {
     const importMeta = import.meta;
     return globalThis.module.default.createRequire(importMeta.url);
 }
-""")
+""",
+)
 internal external fun getRequire(): JsAny
 
 private val require = persistModule().let { getRequire() }
 
-@JsFun("""
+@JsFun(
+    """
     (require, mod) => {
          try {
              let m = require(mod);
@@ -32,7 +37,8 @@ private val require = persistModule().let { getRequire() }
              return null;
          }
     }
-""")
+""",
+)
 internal external fun requireModule(require: JsAny, mod: String): JsAny?
 
 internal fun loadModule(name: String): JsAny {
@@ -45,7 +51,7 @@ internal actual val buffer: NodeJsBufferModule by lazy {
     loadModule("buffer") as NodeJsBufferModule
 }
 
-internal actual val os: Os  by lazy {
+internal actual val os: Os by lazy {
     @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
     loadModule("os") as Os
 }

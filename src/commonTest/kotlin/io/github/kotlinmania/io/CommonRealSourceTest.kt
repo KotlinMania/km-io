@@ -34,13 +34,12 @@ class CommonRealSourceTest {
     @Test
     fun indexOfStopsReadingAtLimit() {
         val buffer = Buffer().also { it.writeString("abcdef") }
-        val bufferedSource = (
+        val bufferedSource =
+            (
                 object : RawSource by buffer {
-                    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-                        return buffer.readAtMostTo(sink, minOf(1, byteCount))
-                    }
+                    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = buffer.readAtMostTo(sink, minOf(1, byteCount))
                 }
-                ).buffered()
+            ).buffered()
 
         assertEquals(6, buffer.size)
         assertEquals(-1, bufferedSource.indexOf('e'.code.toByte(), 0, 4))
@@ -149,7 +148,7 @@ class CommonRealSourceTest {
 
         val source = Buffer()
         source.writeString(
-            "${"a".repeat(Segment.SIZE)}${"b".repeat(Segment.SIZE)}${"c".repeat(Segment.SIZE)}"
+            "${"a".repeat(Segment.SIZE)}${"b".repeat(Segment.SIZE)}${"c".repeat(Segment.SIZE)}",
         )
 
         val mockSink = MockSink()
@@ -158,19 +157,21 @@ class CommonRealSourceTest {
         mockSink.assertLog(
             "write($write1, ${write1.size})",
             "write($write2, ${write2.size})",
-            "write($write3, ${write3.size})"
+            "write($write3, ${write3.size})",
         )
     }
 
     @Test
     fun closeMultipleTimes() {
         var closeCalls = 0
-        val rawSource: RawSource = object : RawSource {
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = -1
-            override fun close() {
-                closeCalls++
+        val rawSource: RawSource =
+            object : RawSource {
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = -1
+
+                override fun close() {
+                    closeCalls++
+                }
             }
-        }
         val source = rawSource.buffered()
 
         source.close()
@@ -181,31 +182,32 @@ class CommonRealSourceTest {
 
     @Test
     fun readAtMostFromEmptySource() {
-        val rawSource = object : RawSource {
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-                return -1
-            }
+        val rawSource =
+            object : RawSource {
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = -1
 
-            override fun close() {}
-        }
+                override fun close() {}
+            }
 
         assertEquals(-1, rawSource.buffered().readAtMostTo(Buffer(), 1024))
     }
 
     @Test
     fun readAtMostFromFinite() {
-        val rawSource = object : RawSource {
-            var remainingBytes: Long = 10
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-                if (remainingBytes == 0L) return -1
-                val toWrite = minOf(remainingBytes, byteCount)
-                remainingBytes -= toWrite
-                sink.write(ByteArray(toWrite.toInt()))
-                return toWrite
-            }
+        val rawSource =
+            object : RawSource {
+                var remainingBytes: Long = 10
 
-            override fun close() {}
-        }
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+                    if (remainingBytes == 0L) return -1
+                    val toWrite = minOf(remainingBytes, byteCount)
+                    remainingBytes -= toWrite
+                    sink.write(ByteArray(toWrite.toInt()))
+                    return toWrite
+                }
+
+                override fun close() {}
+            }
 
         val source = rawSource.buffered()
         assertEquals(10, source.readAtMostTo(Buffer(), 1024))

@@ -42,32 +42,44 @@ internal external fun path_filestat_get(fd: Fd, flags: Int, pathPtr: Int, pathLe
 internal external fun path_open(
     fd: Fd,
     dirflags: Int, // is it?
-    pathPtr: Int, pathLen: Int,
+    pathPtr: Int,
+    pathLen: Int,
     oflags: Int, // is it?
     fsRightsBase: Long,
     fsRightsInheriting: Long,
     fdFlags: Short, // is it?
-    resultPtr: Int
+    resultPtr: Int,
 ): Int
 
 @WasmImport("wasi_snapshot_preview1", "path_remove_directory")
 internal external fun path_remove_directory(fd: Fd, pathPtr: Int, pathLen: Int): Int
 
 @WasmImport("wasi_snapshot_preview1", "path_rename")
-external internal fun path_rename(
-    oldFd: Fd, oldPathPtr: Int, oldPathLen: Int,
-    newFd: Fd, newPathPtr: Int, newPathLen: Int
+internal external fun path_rename(
+    oldFd: Fd,
+    oldPathPtr: Int,
+    oldPathLen: Int,
+    newFd: Fd,
+    newPathPtr: Int,
+    newPathLen: Int,
 ): Int
 
 @WasmImport("wasi_snapshot_preview1", "path_unlink_file")
-external internal fun path_unlink_file(
-    fd: Fd, pathPtr: Int, pathLen: Int
+internal external fun path_unlink_file(
+    fd: Fd,
+    pathPtr: Int,
+    pathLen: Int,
 ): Int
 
 @WasmImport("wasi_snapshot_preview1", "path_readlink")
-external internal fun path_readlink(
-    fd: Fd, pathPtr: Int, pathLen: Int, bufPtr: Int, bufLen: Int, resultPtr: Int
+internal external fun path_readlink(
+    fd: Fd,
+    pathPtr: Int,
+    pathLen: Int,
+    bufPtr: Int,
+    bufLen: Int,
+    resultPtr: Int,
 ): Int
 
 @WasmImport("wasi_snapshot_preview1", "path_symlink")
-external internal fun path_symlink(oldPathPtr: Int, oldPathLen: Int, fd: Fd, newPathPtr: Int, newPathLen: Int): Int
+internal external fun path_symlink(oldPathPtr: Int, oldPathLen: Int, fd: Fd, newPathPtr: Int, newPathLen: Int): Int

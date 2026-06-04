@@ -6,14 +6,34 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.IOException
-import platform.Foundation.*
-import platform.posix.*
-
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.cstr
+import kotlinx.cinterop.get
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.toKString
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSFileSize
+import platform.Foundation.NSFileType
+import platform.Foundation.NSFileTypeDirectory
+import platform.Foundation.NSFileTypeRegular
+import platform.Foundation.NSTemporaryDirectory
+import platform.posix.DIR
+import platform.posix.basename
+import platform.posix.closedir
+import platform.posix.dirname
+import platform.posix.errno
+import platform.posix.free
+import platform.posix.mkdir
+import platform.posix.opendir
+import platform.posix.readdir
+import platform.posix.realpath
+import platform.posix.rename
+import platform.posix.strerror
 
 internal actual fun atomicMoveImpl(source: Path, destination: Path) {
-    if (rename(source.path, destination.path) != 0) {
+    if (rename(source.pathString, destination.pathString) != 0) {
         throw IOException("Move failed: ${strerror(errno)?.toKString()}")
     }
 }
@@ -54,13 +74,39 @@ internal actual fun realpathImpl(path: String): String {
 }
 
 internal actual fun metadataOrNullImpl(path: Path): FileMetadata? {
-    val attributes = NSFileManager.defaultManager().fileAttributesAtPath(path.path, traverseLink = true) ?: return null
+    val attributes = NSFileManager().fileAttributesAtPath(path.pathString, traverseLink = true) ?: return null
     val fileType = attributes[NSFileType] as String
     val isFile = fileType == NSFileTypeRegular
     val isDir = fileType == NSFileTypeDirectory
     return FileMetadata(
         isRegularFile = isFile,
         isDirectory = isDir,
-        size = if (isFile) attributes[NSFileSize] as Long else -1
+        size = if (isFile) attributes[NSFileSize] as Long else -1,
     )
+}
+
+internal actual class OpaqueDirEntry(
+    private val dir: CPointer<DIR>,
+) : AutoCloseable {
+    actual fun readdir(): String? {
+        val entry = platform.posix.readdir(dir) ?: return null
+        return entry[0].d_name.toKString()
+    }
+
+    actual override fun close() {
+        if (closedir(dir) != 0) {
+            val err = errno
+            val strerr = strerror(err)?.toKString() ?: "unknown error"
+            throw IOException("closedir failed with errno $err ($strerr)")
+        }
+    }
+}
+
+internal actual fun opendir(path: String): OpaqueDirEntry {
+    val dirent = platform.posix.opendir(path)
+    if (dirent != null) return OpaqueDirEntry(dirent)
+
+    val err = errno
+    val strerr = strerror(err)?.toKString() ?: "unknown error"
+    throw IOException("Can't open directory $path: $err ($strerr)")
 }

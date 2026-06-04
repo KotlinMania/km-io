@@ -106,7 +106,6 @@ public abstract interface class io/github/kotlinmania/io/RawSource : java/lang/A
 }
 
 public final class io/github/kotlinmania/io/Segment {
-	public synthetic fun <init> ([BIILio/github/kotlinmania/io/SegmentCopyTracker;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final synthetic fun dataAsByteArray (Z)[B
 	public final synthetic fun getLimit ()I
 	public final synthetic fun getNext ()Lio/github/kotlinmania/io/Segment;

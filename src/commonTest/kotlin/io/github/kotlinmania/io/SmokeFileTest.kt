@@ -5,8 +5,15 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SmokeFileTest {
     private val files: MutableList<Path> = arrayListOf()
@@ -188,8 +195,19 @@ class SmokeFileTest {
         val p = Path(SystemPathSeparator.toString(), "a", "b", "c")
         assertEquals(constructAbsolutePath("a", "b"), p.parent?.toString())
         assertEquals(constructAbsolutePath("a"), p.parent?.parent?.toString())
-        assertEquals(constructAbsolutePath(), p.parent?.parent?.parent?.toString())
-        assertNull(p.parent?.parent?.parent?.parent)
+        assertEquals(
+            constructAbsolutePath(),
+            p.parent
+                ?.parent
+                ?.parent
+                ?.toString(),
+        )
+        assertNull(
+            p.parent
+                ?.parent
+                ?.parent
+                ?.parent,
+        )
 
         val p1 = Path("home", "..", "lib")
         assertEquals(constructRelativePath("home", ".."), p1.parent?.toString())
@@ -201,7 +219,7 @@ class SmokeFileTest {
         assertNull(Path("..").parent)
         assertNull(Path(SystemPathSeparator.toString()).parent)
 
-        assertEquals("..", Path("..${SystemPathSeparator}..").parent?.toString())
+        assertEquals("..", Path("..$SystemPathSeparator..").parent?.toString())
 
         assertEquals(" ", Path(SystemFileSystem.resolve(Path(".")), " ", "ws").parent?.name)
         assertEquals(" ", Path(" $SystemPathSeparator.").parent?.name)
@@ -217,17 +235,17 @@ class SmokeFileTest {
     fun pathConcat() {
         assertEquals(
             constructAbsolutePath("a", "b", "c"),
-            Path(Path(Path(Path(SystemPathSeparator.toString()), "a"), "b"), "c").toString()
+            Path(Path(Path(Path(SystemPathSeparator.toString()), "a"), "b"), "c").toString(),
         )
 
         assertEquals(
             constructAbsolutePath("a", "b", "..", "c"),
-            Path("${SystemPathSeparator}a", "b", "..${SystemPathSeparator}c").toString()
+            Path("${SystemPathSeparator}a", "b", "..${SystemPathSeparator}c").toString(),
         )
 
         assertEquals(
             constructRelativePath("a", "b", "c"),
-            Path("", "a", "b", "c").toString()
+            Path("", "a", "b", "c").toString(),
         )
     }
 
@@ -239,7 +257,7 @@ class SmokeFileTest {
         assertEquals(".", Path(".").name)
         assertEquals("..", Path("..").name)
         assertEquals("hello.txt", Path("base", "hello.txt").name)
-        assertEquals("dir", Path("dir${SystemPathSeparator}").name)
+        assertEquals("dir", Path("dir$SystemPathSeparator").name)
         assertEquals(" ", Path(" ").name)
         assertEquals("  ", Path(" /  ").name)
     }
@@ -353,14 +371,18 @@ class SmokeFileTest {
         SystemFileSystem.sink(path).buffered().use {
             it.writeString("second")
         }
-        assertEquals("second",
-            SystemFileSystem.source(path).buffered().use { it.readString() })
+        assertEquals(
+            "second",
+            SystemFileSystem.source(path).buffered().use { it.readString() },
+        )
 
         SystemFileSystem.sink(path, append = true).buffered().use {
             it.writeString(" third")
         }
-        assertEquals("second third",
-            SystemFileSystem.source(path).buffered().use { it.readString() })
+        assertEquals(
+            "second third",
+            SystemFileSystem.source(path).buffered().use { it.readString() },
+        )
     }
 
     @Test
@@ -378,8 +400,9 @@ class SmokeFileTest {
         assertEquals(cwd, SystemFileSystem.resolve(childRel))
 
         assertEquals(
-            cwd, SystemFileSystem.resolve(cwd),
-            "Absolute path resolution should not alter the path"
+            cwd,
+            SystemFileSystem.resolve(cwd),
+            "Absolute path resolution should not alter the path",
         )
 
         // root
@@ -428,32 +451,36 @@ class SmokeFileTest {
         assertTrue(SystemFileSystem.exists(path))
         val source = SystemFileSystem.source(path)
         source.close()
-        source.close()  // there should be no error
+        source.close() // there should be no error
     }
 
     @Test
     fun listDirectory() {
         assertFailsWith<FileNotFoundException> { SystemFileSystem.list(createTempPath()) }
 
-        val tmpFile = createTempPath().also {
-            SystemFileSystem.sink(it).close()
-        }
+        val tmpFile =
+            createTempPath().also {
+                SystemFileSystem.sink(it).close()
+            }
         assertFailsWith<IOException> { SystemFileSystem.list(tmpFile) }
 
-        val dir = createTempPath().also {
-            SystemFileSystem.createDirectories(it)
-        }
+        val dir =
+            createTempPath().also {
+                SystemFileSystem.createDirectories(it)
+            }
         assertEquals(emptyList(), SystemFileSystem.list(dir))
 
-        val subdir = Path(dir, "subdir").also {
-            SystemFileSystem.createDirectories(it)
-            SystemFileSystem.sink(Path(it, "file")).close()
-        }
+        val subdir =
+            Path(dir, "subdir").also {
+                SystemFileSystem.createDirectories(it)
+                SystemFileSystem.sink(Path(it, "file")).close()
+            }
         assertEquals(listOf(subdir), SystemFileSystem.list(dir))
 
-        val file = Path(dir, "file").also {
-            SystemFileSystem.sink(it).close()
-        }
+        val file =
+            Path(dir, "file").also {
+                SystemFileSystem.sink(it).close()
+            }
         assertEquals(setOf(file, subdir), SystemFileSystem.list(dir).toSet())
 
         SystemFileSystem.delete(file)
@@ -461,11 +488,7 @@ class SmokeFileTest {
         SystemFileSystem.delete(subdir)
     }
 
-    private fun constructAbsolutePath(vararg parts: String): String {
-        return SystemPathSeparator.toString() + parts.joinToString(SystemPathSeparator.toString())
-    }
+    private fun constructAbsolutePath(vararg parts: String): String = SystemPathSeparator.toString() + parts.joinToString(SystemPathSeparator.toString())
 
-    private fun constructRelativePath(vararg parts: String): String {
-        return parts.joinToString(SystemPathSeparator.toString())
-    }
+    private fun constructRelativePath(vararg parts: String): String = parts.joinToString(SystemPathSeparator.toString())
 }

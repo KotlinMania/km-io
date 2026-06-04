@@ -62,7 +62,6 @@ class PoolingTest {
         }
         segments.forEach(SegmentPool::recycle)
 
-
         // take the same number of segments again and check that nothing new was allocated
         val segments2 = mutableSetOf<Segment>()
         size = 0
@@ -139,7 +138,6 @@ class PoolingTest {
                                 }
                             }
                         }
-
                     }
                     segments.forEach { SegmentPool.recycle(it) }
                 }

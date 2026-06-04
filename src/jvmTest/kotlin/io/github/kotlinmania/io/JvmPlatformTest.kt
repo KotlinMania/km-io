@@ -34,7 +34,11 @@ import java.nio.file.LinkOption
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class JvmPlatformTest {
     @TempDir
@@ -80,7 +84,7 @@ class JvmPlatformTest {
         val bais = ByteArrayInputStream(byteArrayOf(0x61))
         val source = bais.asSource()
         val buffer = Buffer()
-        val _ = source.readAtMostTo(buffer, 1)
+        discardReturnValue(source.readAtMostTo(buffer, 1))
         assertEquals(buffer.readString(), "a")
     }
 
@@ -89,7 +93,7 @@ class JvmPlatformTest {
         val bais = ByteArrayInputStream(ByteArray(128))
         val source = bais.asSource()
         val buffer = Buffer()
-        val _ = source.readAtMostTo(buffer, 0)
+        discardReturnValue(source.readAtMostTo(buffer, 0))
         assertEquals(0, buffer.size)
     }
 
@@ -173,17 +177,28 @@ class JvmPlatformTest {
         }
 
         assertFailsWith<IOException> {
-            link.toPath().inputStream(LinkOption.NOFOLLOW_LINKS).asSource().use { it.buffered().readLine() }
+            link
+                .toPath()
+                .inputStream(LinkOption.NOFOLLOW_LINKS)
+                .asSource()
+                .use { it.buffered().readLine() }
         }
-        assertNull(link.toPath().inputStream().asSource().use { it.buffered().readLine() })
+        assertNull(
+            link
+                .toPath()
+                .inputStream()
+                .asSource()
+                .use { it.buffered().readLine() },
+        )
     }
 
     @Test
     fun socketSink() {
         val baos = ByteArrayOutputStream()
-        val socket = object : Socket() {
-            override fun getOutputStream() = baos
-        }
+        val socket =
+            object : Socket() {
+                override fun getOutputStream() = baos
+            }
         val sink = socket.outputStream.asSink()
         sink.write(Buffer().also { it.writeString("a") }, 1L)
         assertArrayEquals(baos.toByteArray(), byteArrayOf(0x61))
@@ -192,12 +207,13 @@ class JvmPlatformTest {
     @Test
     fun socketSource() {
         val bais = ByteArrayInputStream(byteArrayOf(0x61))
-        val socket = object : Socket() {
-            override fun getInputStream() = bais
-        }
+        val socket =
+            object : Socket() {
+                override fun getInputStream() = bais
+            }
         val source = socket.inputStream.asSource()
         val buffer = Buffer()
-        val _ = source.readAtMostTo(buffer, 1L)
+        discardReturnValue(source.readAtMostTo(buffer, 1L))
         assertEquals(buffer.readString(), "a")
     }
 }

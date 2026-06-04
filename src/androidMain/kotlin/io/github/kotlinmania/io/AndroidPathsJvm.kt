@@ -5,12 +5,11 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.Sink
-import io.github.kotlinmania.io.Source
-import io.github.kotlinmania.io.buffered
 import java.io.File
 
-public actual class Path internal constructor(internal val file: File) {
+public actual class Path internal constructor(
+    internal val file: File,
+) {
     public actual val parent: Path?
         get() {
             val parentFile = file.parentFile ?: return null
@@ -26,9 +25,7 @@ public actual class Path internal constructor(internal val file: File) {
         return toString() == other.toString()
     }
 
-    actual override fun hashCode(): Int {
-        return toString().hashCode()
-    }
+    actual override fun hashCode(): Int = toString().hashCode()
 
     public actual val isAbsolute: Boolean
         get() = file.isAbsolute

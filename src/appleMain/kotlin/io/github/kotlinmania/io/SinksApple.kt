@@ -7,8 +7,31 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import platform.Foundation.*
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.get
+import kotlinx.cinterop.value
+import platform.Foundation.NSError
+import platform.Foundation.NSOutputStream
+import platform.Foundation.NSRunLoop
+import platform.Foundation.NSRunLoopMode
+import platform.Foundation.NSStream
+import platform.Foundation.NSStreamDataWrittenToMemoryStreamKey
+import platform.Foundation.NSStreamDelegateProtocol
+import platform.Foundation.NSStreamEvent
+import platform.Foundation.NSStreamEventErrorOccurred
+import platform.Foundation.NSStreamEventHasSpaceAvailable
+import platform.Foundation.NSStreamEventOpenCompleted
+import platform.Foundation.NSStreamPropertyKey
+import platform.Foundation.NSStreamStatusClosed
+import platform.Foundation.NSStreamStatusError
+import platform.Foundation.NSStreamStatusNotOpen
+import platform.Foundation.NSStreamStatusOpen
+import platform.Foundation.NSStreamStatusOpening
+import platform.Foundation.NSStreamStatusWriting
+import platform.Foundation.performInModes
 import platform.darwin.NSInteger
 import platform.darwin.NSUInteger
 import platform.posix.uint8_tVar
@@ -35,15 +58,16 @@ public fun Sink.asNSOutputStream(): NSOutputStream = SinkNSOutputStream(this)
 
 @OptIn(UnsafeNumber::class)
 private class SinkNSOutputStream(
-    private val sink: Sink
-) : NSOutputStream(toMemory = Unit), NSStreamDelegateProtocol {
-
-    private val isClosed: () -> Boolean = when (sink) {
-        is RealSink -> sink::closed
-        is Buffer -> {
-            { false }
+    private val sink: Sink,
+) : NSOutputStream(toMemory = Unit),
+    NSStreamDelegateProtocol {
+    private val isClosed: () -> Boolean =
+        when (sink) {
+            is RealSink -> sink::closed
+            is Buffer -> {
+                { false }
+            }
         }
-    }
 
     private var status = NSStreamStatusNotOpen
     private var error: NSError? = null
@@ -95,22 +119,24 @@ private class SinkNSOutputStream(
     override fun hasSpaceAvailable() = !isFinished
 
     private val isFinished
-        get() = when (streamStatus) {
-            NSStreamStatusClosed, NSStreamStatusError -> true
-            else -> false
-        }
+        get() =
+            when (streamStatus) {
+                NSStreamStatusClosed, NSStreamStatusError -> true
+                else -> false
+            }
 
     @OptIn(InternalIoApi::class)
-    override fun propertyForKey(key: NSStreamPropertyKey): Any? = when (key) {
-        NSStreamDataWrittenToMemoryStreamKey -> sink.buffer.snapshotAsNSData()
-        else -> null
-    }
+    override fun propertyForKey(key: NSStreamPropertyKey): Any? =
+        when (key) {
+            NSStreamDataWrittenToMemoryStreamKey -> sink.buffer.snapshotAsNSData()
+            else -> null
+        }
 
     override fun setProperty(property: Any?, forKey: NSStreamPropertyKey) = false
 
     // WeakReference as delegate should not be retained
     // https://developer.apple.com/documentation/foundation/nsstream/1418423-delegate
-    private var _delegate: WeakReference<NSStreamDelegateProtocol>? = null
+    private var delegateReference: WeakReference<NSStreamDelegateProtocol>? = null
     private var runLoop: NSRunLoop? = null
     private var runLoopModes = listOf<NSRunLoopMode>()
 
@@ -123,12 +149,12 @@ private class SinkNSOutputStream(
         }
     }
 
-    override fun delegate() = _delegate?.value
+    override fun delegate() = delegateReference?.value
 
     private val delegateOrSelf get() = delegate ?: this
 
     override fun setDelegate(delegate: NSStreamDelegateProtocol?) {
-        _delegate = delegate?.let { WeakReference(it) }
+        delegateReference = delegate?.let { WeakReference(it) }
     }
 
     override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {

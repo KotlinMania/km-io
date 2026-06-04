@@ -6,20 +6,12 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.Buffer
-import io.github.kotlinmania.io.UnsafeIoApi
-import io.github.kotlinmania.io.assertArrayEquals
-import io.github.kotlinmania.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class UnsafeBufferOperationsForEachTest {
-
     @Test
     fun emptyBuffer() {
         UnsafeBufferOperations.forEachSegment(Buffer()) { _, head ->
@@ -42,7 +34,7 @@ class UnsafeBufferOperationsForEachTest {
         val buffer = Buffer()
 
         val expectedSegments = 10
-        for (i in 0 ..< expectedSegments) {
+        for (i in 0..<expectedSegments) {
             UnsafeBufferOperations.moveToTail(buffer, byteArrayOf(i.toByte()))
         }
 

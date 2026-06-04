@@ -20,7 +20,6 @@
  */
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.REPLACEMENT_BYTE
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -65,9 +64,7 @@ fun String.decodeHex(): ByteArray {
     return result
 }
 
-fun Char.repeat(count: Int): String {
-    return toString().repeat(count)
-}
+fun Char.repeat(count: Int): String = toString().repeat(count)
 
 fun assertArrayEquals(a: ByteArray, b: ByteArray) {
     assertEquals(a.contentToString(), b.contentToString())
@@ -96,13 +93,14 @@ internal fun String.commonAsUtf8ToByteArray(): ByteArray {
 internal inline fun String.processUtf8Bytes(
     beginIndex: Int,
     endIndex: Int,
-    yield: (Byte) -> Unit
+    yield: (Byte) -> Unit,
 ) {
     // Transcode a UTF-16 String to UTF-8 bytes.
     var index = beginIndex
     while (index < endIndex) {
         val c = this[index]
 
+        @Suppress("ktlint:standard:no-multi-spaces")
         when {
             c < '\u0080' -> {
                 // Emit a 7-bit character with 1 byte.
@@ -117,20 +115,16 @@ internal inline fun String.processUtf8Bytes(
 
             c < '\u0800' -> {
                 // Emit a 11-bit character with 2 bytes.
-                /* ktlint-disable no-multi-spaces */
                 yield((c.code shr 6 or 0xc0).toByte()) // 110xxxxx
                 yield((c.code and 0x3f or 0x80).toByte()) // 10xxxxxx
-                /* ktlint-enable no-multi-spaces */
                 index++
             }
 
             c !in '\ud800'..'\udfff' -> {
                 // Emit a 16-bit character with 3 bytes.
-                /* ktlint-disable no-multi-spaces */
                 yield((c.code shr 12 or 0xe0).toByte()) // 1110xxxx
                 yield((c.code shr 6 and 0x3f or 0x80).toByte()) // 10xxxxxx
                 yield((c.code and 0x3f or 0x80).toByte()) // 10xxxxxx
-                /* ktlint-enable no-multi-spaces */
                 index++
             }
 
@@ -151,12 +145,10 @@ internal inline fun String.processUtf8Bytes(
                     val codePoint = (((c.code shl 10) + this[index + 1].code) + (0x010000 - (0xd800 shl 10) - 0xdc00))
 
                     // Emit a 21-bit character with 4 bytes.
-                    /* ktlint-disable no-multi-spaces */
                     yield((codePoint shr 18 or 0xf0).toByte()) // 11110xxx
                     yield((codePoint shr 12 and 0x3f or 0x80).toByte()) // 10xxxxxx
                     yield((codePoint shr 6 and 0x3f or 0x80).toByte()) // 10xxyyyy
                     yield((codePoint and 0x3f or 0x80).toByte()) // 10yyyyyy
-                    /* ktlint-enable no-multi-spaces */
                     index += 2
                 }
             }

@@ -64,3 +64,27 @@ internal actual fun metadataOrNullImpl(path: Path): FileMetadata? {
         size = if (isFile) attributes[NSFileSize] as Long else -1
     )
 }
+
+internal actual class OpaqueDirEntry(private val dir: CPointer<DIR>) : AutoCloseable {
+    actual fun readdir(): String? {
+        val entry = platform.posix.readdir(dir) ?: return null
+        return entry[0].d_name.toKString()
+    }
+
+    actual override fun close() {
+        if (closedir(dir) != 0) {
+            val err = errno
+            val strerr = strerror(err)?.toKString() ?: "unknown error"
+            throw IOException("closedir failed with errno $err ($strerr)")
+        }
+    }
+}
+
+internal actual fun opendir(path: String): OpaqueDirEntry {
+    val dirent = platform.posix.opendir(path)
+    if (dirent != null) return OpaqueDirEntry(dirent)
+
+    val err = errno
+    val strerr = strerror(err)?.toKString() ?: "unknown error"
+    throw IOException("Can't open directory $path: $err ($strerr)")
+}

@@ -5,7 +5,13 @@
 
 package io.github.kotlinmania.io
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class ByteStringTest {
     @Test
@@ -41,7 +47,8 @@ class ByteStringTest {
         assertNotEquals(str1.hashCode(), str2.hashCode())
         assertNotEquals(str1, str2)
 
-        assertFalse(ByteString().equals(null))
+        val nullValue: Any? = null
+        assertFalse(ByteString().equals(nullValue))
         assertFalse(ByteString().equals(byteArrayOf(1, 2, 3)))
     }
 
@@ -380,12 +387,12 @@ class ByteStringTest {
         assertEquals("ByteString(size=1 hex=00)", ByteString(0).toString())
         assertEquals(
             "ByteString(size=16 hex=000102030405060708090a0b0c0d0e0f)",
-            ByteString(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).toString()
+            ByteString(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).toString(),
         )
         assertEquals(
             "ByteString(size=64 hex=0000000000000000000000000000000000000000000000000000000000000000" +
-                    "0000000000000000000000000000000000000000000000000000000000000000)",
-            ByteString(ByteArray(64)).toString()
+                "0000000000000000000000000000000000000000000000000000000000000000)",
+            ByteString(ByteArray(64)).toString(),
         )
     }
 
@@ -417,7 +424,7 @@ class ByteStringTest {
         val str = ByteString(0xDEu, 0xADu, 0xC0u, 0xDEu)
         assertContentEquals(
             byteArrayOf(0xDE.toByte(), 0xAD.toByte(), 0xC0u.toByte(), 0xDEu.toByte()),
-            str.toByteArray()
+            str.toByteArray(),
         )
     }
 }

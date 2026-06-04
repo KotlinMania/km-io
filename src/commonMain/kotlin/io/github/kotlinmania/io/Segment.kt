@@ -60,7 +60,9 @@ internal abstract class SegmentCopyTracker {
  */
 internal object AlwaysSharedCopyTracker : SegmentCopyTracker() {
     override val shared: Boolean get() = true
+
     override fun addCopy() = Unit
+
     override fun removeCopy(): Boolean = true
 }
 
@@ -147,9 +149,10 @@ public class Segment {
      * prevents it from being pooled.
      */
     internal fun sharedCopy(): Segment {
-        val t = copyTracker ?: SegmentPool.tracker().also {
-            copyTracker = it
-        }
+        val t =
+            copyTracker ?: SegmentPool.tracker().also {
+                copyTracker = it
+            }
         return Segment(data, pos, limit, t.also { it.addCopy() }, false)
     }
 
@@ -210,7 +213,7 @@ public class Segment {
         prefix.limit = prefix.pos + byteCount
         pos += byteCount
         if (this.prev != null) {
-            val _ = this.prev!!.push(prefix)
+            discardReturnValue(this.prev!!.push(prefix))
         } else {
             prefix.next = this
             this.prev = prefix
@@ -272,9 +275,7 @@ public class Segment {
         this.limit = limit
     }
 
-    internal fun readByte(): Byte {
-        return data[pos++]
-    }
+    internal fun readByte(): Byte = data[pos++]
 
     internal fun readShort(): Short {
         val data = data
@@ -288,11 +289,11 @@ public class Segment {
         val data = data
         var pos = pos
         val i = (
-                data[pos++] and 0xff shl 24
-                        or (data[pos++] and 0xff shl 16)
-                        or (data[pos++] and 0xff shl 8)
-                        or (data[pos++] and 0xff)
-                )
+            data[pos++] and 0xff shl 24
+                or (data[pos++] and 0xff shl 16)
+                or (data[pos++] and 0xff shl 8)
+                or (data[pos++] and 0xff)
+        )
         this.pos = pos
         return i
     }
@@ -301,15 +302,15 @@ public class Segment {
         val data = data
         var pos = pos
         val v = (
-                data[pos++] and 0xffL shl 56
-                        or (data[pos++] and 0xffL shl 48)
-                        or (data[pos++] and 0xffL shl 40)
-                        or (data[pos++] and 0xffL shl 32)
-                        or (data[pos++] and 0xffL shl 24)
-                        or (data[pos++] and 0xffL shl 16)
-                        or (data[pos++] and 0xffL shl 8)
-                        or (data[pos++] and 0xffL)
-                )
+            data[pos++] and 0xffL shl 56
+                or (data[pos++] and 0xffL shl 48)
+                or (data[pos++] and 0xffL shl 40)
+                or (data[pos++] and 0xffL shl 32)
+                or (data[pos++] and 0xffL shl 24)
+                or (data[pos++] and 0xffL shl 16)
+                or (data[pos++] and 0xffL shl 8)
+                or (data[pos++] and 0xffL)
+        )
         this.pos = pos
         return v
     }
@@ -327,8 +328,10 @@ public class Segment {
         }
 
         data.copyInto(
-            sink.data, destinationOffset = sink.limit, startIndex = pos,
-            endIndex = pos + byteCount
+            sink.data,
+            destinationOffset = sink.limit,
+            startIndex = pos,
+            endIndex = pos + byteCount,
         )
         sink.limit += byteCount
         pos += byteCount
@@ -387,9 +390,7 @@ public class Segment {
     @Suppress("UNUSED_PARAMETER")
     internal fun writeBackData(data: ByteArray, bytesToCommit: Int): Unit = Unit
 
-    internal fun getUnchecked(index: Int): Byte {
-        return data[pos + index]
-    }
+    internal fun getUnchecked(index: Int): Byte = data[pos + index]
 
     internal fun setUnchecked(index: Int, value: Byte) {
         data[limit + index] = value
@@ -435,7 +436,7 @@ public class Segment {
             pos: Int,
             limit: Int,
             copyTracker: SegmentCopyTracker?,
-            owner: Boolean
+            owner: Boolean,
         ): Segment = Segment(data, pos, limit, copyTracker, owner)
     }
 }

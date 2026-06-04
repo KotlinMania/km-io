@@ -6,15 +6,17 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.UnsafeBufferOperations
 import kotlin.math.min
 import kotlin.wasm.unsafe.MemoryAllocator
 import kotlin.wasm.unsafe.Pointer
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi
 
 internal fun Pointer.loadInt(offset: Int): Int = (this + offset).loadInt()
+
 internal fun Pointer.loadLong(offset: Int): Long = (this + offset).loadLong()
+
 internal fun Pointer.loadShort(offset: Int): Short = (this + offset).loadShort()
+
 internal fun Pointer.loadByte(offset: Int): Byte = (this + offset).loadByte()
 
 internal fun Pointer.loadBytes(length: Int): ByteArray {
@@ -26,8 +28,11 @@ internal fun Pointer.loadBytes(length: Int): ByteArray {
 }
 
 internal fun Pointer.storeInt(offset: Int, value: Int): Unit = (this + offset).storeInt(value)
+
 internal fun Pointer.storeLong(offset: Int, value: Long): Unit = (this + offset).storeLong(value)
+
 internal fun Pointer.storeShort(offset: Int, value: Short): Unit = (this + offset).storeShort(value)
+
 internal fun Pointer.storeByte(offset: Int, value: Byte): Unit = (this + offset).storeByte(value)
 
 internal fun Pointer.storeBytes(bytes: ByteArray) {
@@ -42,13 +47,14 @@ internal fun Buffer.readToLinearMemory(pointer: Pointer, bytes: Int) {
     var remaining = bytes
     var currentPtr = pointer
     while (remaining > 0 && !exhausted()) {
-        val bytesRead = UnsafeBufferOperations.readFromHead(this) { ctx, seg ->
-            val read = minOf(remaining, seg.size)
-            for (offset in 0..<read) {
-                currentPtr.storeByte(offset, ctx.getUnchecked(seg, offset))
+        val bytesRead =
+            UnsafeBufferOperations.readFromHead(this) { ctx, seg ->
+                val read = minOf(remaining, seg.size)
+                for (offset in 0..<read) {
+                    currentPtr.storeByte(offset, ctx.getUnchecked(seg, offset))
+                }
+                read
             }
-            read
-        }
         remaining -= bytesRead
         currentPtr += bytesRead
     }
@@ -59,13 +65,14 @@ internal fun Buffer.writeFromLinearMemory(pointer: Pointer, bytes: Int) {
     var remaining = bytes
     var currentPtr = pointer
     while (remaining > 0) {
-        val bytesWritten = UnsafeBufferOperations.writeToTail(this, 1) { ctx, seg ->
-            val cap = min(seg.remainingCapacity, remaining)
-            for (offset in 0..<cap) {
-                ctx.setUnchecked(seg, offset, currentPtr.loadByte(offset))
+        val bytesWritten =
+            UnsafeBufferOperations.writeToTail(this, 1) { ctx, seg ->
+                val cap = min(seg.remainingCapacity, remaining)
+                for (offset in 0..<cap) {
+                    ctx.setUnchecked(seg, offset, currentPtr.loadByte(offset))
+                }
+                cap
             }
-            cap
-        }
         currentPtr += bytesWritten
         remaining -= bytesWritten
     }

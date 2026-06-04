@@ -5,9 +5,14 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.UnsafeByteStringApi
-import io.github.kotlinmania.io.UnsafeByteStringOperations
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.get
+import kotlinx.cinterop.readBytes
+import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
 import platform.Foundation.create
 
@@ -42,6 +47,6 @@ public fun NSData.toByteString(): ByteString {
         throw IllegalArgumentException("NSData content is to long to read as byte array: $l")
     }
     return UnsafeByteStringOperations.wrapUnsafe(
-        bytes!!.readBytes(l.toInt())
+        bytes!!.readBytes(l.toInt()),
     )
 }

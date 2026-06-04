@@ -5,10 +5,9 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import io.github.kotlinmania.io.ByteString
-import io.github.kotlinmania.io.encodeToByteString
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ByteStringSample2 {
     @Test

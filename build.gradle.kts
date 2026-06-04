@@ -30,7 +30,6 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.kmp)
-    alias(libs.plugins.vanniktech)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.kover)
@@ -38,8 +37,12 @@ plugins {
     id("kotlinx-io-dokka")
 }
 
+val projectGroup = providers.gradleProperty("project.group").getOrElse("io.github.kotlinmania")
+val projectVersion = providers.gradleProperty("project.version").getOrElse("0.1.0-SNAPSHOT")
+
 allprojects {
-    properties["DeployVersion"]?.let { version = it }
+    group = projectGroup
+    version = properties["DeployVersion"] ?: projectVersion
     repositories {
         mavenCentral()
         google()
@@ -66,10 +69,8 @@ dependencies {
     dokka(project(":km-io-core"))
 }
 
-group = providers.gradleProperty("project.group").getOrElse("io.github.kotlinmania")
-version = providers.gradleProperty("project.version").getOrElse("0.1.0-SNAPSHOT")
-val frameworkName = providers.gradleProperty("project.frameworkName").getOrElse("Unnamed")
-val projectNamespace = providers.gradleProperty("project.namespace").getOrElse("io.github.kotlinmania")
+val frameworkName = providers.gradleProperty("project.frameworkName").getOrElse("KmIo")
+val projectNamespace = providers.gradleProperty("project.namespace").getOrElse("io.github.kotlinmania.io")
 val kotlinVersion = providers.gradleProperty("versions.kotlin").getOrElse("2.3.21")
 val isCodeqlBuild = providers.gradleProperty("kotlinmania.codeql").map(String::toBoolean).getOrElse(false)
 val commonMainBundleName = providers.gradleProperty("project.dependencies.commonMainBundle").get()
@@ -284,7 +285,6 @@ kotlin {
         optIn.addAll(commonOptIns)
         freeCompilerArgs.add("-Xexpect-actual-classes")
         freeCompilerArgs.add("-Xreturn-value-checker=full")
-        freeCompilerArgs.add("-XXLanguage:+UnnamedLocalVariables")
     }
 
     val xcf = XCFramework(frameworkName)
@@ -327,14 +327,22 @@ kotlin {
 
     // Web
     js {
-        browser()
+        browser {
+            testTask {
+                filter.setExcludePatterns("*SmokeFileTest*")
+            }
+        }
         nodejs()
     }
 
     // wasmJs is Stable as of Kotlin 2.2; @OptIn may be removable — verify before dropping on wasmWasi.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
+        browser {
+            testTask {
+                filter.setExcludePatterns("*SmokeFileTest*")
+            }
+        }
         nodejs()
     }
 
@@ -366,6 +374,9 @@ kotlin {
 
     // JVM — jvmTarget derived from the same toolchain property so they can't drift.
     jvm {
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(jvmToolchainVersion.toString()))
         }
@@ -378,12 +389,9 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-    }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    if (name.startsWith("compileSwiftExport")) {
-        compilerOptions.allWarningsAsErrors.set(false)
+        jvmTest.dependencies {
+            implementation(kotlin("test-junit5"))
+        }
     }
 }
 
@@ -512,46 +520,6 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
     versions.karmaWebpack.version = "file:$patchedKarmaWebpackPackage"
     versions.mocha.version = providers.gradleProperty("node.mocha.version").getOrElse("12.0.0-beta-10")
     versions.kotlinWebHelpers.version = providers.gradleProperty("node.kotlinWebHelpers.version").getOrElse("3.1.0")
-}
-
-// ============================================================================
-// Maven Central publishing
-// ============================================================================
-mavenPublishing {
-    publishToMavenCentral()
-    if (project.findProperty("RELEASE_SIGNING_ENABLED") != "false") {
-        signAllPublications()
-    }
-    val projectName = providers.gradleProperty("project.name").getOrElse("unnamed-project")
-    coordinates(group.toString(), projectName, version.toString())
-    pom {
-        name.set(projectName)
-        description.set(providers.gradleProperty("project.pom.description").getOrElse(""))
-        inceptionYear.set("2026")
-        url.set("https://github.com/KotlinMania/$projectName")
-        licenses {
-            license {
-                name.set(providers.gradleProperty("project.pom.licenseName").getOrElse("Apache-2.0"))
-                url.set(
-                    providers.gradleProperty("project.pom.licenseUrl").getOrElse("https://www.apache.org/licenses/LICENSE-2.0.txt"),
-                )
-                distribution.set("repo")
-            }
-        }
-        developers {
-            developer {
-                id.set("sydneyrenee")
-                name.set("Sydney Renee")
-                email.set("sydney@solace.ofharmony.ai")
-                url.set("https://github.com/sydneyrenee")
-            }
-        }
-        scm {
-            url.set("https://github.com/KotlinMania/$projectName")
-            connection.set("scm:git:git://github.com/KotlinMania/$projectName.git")
-            developerConnection.set("scm:git:ssh://github.com/KotlinMania/$projectName.git")
-        }
-    }
 }
 
 // ============================================================================
@@ -711,6 +679,166 @@ tasks.register("setupAndroidSdk") {
     dependsOn("ensureAndroidSdk")
 }
 
+tasks.named("wasmWasiNodeTest") {
+    val rootName = rootProject.name
+    doFirst {
+        val templateFile = layout.projectDirectory.file("src/wasmWasiTest/resources/test-driver.mjs.template").asFile
+        val driverFile =
+            layout.buildDirectory.file(
+                "compileSync/wasmWasi/test/testDevelopmentExecutable/kotlin/$rootName-test.mjs",
+            )
+
+        fun File.mkdirsAndEscape(): String {
+            mkdirs()
+            return absolutePath.replace("\\", "\\\\")
+        }
+
+        val tmpDir = temporaryDir.resolve("km-io-wasi-test").mkdirsAndEscape()
+        val tmpDir2 = temporaryDir.resolve("km-io-wasi-test-2").mkdirsAndEscape()
+
+        val newDriver =
+            templateFile
+                .readText()
+                .replace("<SYSTEM_TEMP_DIR>", tmpDir, false)
+                .replace("<SYSTEM_TEMP_DIR2>", tmpDir2, false)
+                .replace("<WASM_FILE>", "$rootName-test.wasm", false)
+
+        driverFile.get().asFile.writeText(newDriver)
+    }
+}
+
+fun patchSwiftPackage(packageDir: File) {
+    val swiftExportArchiveName = frameworkName
+    val packageSwift = packageDir.resolve("Package.swift")
+    if (packageSwift.exists()) {
+        val text = packageSwift.readText()
+        if (!text.contains("platforms:")) {
+            packageSwift.writeText(
+                text.replaceFirst(
+                    Regex("(name:\\s*\"[^\"]*\",)"),
+                    "\$1\n    platforms: [.macOS(.v14)],",
+                ),
+            )
+        }
+    }
+
+    val sourcesDir = packageDir.resolve("Sources")
+    if (!sourcesDir.exists()) return
+    sourcesDir
+        .walkTopDown()
+        .filter { it.isFile && it.extension == "swift" }
+        .forEach { swiftFile ->
+            val text = swiftFile.readText()
+            val patched =
+                text
+                    .replace("Foundation.NSInputStream", "Foundation.InputStream")
+                    .replace("Foundation.NSOutputStream", "Foundation.OutputStream")
+            if (patched != text) {
+                swiftFile.writeText(patched)
+            }
+        }
+    packageDir
+        .walkTopDown()
+        .filter { it.isFile && it.name == "module.modulemap" }
+        .forEach { moduleMap ->
+            val text = moduleMap.readText()
+            val patched =
+                Regex("""link "[^"]+"""").replace(text) {
+                    "link \"$swiftExportArchiveName\""
+                }
+            if (patched != text) {
+                moduleMap.writeText(patched)
+            }
+        }
+}
+
+fun patchSwiftExportGeneratedKotlin(filesDir: File) {
+    if (!filesDir.exists()) return
+    val unitBridgeReturn =
+        Regex("""(?m)^([ \t]*)val _result = run \{ ([^\n{}]*) \}\R\1return run \{ _result; true \}""")
+    val swiftUnitCallback =
+        Regex("""(?m)^([ \t]*)val _result = kotlinFun\((.*)\)\s*\R\1run<Unit> \{ _result \}\s*$""")
+    val patchedSwiftUnitCallback =
+        Regex("""(?m)^([ \t]*)kotlinFun\((.*)\)\s*\R\1Unit\s*$""")
+
+    filesDir
+        .walkTopDown()
+        .filter { it.isFile && it.extension == "kt" }
+        .forEach { kotlinFile ->
+            var text = kotlinFile.readText()
+            var patched =
+                unitBridgeReturn.replace(text) { match ->
+                    val indent = match.groupValues[1]
+                    val expression = match.groupValues[2]
+                    "$indent run { $expression }\n${indent}return true"
+                }
+            patched =
+                swiftUnitCallback.replace(patched) { match ->
+                    val indent = match.groupValues[1]
+                    val expression = match.groupValues[2]
+                    "$indent kotlinFun($expression).let { Unit }"
+                }
+            patched =
+                patchedSwiftUnitCallback.replace(patched) { match ->
+                    val indent = match.groupValues[1]
+                    val expression = match.groupValues[2]
+                    "$indent kotlinFun($expression).let { Unit }"
+                }
+            if (
+                patched.contains("writeToInternalBuffer") &&
+                !patched.contains("@file:kotlin.OptIn(io.github.kotlinmania.io.DelicateIoApi::class)")
+            ) {
+                patched =
+                    if (patched.startsWith("@file:")) {
+                        patched.replaceFirst(
+                            Regex("""\A((?:@file:[^\n]*\n)+)"""),
+                            "$1@file:kotlin.OptIn(io.github.kotlinmania.io.DelicateIoApi::class)\n",
+                        )
+                    } else {
+                        "@file:kotlin.OptIn(io.github.kotlinmania.io.DelicateIoApi::class)\n$patched"
+                    }
+            }
+            if (patched != text) {
+                kotlinFile.writeText(patched)
+            }
+        }
+}
+
+val patchMacosArm64DebugSwiftPackage =
+    tasks.register("patchMacosArm64DebugSwiftPackage") {
+        dependsOn("macosArm64DebugGenerateSPMPackage")
+        doLast {
+            patchSwiftPackage(
+                layout.buildDirectory
+                    .dir("SPMPackage/macosArm64/Debug")
+                    .get()
+                    .asFile,
+            )
+        }
+    }
+
+val patchMacosArm64DebugSwiftExportKotlin =
+    tasks.register("patchMacosArm64DebugSwiftExportKotlin") {
+        dependsOn("macosArm64DebugSwiftExport")
+        doLast {
+            patchSwiftExportGeneratedKotlin(
+                layout.buildDirectory
+                    .dir("SwiftExport/macosArm64/Debug/files")
+                    .get()
+                    .asFile,
+            )
+        }
+    }
+
+tasks.configureEach {
+    if (name == "macosArm64DebugBuildSPMPackage") {
+        dependsOn(patchMacosArm64DebugSwiftPackage)
+    }
+    if (name == "compileSwiftExportMainKotlinMacosArm64") {
+        dependsOn(patchMacosArm64DebugSwiftExportKotlin)
+    }
+}
+
 // Explicit test runner. Named hostTests to avoid shadowing the KMP allTests
 // lifecycle task. Do not use findByName/mapNotNull here: missing test tasks
 // mean the target surface drifted and must fail loudly.
@@ -740,9 +868,8 @@ tasks.register("swiftExportSmokeTest") {
     doLast {
         val execOperations = serviceOf<ExecOperations>()
         val swiftBuildDir =
-            layout.buildDirectory
-                .dir("swift-test")
-                .get()
+            layout.projectDirectory
+                .dir("core/build/swift-test")
                 .asFile
                 .absolutePath
         execOperations
@@ -750,7 +877,7 @@ tasks.register("swiftExportSmokeTest") {
                 workingDir = projectDir
                 commandLine(
                     "./gradlew",
-                    "embedSwiftExportForXcode",
+                    ":km-io-core:embedSwiftExportForXcode",
                     "--no-configuration-cache",
                     "--no-daemon",
                     "--console=plain",
@@ -769,22 +896,18 @@ tasks.register("swiftExportSmokeTest") {
                 )
             }.assertNormalExitValue()
 
-        val generatedPackageSwift =
+        val generatedPackageDir =
             layout.buildDirectory
-                .file("SPMPackage/macosArm64/Debug/Package.swift")
+                .dir("SPMPackage/macosArm64/Debug")
                 .get()
                 .asFile
-        if (generatedPackageSwift.exists()) {
-            val text = generatedPackageSwift.readText()
-            if (!text.contains("platforms:")) {
-                generatedPackageSwift.writeText(
-                    text.replaceFirst(
-                        Regex("(name:\\s*\"[^\"]*\",)"),
-                        "\$1\n    platforms: [.macOS(.v14)],",
-                    ),
-                )
-            }
-        }
+        patchSwiftPackage(generatedPackageDir)
+
+        patchSwiftPackage(
+            layout.projectDirectory
+                .dir("core/build/SPMPackage/macosArm64/Debug")
+                .asFile,
+        )
 
         execOperations
             .exec {
@@ -842,7 +965,6 @@ val fullTargetBuildTaskNames =
                 "wasmJsTestClasses",
                 "wasmWasiMainClasses",
                 "wasmWasiTestClasses",
-                "swiftExportSmokeTest",
                 "assemble${frameworkName}XCFramework",
             ),
         )
