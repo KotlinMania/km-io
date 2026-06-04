@@ -67,6 +67,13 @@ dependencies {
     codeqlSourceClasspath("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
 }
 
+val codeqlLanguageVersion =
+    providers
+        .gradleProperty("kotlin.languageVersion")
+        .getOrElse(libs.versions.kotlin.get().split('.').take(2).joinToString("."))
+val codeqlApiVersion = providers.gradleProperty("kotlin.apiVersion").getOrElse(codeqlLanguageVersion)
+val codeqlJvmTarget = providers.gradleProperty("jvm.toolchain").getOrElse("21")
+
 val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
     description =
         "Compile commonMain Kotlin sources with kotlinc for CodeQL Java/Kotlin extraction."
@@ -130,11 +137,12 @@ val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
         args = listOf(
             "-d", outDir.get().asFile.absolutePath,
             "-classpath", fullClasspath,
-            "-jvm-target", "17",
+            "-jvm-target", codeqlJvmTarget,
             "-no-stdlib",
             "-no-reflect",
-            "-language-version", "2.3",
-            "-api-version", "2.3",
+            "-language-version", codeqlLanguageVersion,
+            "-api-version", codeqlApiVersion,
+            "-XXLanguage:+UnnamedLocalVariables",
             "-Xmulti-platform",
             "-Xcommon-sources=${commonSourceFiles.joinToString(",") { it.absolutePath }}",
             "-Xexpect-actual-classes",
@@ -210,7 +218,6 @@ val fullTargetBuildTasks = listOf(
 tasks.named("build") {
     dependsOn(fullTargetBuildTasks)
 }
-
 
 
 
