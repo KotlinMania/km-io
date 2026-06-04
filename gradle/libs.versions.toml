@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 java = "8"
 multi-release-toolchain = "17"
 coroutines = "1.11.0"

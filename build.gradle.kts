@@ -283,6 +283,8 @@ kotlin {
         allWarningsAsErrors.set(!isCodeqlBuild)
         optIn.addAll(commonOptIns)
         freeCompilerArgs.add("-Xexpect-actual-classes")
+        freeCompilerArgs.add("-Xreturn-value-checker=full")
+        freeCompilerArgs.add("-XXLanguage:+UnnamedLocalVariables")
     }
 
     val xcf = XCFramework(frameworkName)
