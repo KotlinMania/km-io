@@ -1,5 +1,0 @@
-Repository: https://github.com/Kotlin/kotlinx-io
-Commit: d53d449697701751bdb254aa2eebb9587680cbc1
-Fetched: 2026-06-04
-
-This directory is a vendored upstream source snapshot used to audit km-io port parity.
