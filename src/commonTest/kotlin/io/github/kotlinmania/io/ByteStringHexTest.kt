@@ -35,11 +35,12 @@ class ByteStringHexTest {
 
     @Test
     fun testFormats() {
-        val format = HexFormat {
-            bytes {
-                byteSeparator = "|"
+        val format =
+            HexFormat {
+                bytes {
+                    byteSeparator = "|"
+                }
             }
-        }
         assertEquals("0a|0b|0c|0d|0e|0f", byteString.toHexString(format))
         assertEquals("0b|0c|0d", byteString.toHexString(1, 4, format))
 
@@ -55,5 +56,4 @@ class ByteStringHexTest {
         assertEquals(byteString, "0a0b0c0d0e0f".hexToByteString())
         assertFails { "0a|0b|0c|0d|0e|0f".hexToByteString() }
     }
-
 }

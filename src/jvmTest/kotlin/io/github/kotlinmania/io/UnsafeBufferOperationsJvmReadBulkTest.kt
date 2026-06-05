@@ -5,9 +5,15 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
 import java.nio.ByteBuffer
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 @OptIn(UnsafeIoApi::class)
 class UnsafeBufferOperationsJvmReadBulkTest {
@@ -19,10 +25,11 @@ class UnsafeBufferOperationsJvmReadBulkTest {
         val array = Array<ByteBuffer?>(16) { null }
 
         val called: Boolean
-        UnsafeBufferOperations.readBulk(buffer, array) { _, _ ->
-            called = true
-            0
-        }.also { assertEquals(0, it) }
+        UnsafeBufferOperations
+            .readBulk(buffer, array) { _, _ ->
+                called = true
+                0
+            }.also { assertEquals(0, it) }
         assertTrue(called)
     }
 
@@ -38,7 +45,8 @@ class UnsafeBufferOperationsJvmReadBulkTest {
         assertFailsWith<IllegalArgumentException> {
             UnsafeBufferOperations.readBulk(
                 Buffer().apply { writeByte(0) },
-                Array(0) { null }) { _, _ -> fail() }
+                Array(0) { null },
+            ) { _, _ -> fail() }
         }
     }
 
@@ -47,22 +55,24 @@ class UnsafeBufferOperationsJvmReadBulkTest {
         val buffer = Buffer().apply { writeString("hello world") }
         val array = Array<ByteBuffer?>(16) { null }
 
-        val read = UnsafeBufferOperations.readBulk(buffer, array) { arrayArg, iovecLen ->
-            assertSame(array, arrayArg)
-            assertEquals(1, iovecLen)
+        val read =
+            UnsafeBufferOperations.readBulk(buffer, array) { arrayArg, iovecLen ->
+                assertSame(array, arrayArg)
+                assertEquals(1, iovecLen)
 
-            val buf = arrayArg[0]
-            assertNotNull(buf)
-            assertEquals(11, buf.capacity())
+                val buf = arrayArg[0]
+                assertNotNull(buf)
+                assertEquals(11, buf.capacity())
 
-            val str = ByteArray(11).let {
-                buf.get(it)
-                it.decodeToString()
+                val str =
+                    ByteArray(11).let {
+                        buf.get(it)
+                        it.decodeToString()
+                    }
+                assertEquals("hello world", str)
+
+                11
             }
-            assertEquals("hello world", str)
-
-            11
-        }
         assertEquals(11L, read)
         assertTrue(buffer.exhausted())
     }
@@ -72,122 +82,134 @@ class UnsafeBufferOperationsJvmReadBulkTest {
         val buffer = Buffer().apply { writeString("hello world") }
         val array = Array<ByteBuffer?>(16) { null }
 
-        val read = UnsafeBufferOperations.readBulk(buffer, array) { arrayArg, iovecLen ->
-            assertSame(array, arrayArg)
-            assertEquals(1, iovecLen)
+        val read =
+            UnsafeBufferOperations.readBulk(buffer, array) { arrayArg, iovecLen ->
+                assertSame(array, arrayArg)
+                assertEquals(1, iovecLen)
 
-            val buf = arrayArg[0]
-            assertNotNull(buf)
-            assertEquals(11, buf.capacity())
+                val buf = arrayArg[0]
+                assertNotNull(buf)
+                assertEquals(11, buf.capacity())
 
-            val str = ByteArray(11).let {
-                buf.get(it)
-                it.decodeToString()
+                val str =
+                    ByteArray(11).let {
+                        buf.get(it)
+                        it.decodeToString()
+                    }
+                assertEquals("hello world", str)
+
+                0
             }
-            assertEquals("hello world", str)
-
-            0
-        }
         assertEquals(0L, read)
         assertEquals("hello world", buffer.readString())
     }
 
     @Test
     fun readMultipleSegments() {
-        val buffer = Buffer().apply {
-            write(ByteArray(Segment.SIZE) { 1 })
-            write(ByteArray(Segment.SIZE) { 2 })
-            write(ByteArray(Segment.SIZE + 1) { 3 })
-        }
+        val buffer =
+            Buffer().apply {
+                write(ByteArray(Segment.SIZE) { 1 })
+                write(ByteArray(Segment.SIZE) { 2 })
+                write(ByteArray(Segment.SIZE + 1) { 3 })
+            }
         val buffers = Array<ByteBuffer?>(16) { null }
-        UnsafeBufferOperations.readBulk(buffer, buffers) { array, iovecLen ->
-            assertSame(buffers, array)
-            assertEquals(4, iovecLen)
+        UnsafeBufferOperations
+            .readBulk(buffer, buffers) { array, iovecLen ->
+                assertSame(buffers, array)
+                assertEquals(4, iovecLen)
 
-            assertEquals(Segment.SIZE, array[0]!!.remaining())
-            val tmpBuffer = ByteArray(Segment.SIZE)
-            array[0]!!.get(tmpBuffer)
-            assertContentEquals(ByteArray(Segment.SIZE) { 1 }, tmpBuffer)
+                assertEquals(Segment.SIZE, array[0]!!.remaining())
+                val tmpBuffer = ByteArray(Segment.SIZE)
+                array[0]!!.get(tmpBuffer)
+                assertContentEquals(ByteArray(Segment.SIZE) { 1 }, tmpBuffer)
 
-            assertEquals(Segment.SIZE, array[1]!!.remaining())
-            array[1]!!.get(tmpBuffer)
-            assertContentEquals(ByteArray(Segment.SIZE) { 2 }, tmpBuffer)
+                assertEquals(Segment.SIZE, array[1]!!.remaining())
+                array[1]!!.get(tmpBuffer)
+                assertContentEquals(ByteArray(Segment.SIZE) { 2 }, tmpBuffer)
 
-            assertEquals(Segment.SIZE, array[2]!!.remaining())
-            array[2]!!.get(tmpBuffer)
-            assertContentEquals(ByteArray(Segment.SIZE) { 3 }, tmpBuffer)
+                assertEquals(Segment.SIZE, array[2]!!.remaining())
+                array[2]!!.get(tmpBuffer)
+                assertContentEquals(ByteArray(Segment.SIZE) { 3 }, tmpBuffer)
 
-            assertEquals(1, array[3]!!.remaining())
-            assertEquals(3, array[3]!!.get())
+                assertEquals(1, array[3]!!.remaining())
+                assertEquals(3, array[3]!!.get())
 
-            buffer.size
-        }.also { assertEquals(Segment.SIZE * 3 + 1L, it) }
+                buffer.size
+            }.also { assertEquals(Segment.SIZE * 3 + 1L, it) }
         assertTrue(buffer.exhausted())
     }
 
     @Test
     fun readMultipleSegmentsWithoutConsumingIt() {
-        val buffer = Buffer().apply {
-            write(ByteArray(Segment.SIZE) { 1 })
-            write(ByteArray(Segment.SIZE) { 2 })
-            write(ByteArray(Segment.SIZE + 1) { 3 })
-        }
+        val buffer =
+            Buffer().apply {
+                write(ByteArray(Segment.SIZE) { 1 })
+                write(ByteArray(Segment.SIZE) { 2 })
+                write(ByteArray(Segment.SIZE + 1) { 3 })
+            }
         val buffers = Array<ByteBuffer?>(16) { null }
-        UnsafeBufferOperations.readBulk(buffer, buffers) { array, iovecLen ->
-            assertSame(buffers, array)
-            assertEquals(4, iovecLen)
+        UnsafeBufferOperations
+            .readBulk(buffer, buffers) { array, iovecLen ->
+                assertSame(buffers, array)
+                assertEquals(4, iovecLen)
 
-            assertEquals(Segment.SIZE, array[0]!!.remaining())
-            val tmpBuffer = ByteArray(Segment.SIZE)
-            array[0]!!.get(tmpBuffer)
-            assertContentEquals(ByteArray(Segment.SIZE) { 1 }, tmpBuffer)
+                assertEquals(Segment.SIZE, array[0]!!.remaining())
+                val tmpBuffer = ByteArray(Segment.SIZE)
+                array[0]!!.get(tmpBuffer)
+                assertContentEquals(ByteArray(Segment.SIZE) { 1 }, tmpBuffer)
 
-            assertEquals(Segment.SIZE, array[1]!!.remaining())
-            array[1]!!.get(tmpBuffer)
-            assertContentEquals(ByteArray(Segment.SIZE) { 2 }, tmpBuffer)
+                assertEquals(Segment.SIZE, array[1]!!.remaining())
+                array[1]!!.get(tmpBuffer)
+                assertContentEquals(ByteArray(Segment.SIZE) { 2 }, tmpBuffer)
 
-            assertEquals(Segment.SIZE, array[2]!!.remaining())
-            array[2]!!.get(tmpBuffer)
-            assertContentEquals(ByteArray(Segment.SIZE) { 3 }, tmpBuffer)
+                assertEquals(Segment.SIZE, array[2]!!.remaining())
+                array[2]!!.get(tmpBuffer)
+                assertContentEquals(ByteArray(Segment.SIZE) { 3 }, tmpBuffer)
 
-            assertEquals(1, array[3]!!.remaining())
-            assertEquals(3, array[3]!!.get())
+                assertEquals(1, array[3]!!.remaining())
+                assertEquals(3, array[3]!!.get())
 
-            0
-        }.also { assertEquals(0, it) }
+                0
+            }.also { assertEquals(0, it) }
         assertEquals(Segment.SIZE * 3 + 1L, buffer.size)
     }
 
     @Test
     fun consumeBufferPartially() {
-        val buffer = Buffer().apply {
-            writeString("hello world")
-        }
-        UnsafeBufferOperations.readBulk(buffer, Array(1) { null }) { _, _ ->
-            6
-        }.also { assertEquals(6, it) }
+        val buffer =
+            Buffer().apply {
+                writeString("hello world")
+            }
+        UnsafeBufferOperations
+            .readBulk(buffer, Array(1) { null }) { _, _ ->
+                6
+            }.also { assertEquals(6, it) }
         assertEquals("world", buffer.readString())
     }
 
     @Test
     fun consumeMultiSegmentBufferPartially() {
-        val buffer = Buffer().apply {
-            write(ByteArray(Segment.SIZE * 3))
-        }
-        UnsafeBufferOperations.readBulk(buffer, Array(3) { null }) { _, _ ->
-            Segment.SIZE * 3 - 1111L
-        }.also { assertEquals(Segment.SIZE * 3 - 1111L, it) }
+        val buffer =
+            Buffer().apply {
+                write(ByteArray(Segment.SIZE * 3))
+            }
+        UnsafeBufferOperations
+            .readBulk(buffer, Array(3) { null }) { _, _ ->
+                Segment.SIZE * 3 - 1111L
+            }.also { assertEquals(Segment.SIZE * 3 - 1111L, it) }
         assertEquals(1111, buffer.size)
     }
 
     @Test
     fun passShortArray() {
-        val buffer = Buffer().apply {
-            write(ByteArray(Segment.SIZE * 2))
-        }
-        UnsafeBufferOperations.readBulk(buffer, Array(1) { null }) { array, _ ->
-            array[0]!!.remaining().toLong()
-        }.also { assertEquals(Segment.SIZE.toLong(), it) }
+        val buffer =
+            Buffer().apply {
+                write(ByteArray(Segment.SIZE * 2))
+            }
+        UnsafeBufferOperations
+            .readBulk(buffer, Array(1) { null }) { array, _ ->
+                array[0]!!.remaining().toLong()
+            }.also { assertEquals(Segment.SIZE.toLong(), it) }
         assertEquals(Segment.SIZE.toLong(), buffer.size)
     }
 
@@ -197,13 +219,13 @@ class UnsafeBufferOperationsJvmReadBulkTest {
         val size = buffer.size
 
         assertFailsWith<IllegalStateException> {
-            UnsafeBufferOperations.readBulk(buffer, Array(2) { null }) { _, _ -> -1L}
+            UnsafeBufferOperations.readBulk(buffer, Array(2) { null }) { _, _ -> -1L }
         }
         assertFailsWith<IllegalStateException> {
             UnsafeBufferOperations.readBulk(buffer, Array(2) { null }) { _, _ -> size + 1L }
         }
         assertFailsWith<IllegalStateException> {
-            UnsafeBufferOperations.readBulk(buffer, Array(1) { null }) { _, _  -> size }
+            UnsafeBufferOperations.readBulk(buffer, Array(1) { null }) { _, _ -> size }
         }
     }
 

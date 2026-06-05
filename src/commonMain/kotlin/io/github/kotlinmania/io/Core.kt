@@ -39,9 +39,11 @@ public fun RawSink.buffered(): Sink = RealSink(this)
 public fun discardingSink(): RawSink = DiscardingSink()
 
 private class DiscardingSink : RawSink {
-  override fun write(source: Buffer, byteCount: Long) = source.skip(byteCount)
-  override fun flush() {}
-  override fun close() {}
+    override fun write(source: Buffer, byteCount: Long) = source.skip(byteCount)
+
+    override fun flush() {}
+
+    override fun close() {}
 }
 
 /**

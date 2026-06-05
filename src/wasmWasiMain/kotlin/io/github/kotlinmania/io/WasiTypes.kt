@@ -7,93 +7,91 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.loadByte
-import io.github.kotlinmania.io.loadInt
-import io.github.kotlinmania.io.loadLong
-import io.github.kotlinmania.io.storeInt
 import kotlin.wasm.unsafe.MemoryAllocator
 import kotlin.wasm.unsafe.Pointer
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi
 
 // https://github.com/WebAssembly/WASI/blob/main/legacy/preview1/docs.md
-internal enum class Errno(val description: String) {
-    success("No error occurred. System call completed successfully"),
-    toobig("Argument list too long"),
-    acces("Permission denied"),
-    addrinuse("Address in use"),
-    addrnotavail("Address not available"),
-    afnosupport("Address family not supported"),
-    again("Resource unavailable, or operation would block"),
-    already("Connection already in progress"),
-    badf("Bad file descriptor"),
-    badmsg("Bad message"),
-    busy("Device or resource busy"),
-    canceled("Operation canceled"),
-    child("No child processes"),
-    connaborted("Connection aborted"),
-    connrefused("Connection refused"),
-    connreset("Connection reset"),
-    deadlk("Resource deadlock would occur"),
-    destaddrreq("Destination address required"),
-    dom("Mathematics argument out of domain of function"),
-    dquot("Reserved"),
-    exist("File exists"),
-    fault("Bad address"),
-    fbig("File too large"),
-    hostunreach("Host is unreachable"),
-    idrm("Identifier removed"),
-    ilseq("Illegal byte sequence"),
-    inprogress("Operation in progress"),
-    intr("Interrupted function"),
-    inval("Invalid argument"),
-    io("I/O error"),
-    isconn("Socket is connected"),
-    isdir("Is a directory"),
-    loop("Too many levels of symbolic links"),
-    mfile("File descriptor value too large"),
-    mlink("Too many links"),
-    msgsize("Message too large"),
-    multihop("Reserved"),
-    nametoolong("Filename too long"),
-    netdown("Network is down"),
-    netreset("Connection aborted by network"),
-    netunreach("Network unreachable"),
-    nfile("Too many files open in system"),
-    nobufs("No buffer space available"),
-    nodev("No such device"),
-    noent("No such file or directory"),
-    noexec("Executable file format error"),
-    nolck("No locks available"),
-    nolink("Reserved"),
-    nomem("Not enough space"),
-    nomsg("No message of the desired type"),
-    noprotoopt("Protocol not available"),
-    nospc("No space left on device"),
-    nosys("Function not supported"),
-    notconn("The socket is not connected"),
-    notdir("Not a directory or a symbolic link to a directory"),
-    notempty("Directory not empty"),
-    notrecoverable("State not recoverable"),
-    notsock("Not a socket"),
-    notsup("Not supported, or operation not supported on socket"),
-    notty("Inappropriate I/O control operation"),
-    nxio("No such device or address"),
-    overflow("Value too large to be stored in data type"),
-    ownerdead("Previous owner died"),
-    perm("Operation not permitted"),
-    pipe("Broken pipe"),
-    proto("Protocol error"),
-    protonosupport("Protocol not supported"),
-    prototype("Protocol wrong type for socket"),
-    range("Result too large"),
-    rofs("Read-only file system"),
-    spipe("Invalid seek"),
-    srch("No such process"),
-    stale("Reserved"),
-    timedout("Connection timed out"),
-    txtbsy("Text file busy"),
-    xdev("Cross-device link"),
-    notcapable("Extension: Capabilities insufficient")
+internal enum class Errno(
+    val description: String,
+) {
+    SUCCESS("No error occurred. System call completed successfully"),
+    TOOBIG("Argument list too long"),
+    ACCES("Permission denied"),
+    ADDRINUSE("Address in use"),
+    ADDRNOTAVAIL("Address not available"),
+    AFNOSUPPORT("Address family not supported"),
+    AGAIN("Resource unavailable, or operation would block"),
+    ALREADY("Connection already in progress"),
+    BADF("Bad file descriptor"),
+    BADMSG("Bad message"),
+    BUSY("Device or resource busy"),
+    CANCELED("Operation canceled"),
+    CHILD("No child processes"),
+    CONNABORTED("Connection aborted"),
+    CONNREFUSED("Connection refused"),
+    CONNRESET("Connection reset"),
+    DEADLK("Resource deadlock would occur"),
+    DESTADDRREQ("Destination address required"),
+    DOM("Mathematics argument out of domain of function"),
+    DQUOT("Reserved"),
+    EXIST("File exists"),
+    FAULT("Bad address"),
+    FBIG("File too large"),
+    HOSTUNREACH("Host is unreachable"),
+    IDRM("Identifier removed"),
+    ILSEQ("Illegal byte sequence"),
+    INPROGRESS("Operation in progress"),
+    INTR("Interrupted function"),
+    INVAL("Invalid argument"),
+    IO("I/O error"),
+    ISCONN("Socket is connected"),
+    ISDIR("Is a directory"),
+    LOOP("Too many levels of symbolic links"),
+    MFILE("File descriptor value too large"),
+    MLINK("Too many links"),
+    MSGSIZE("Message too large"),
+    MULTIHOP("Reserved"),
+    NAMETOOLONG("Filename too long"),
+    NETDOWN("Network is down"),
+    NETRESET("Connection aborted by network"),
+    NETUNREACH("Network unreachable"),
+    NFILE("Too many files open in system"),
+    NOBUFS("No buffer space available"),
+    NODEV("No such device"),
+    NOENT("No such file or directory"),
+    NOEXEC("Executable file format error"),
+    NOLCK("No locks available"),
+    NOLINK("Reserved"),
+    NOMEM("Not enough space"),
+    NOMSG("No message of the desired type"),
+    NOPROTOOPT("Protocol not available"),
+    NOSPC("No space left on device"),
+    NOSYS("Function not supported"),
+    NOTCONN("The socket is not connected"),
+    NOTDIR("Not a directory or a symbolic link to a directory"),
+    NOTEMPTY("Directory not empty"),
+    NOTRECOVERABLE("State not recoverable"),
+    NOTSOCK("Not a socket"),
+    NOTSUP("Not supported, or operation not supported on socket"),
+    NOTTY("Inappropriate I/O control operation"),
+    NXIO("No such device or address"),
+    OVERFLOW("Value too large to be stored in data type"),
+    OWNERDEAD("Previous owner died"),
+    PERM("Operation not permitted"),
+    PIPE("Broken pipe"),
+    PROTO("Protocol error"),
+    PROTONOSUPPORT("Protocol not supported"),
+    PROTOTYPE("Protocol wrong type for socket"),
+    RANGE("Result too large"),
+    ROFS("Read-only file system"),
+    SPIPE("Invalid seek"),
+    SRCH("No such process"),
+    STALE("Reserved"),
+    TIMEDOUT("Connection timed out"),
+    TXTBSY("Text file busy"),
+    XDEV("Cross-device link"),
+    NOTCAPABLE("Extension: Capabilities insufficient"),
 }
 
 internal fun Errno(errno: Int): Errno {
@@ -102,14 +100,14 @@ internal fun Errno(errno: Int): Errno {
 }
 
 internal enum class FileType {
-    unknown,
-    block_device,
-    character_device,
-    directory,
-    regular_file,
-    socket_dgram,
-    socket_stream,
-    symbolic_link
+    UNKNOWN,
+    BLOCK_DEVICE,
+    CHARACTER_DEVICE,
+    DIRECTORY,
+    REGULAR_FILE,
+    SOCKET_DGRAM,
+    SOCKET_STREAM,
+    SYMBOLIC_LINK,
 }
 
 internal fun FileType(filetype: Byte): FileType {
@@ -119,36 +117,36 @@ internal fun FileType(filetype: Byte): FileType {
 }
 
 internal enum class Rights {
-    fd_datasync,
-    fd_read,
-    fd_seek,
-    fd_fdstat_set_flags,
-    fd_sync,
-    fd_tell,
-    fd_write,
-    fd_advise,
-    fd_allocate,
-    path_create_directory,
-    path_create_file,
-    path_link_source,
-    path_link_target,
-    path_open,
-    fd_readdir,
-    path_readlink,
-    path_rename_source,
-    path_rename_target,
-    path_filestat_get,
-    path_filestat_set_size,
-    path_filestat_set_times,
-    fd_filestat_get,
-    fd_filestat_set_size,
-    fd_filestat_set_times,
-    path_symlink,
-    path_remove_directory,
-    path_unlink_file,
-    poll_fd_readwrite,
-    sock_shutdown,
-    sock_accept
+    FD_DATASYNC,
+    FD_READ,
+    FD_SEEK,
+    FD_FDSTAT_SET_FLAGS,
+    FD_SYNC,
+    FD_TELL,
+    FD_WRITE,
+    FD_ADVISE,
+    FD_ALLOCATE,
+    PATH_CREATE_DIRECTORY,
+    PATH_CREATE_FILE,
+    PATH_LINK_SOURCE,
+    PATH_LINK_TARGET,
+    PATH_OPEN,
+    FD_READDIR,
+    PATH_READLINK,
+    PATH_RENAME_SOURCE,
+    PATH_RENAME_TARGET,
+    PATH_FILESTAT_GET,
+    PATH_FILESTAT_SET_SIZE,
+    PATH_FILESTAT_SET_TIMES,
+    FD_FILESTAT_GET,
+    FD_FILESTAT_SET_SIZE,
+    FD_FILESTAT_SET_TIMES,
+    PATH_SYMLINK,
+    PATH_REMOVE_DIRECTORY,
+    PATH_UNLINK_FILE,
+    POLL_FD_READWRITE,
+    SOCK_SHUTDOWN,
+    SOCK_ACCEPT,
 }
 
 internal fun Iterable<Rights>.toBitset(): Long {
@@ -160,10 +158,10 @@ internal fun Iterable<Rights>.toBitset(): Long {
 }
 
 internal enum class FdFlags {
-    append,
-    dsync,
-    nonblock,
-    rsync
+    APPEND,
+    DSYNC,
+    NONBLOCK,
+    RSYNC,
 }
 
 internal fun Iterable<FdFlags>.toBitset(): Short {
@@ -175,7 +173,7 @@ internal fun Iterable<FdFlags>.toBitset(): Short {
 }
 
 internal enum class LookupFlags {
-    symlink_follow
+    SYMLINK_FOLLOW,
 }
 
 internal fun Iterable<LookupFlags>.toBitset(): Int {
@@ -187,10 +185,10 @@ internal fun Iterable<LookupFlags>.toBitset(): Int {
 }
 
 internal enum class OpenFlags {
-    creat,
-    directory,
-    excl,
-    trunc,
+    CREAT,
+    DIRECTORY,
+    EXCL,
+    TRUNC,
 }
 
 internal fun Iterable<OpenFlags>.toBitset(): Int {
@@ -204,8 +202,8 @@ internal fun Iterable<OpenFlags>.toBitset(): Int {
 internal typealias Fd = Int
 
 internal enum class PrestatType {
-    dir,
-    invalid
+    DIR,
+    INVALID,
 }
 
 internal interface WasmMemoryAllocated {
@@ -215,13 +213,16 @@ internal interface WasmMemoryAllocated {
 /**
  * See https://github.com/WebAssembly/WASI/blob/main/legacy/preview1/docs.md#-prestat-variant
  */
-internal data class Prestat(val ptr: Pointer) : WasmMemoryAllocated {
+internal data class Prestat(
+    val ptr: Pointer,
+) : WasmMemoryAllocated {
     val type: PrestatType
-        get() = if (ptr.loadByte().toInt() == 0) {
-            PrestatType.dir
-        } else {
-            PrestatType.invalid
-        }
+        get() =
+            if (ptr.loadByte().toInt() == 0) {
+                PrestatType.DIR
+            } else {
+                PrestatType.INVALID
+            }
 
     val nameLength: Int
         get() = ptr.loadInt(4)
@@ -235,7 +236,9 @@ internal fun Prestat(allocator: MemoryAllocator): Prestat = Prestat(allocator.al
 /**
  * See https://github.com/WebAssembly/WASI/blob/main/legacy/preview1/docs.md#-filestat-record
  */
-internal data class FileStat(val ptr: Pointer) : WasmMemoryAllocated {
+internal data class FileStat(
+    val ptr: Pointer,
+) : WasmMemoryAllocated {
     val dev: Long
         get() = ptr.loadLong()
 
@@ -269,7 +272,9 @@ internal fun FileStat(allocator: MemoryAllocator): FileStat = FileStat(allocator
 /**
  * See https://github.com/WebAssembly/WASI/blob/main/legacy/preview1/docs.md#-ciovec-record
  */
-internal data class Ciovec(val ptr: Pointer) : WasmMemoryAllocated {
+internal data class Ciovec(
+    val ptr: Pointer,
+) : WasmMemoryAllocated {
     var buffer: Pointer
         get() = Pointer(ptr.loadInt().toUInt())
         set(value) = ptr.storeInt(value.address.toInt())

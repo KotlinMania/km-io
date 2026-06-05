@@ -7,14 +7,18 @@
 
 package io.github.kotlinmania.io
 
-internal class JsException(message: String) : RuntimeException(message)
+internal class JsException(
+    message: String,
+) : RuntimeException(message)
 
 internal actual fun withCaughtException(block: () -> Unit): Throwable? {
     val e = catchJsThrowable(block) ?: return null
     return JsException(e.toString())
 }
 
-private fun catchJsThrowable(block: () -> Unit): JsAny? = js("""{
+private fun catchJsThrowable(block: () -> Unit): JsAny? =
+    js(
+        """{
     try {
         block();
         return null;
@@ -23,7 +27,8 @@ private fun catchJsThrowable(block: () -> Unit): JsAny? = js("""{
         if (e && e.toString) return e.toString();
         return e + "";
     }
-}""")
+}""",
+    )
 
 /**
  * Sequence of characters used as a line separator by the underlying platform.
@@ -39,9 +44,11 @@ public actual val SystemLineSeparator: String by lazy {
     }
 }
 
-@JsFun("""
+@JsFun(
+    """
     () => (typeof navigator !== "undefined" && navigator.platform) || "unknown"
-""")
+""",
+)
 private external fun getPlatformName(): String
 
 internal actual val isWindows by lazy {

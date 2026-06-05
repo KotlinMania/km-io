@@ -24,7 +24,9 @@ import java.io.Flushable
 
 @MustUseReturnValues
 @Suppress("ACTUAL_IGNORABILITY_NOT_MATCH_EXPECT")
-public actual interface RawSink : AutoCloseable, Flushable {
+public actual interface RawSink :
+    AutoCloseable,
+    Flushable {
     public actual fun write(source: Buffer, byteCount: Long)
 
     actual override fun flush()

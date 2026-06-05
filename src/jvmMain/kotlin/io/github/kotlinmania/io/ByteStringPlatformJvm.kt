@@ -9,4 +9,3 @@ package io.github.kotlinmania.io
 // so we have to explicitly actualize the annotation.
 @Target(AnnotationTarget.FIELD)
 internal actual annotation class BenignDataRace actual constructor()
-

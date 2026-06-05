@@ -110,6 +110,6 @@ public actual val SystemFileSystem: FileSystem = object : SystemFileSystemImpl()
 }
 
 @JvmField
-public actual val SystemTemporaryDirectory: Path = Path(System.getProperty("java.io.tmpdir"))
+public actual val SystemTemporaryDirectory: Path = Path(System.getProperty("java.io.tmpdir") as String)
 
 public actual typealias FileNotFoundException = java.io.FileNotFoundException

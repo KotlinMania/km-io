@@ -6,13 +6,14 @@
 package io.github.kotlinmania.io
 
 import kotlin.io.encoding.Base64
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class ByteStringBase64Test {
-    private fun bytes(vararg values: Int): ByteArray {
-        return ByteArray(values.size) { values[it].toByte() }
-    }
-
+    private fun bytes(vararg values: Int): ByteArray = ByteArray(values.size) { values[it].toByte() }
 
     private val byteArray: ByteArray = bytes(0b0000_0100, 0b0010_0000, 0b1100_0100, 0b0001_0100, 0b0110_0001, 0b1100_1000)
     private val byteString = ByteString.wrap(byteArray)
@@ -20,7 +21,6 @@ class ByteStringBase64Test {
     private val encodedSymbols = "BCDEFGHI"
     private val encodedBytes = encodedSymbols.encodeToByteArray()
     private val encodedByteString = ByteString.wrap(encodedBytes)
-
 
     @Test
     fun testEncodeToByteArray() {

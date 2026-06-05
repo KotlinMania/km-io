@@ -7,8 +7,34 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import platform.Foundation.*
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.CPointerVar
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.get
+import kotlinx.cinterop.value
+import platform.Foundation.NSData
+import platform.Foundation.NSError
+import platform.Foundation.NSInputStream
+import platform.Foundation.NSRunLoop
+import platform.Foundation.NSRunLoopMode
+import platform.Foundation.NSStream
+import platform.Foundation.NSStreamDelegateProtocol
+import platform.Foundation.NSStreamEvent
+import platform.Foundation.NSStreamEventEndEncountered
+import platform.Foundation.NSStreamEventErrorOccurred
+import platform.Foundation.NSStreamEventHasBytesAvailable
+import platform.Foundation.NSStreamEventOpenCompleted
+import platform.Foundation.NSStreamPropertyKey
+import platform.Foundation.NSStreamStatusAtEnd
+import platform.Foundation.NSStreamStatusClosed
+import platform.Foundation.NSStreamStatusError
+import platform.Foundation.NSStreamStatusNotOpen
+import platform.Foundation.NSStreamStatusOpen
+import platform.Foundation.NSStreamStatusOpening
+import platform.Foundation.NSStreamStatusReading
+import platform.Foundation.performInModes
 import platform.darwin.NSInteger
 import platform.darwin.NSUInteger
 import platform.darwin.NSUIntegerVar
@@ -35,15 +61,16 @@ public fun Source.asNSInputStream(): NSInputStream = SourceNSInputStream(this)
 
 @OptIn(InternalIoApi::class, UnsafeNumber::class)
 private class SourceNSInputStream(
-    private val source: Source
-) : NSInputStream(NSData()), NSStreamDelegateProtocol {
-
-    private val isClosed: () -> Boolean = when (source) {
-        is RealSource -> source::closed
-        is Buffer -> {
-            { false }
+    private val source: Source,
+) : NSInputStream(NSData()),
+    NSStreamDelegateProtocol {
+    private val isClosed: () -> Boolean =
+        when (source) {
+            is RealSource -> source::closed
+            is Buffer -> {
+                { false }
+            }
         }
-    }
 
     private var status = NSStreamStatusNotOpen
     private var error: NSError? = null
@@ -99,10 +126,11 @@ private class SourceNSInputStream(
     override fun hasBytesAvailable() = !isFinished
 
     private val isFinished
-        get() = when (streamStatus) {
-            NSStreamStatusClosed, NSStreamStatusError -> true
-            else -> false
-        }
+        get() =
+            when (streamStatus) {
+                NSStreamStatusClosed, NSStreamStatusError -> true
+                else -> false
+            }
 
     override fun propertyForKey(key: NSStreamPropertyKey): Any? = null
 
@@ -110,7 +138,7 @@ private class SourceNSInputStream(
 
     // WeakReference as delegate should not be retained
     // https://developer.apple.com/documentation/foundation/nsstream/1418423-delegate
-    private var _delegate: WeakReference<NSStreamDelegateProtocol>? = null
+    private var delegateReference: WeakReference<NSStreamDelegateProtocol>? = null
     private var runLoop: NSRunLoop? = null
     private var runLoopModes = listOf<NSRunLoopMode>()
 
@@ -127,27 +155,28 @@ private class SourceNSInputStream(
         val runLoop = runLoop ?: return
         runLoop.performInModes(runLoopModes) {
             if (runLoop != this.runLoop || isFinished) return@performInModes
-            val event = try {
-                if (source.exhausted()) {
-                    status = NSStreamStatusAtEnd
-                    NSStreamEventEndEncountered
-                } else {
-                    NSStreamEventHasBytesAvailable
+            val event =
+                try {
+                    if (source.exhausted()) {
+                        status = NSStreamStatusAtEnd
+                        NSStreamEventEndEncountered
+                    } else {
+                        NSStreamEventHasBytesAvailable
+                    }
+                } catch (e: Exception) {
+                    error = e.toNSError()
+                    NSStreamEventErrorOccurred
                 }
-            } catch (e: Exception) {
-                error = e.toNSError()
-                NSStreamEventErrorOccurred
-            }
             delegateOrSelf.stream(this, event)
         }
     }
 
-    override fun delegate() = _delegate?.value
+    override fun delegate() = delegateReference?.value
 
     private val delegateOrSelf get() = delegate ?: this
 
     override fun setDelegate(delegate: NSStreamDelegateProtocol?) {
-        _delegate = delegate?.let { WeakReference(it) }
+        delegateReference = delegate?.let { WeakReference(it) }
     }
 
     override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {

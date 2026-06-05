@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.isWindows
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SmokeFileTestWindows {
     @Test

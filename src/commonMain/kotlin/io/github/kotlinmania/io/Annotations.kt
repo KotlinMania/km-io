@@ -15,8 +15,9 @@ package io.github.kotlinmania.io
 @Retention(AnnotationRetention.BINARY)
 @RequiresOptIn(
     level = RequiresOptIn.Level.WARNING,
-    message = "This is a delicate API and its use requires care. " +
-            "Make sure you fully read and understand documentation of the declaration that is marked as a delicate API."
+    message =
+        "This is a delicate API and its use requires care. " +
+            "Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.",
 )
 public annotation class DelicateIoApi
 
@@ -33,10 +34,11 @@ public annotation class DelicateIoApi
 @Retention(AnnotationRetention.BINARY)
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,
-    message = "This is an internal API and its use requires care. " +
+    message =
+        "This is an internal API and its use requires care. " +
             "It is subject to change or removal and is not intended for use outside the library." +
             "Make sure you fully read and understand documentation of the declaration that " +
-            "is marked as an internal API."
+            "is marked as an internal API.",
 )
 public annotation class InternalIoApi
 
@@ -49,7 +51,8 @@ public annotation class InternalIoApi
 @Retention(AnnotationRetention.BINARY)
 @RequiresOptIn(
     level = RequiresOptIn.Level.WARNING,
-    message = "This is an unsafe API and its use requires care. " +
-            "Make sure you fully understand documentation of the declaration marked as UnsafeIoApi"
+    message =
+        "This is an unsafe API and its use requires care. " +
+            "Make sure you fully understand documentation of the declaration marked as UnsafeIoApi",
 )
 public annotation class UnsafeIoApi

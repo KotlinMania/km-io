@@ -8,7 +8,6 @@ package io.github.kotlinmania.io
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import io.github.kotlinmania.io.ByteString
 
 /**
  * Collection of helper functions providing unsafe access to the [ByteString]'s underlying byte sequence or allowing

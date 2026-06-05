@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ByteStringSamples {
     @Test
@@ -216,19 +219,21 @@ class ByteStringSamples {
                 'e'.code.toByte(),
                 'l'.code.toByte(),
                 'l'.code.toByte(),
-                'o'.code.toByte()
-            ), helloAsByteString
+                'o'.code.toByte(),
+            ),
+            helloAsByteString,
         )
         assertEquals("hello", helloAsByteString.decodeToString())
     }
 
     @Test
     fun builderSample() {
-        val byteString = buildByteString {
-            append("hello".encodeToByteArray())
-            append(' '.code.toByte())
-            append("world".encodeToByteArray())
-        }
+        val byteString =
+            buildByteString {
+                append("hello".encodeToByteArray())
+                append(' '.code.toByte())
+                append("world".encodeToByteArray())
+            }
 
         assertEquals("hello world".encodeToByteString(), byteString)
     }
@@ -237,13 +242,14 @@ class ByteStringSamples {
     fun builderSampleWithoutAdditionalAllocs() {
         val array = byteArrayOf(1, 2, 3, 4, 5, 6, 7)
 
-        val byteString = buildByteString(4) {
-            append(array, startIndex = 2, endIndex = 6)
+        val byteString =
+            buildByteString(4) {
+                append(array, startIndex = 2, endIndex = 6)
 
-            // When the capacity (4 in this case) matches the number of bytes appended,
-            // then a ByteString will wrap builder's backing array without copying it.
-            assertEquals(capacity, size)
-        }
+                // When the capacity (4 in this case) matches the number of bytes appended,
+                // then a ByteString will wrap builder's backing array without copying it.
+                assertEquals(capacity, size)
+            }
 
         assertEquals(ByteString(3, 4, 5, 6), byteString)
     }

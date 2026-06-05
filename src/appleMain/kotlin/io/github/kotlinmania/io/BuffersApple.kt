@@ -7,14 +7,25 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.UnsafeBufferOperations
-import io.github.kotlinmania.io.withData
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.plus
+import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.toKString
+import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.Foundation.data
 import platform.darwin.NSUIntegerMax
-import platform.posix.*
+import platform.posix.errno
+import platform.posix.malloc
+import platform.posix.memcpy
+import platform.posix.strerror
+import platform.posix.uint8_tVar
 
 @OptIn(ExperimentalForeignApi::class, UnsafeIoApi::class)
 internal fun Buffer.write(source: CPointer<uint8_tVar>, maxLength: Int) {
@@ -22,13 +33,14 @@ internal fun Buffer.write(source: CPointer<uint8_tVar>, maxLength: Int) {
 
     var currentOffset = 0
     while (currentOffset < maxLength) {
-        currentOffset += UnsafeBufferOperations.writeToTail(this, 1) { data, pos, limit ->
-            val toCopy = minOf(maxLength - currentOffset, limit - pos)
-            data.usePinned {
-                val _ = memcpy(it.addressOf(pos), source + currentOffset, toCopy.convert())
+        currentOffset +=
+            UnsafeBufferOperations.writeToTail(this, 1) { data, pos, limit ->
+                val toCopy = minOf(maxLength - currentOffset, limit - pos)
+                data.usePinned {
+                    discardReturnValue(memcpy(it.addressOf(pos), source + currentOffset, toCopy.convert()))
+                }
+                toCopy
             }
-            toCopy
-        }
     }
 }
 
@@ -39,7 +51,7 @@ internal fun Buffer.readAtMostTo(sink: CPointer<uint8_tVar>, maxLength: Int): In
     return UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
         val toCopy = minOf(maxLength, limit - pos)
         data.usePinned {
-            val _ = memcpy(sink, it.addressOf(pos), toCopy.convert())
+            discardReturnValue(memcpy(sink, it.addressOf(pos), toCopy.convert()))
         }
         toCopy
     }
@@ -51,15 +63,16 @@ internal fun Buffer.snapshotAsNSData(): NSData {
 
     check(size.toULong() <= NSUIntegerMax) { "Buffer is too long ($size) to be converted into NSData." }
 
-    val bytes = malloc(size.convert())?.reinterpret<uint8_tVar>()
-        ?: throw Error("malloc failed: ${strerror(errno)?.toKString()}")
+    val bytes =
+        malloc(size.convert())?.reinterpret<uint8_tVar>()
+            ?: throw Error("malloc failed: ${strerror(errno)?.toKString()}")
 
     var index = 0
     UnsafeBufferOperations.forEachSegment(this) { ctx, segment ->
         ctx.withData(segment) { data, pos, limit ->
             val length = limit - pos
             data.usePinned {
-                val _ = memcpy(bytes + index, it.addressOf(pos), length.convert())
+                discardReturnValue(memcpy(bytes + index, it.addressOf(pos), length.convert()))
             }
             index += length
         }

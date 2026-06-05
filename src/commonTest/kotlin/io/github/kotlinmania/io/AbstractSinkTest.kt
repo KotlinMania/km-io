@@ -21,17 +21,16 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.ByteString
-import io.github.kotlinmania.io.encodeToByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class BufferSinkTest : AbstractSinkTest(SinkFactory.BUFFER)
+
 class RealSinkTest : AbstractSinkTest(SinkFactory.REAL_BUFFERED_SINK)
 
 abstract class AbstractSinkTest internal constructor(
-    factory: SinkFactory
+    factory: SinkFactory,
 ) {
     private val data: Buffer = Buffer()
     private val sink: Sink = factory.create(data)
@@ -221,12 +220,13 @@ abstract class AbstractSinkTest internal constructor(
 
     @Test
     fun writeSourceReadsFully() {
-        val source = object : RawSource by Buffer() {
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-                sink.writeString("abcd")
-                return 4
+        val source =
+            object : RawSource by Buffer() {
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+                    sink.writeString("abcd")
+                    return 4
+                }
             }
-        }
 
         sink.write(source, 8)
         sink.flush()
@@ -282,11 +282,10 @@ abstract class AbstractSinkTest internal constructor(
         // This test ensures that a zero byte count never calls through to read the source. It may be
         // tied to something like a socket which will potentially block trying to read a segment when
         // ultimately we don't want any data.
-        val source = object : RawSource by Buffer() {
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-                throw AssertionError()
+        val source =
+            object : RawSource by Buffer() {
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = throw AssertionError()
             }
-        }
         sink.write(source, 0)
         assertEquals(0, data.size)
     }

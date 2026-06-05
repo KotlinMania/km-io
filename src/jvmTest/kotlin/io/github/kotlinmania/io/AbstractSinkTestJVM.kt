@@ -32,9 +32,12 @@ import kotlin.text.Charsets.UTF_8
 private const val SEGMENT_SIZE = Segment.SIZE
 
 class BufferSinkTestJVM : AbstractSinkTestJVM(SinkFactory.BUFFER)
+
 class RealSinkTestJVM : AbstractSinkTestJVM(SinkFactory.REAL_BUFFERED_SINK)
 
-abstract class AbstractSinkTestJVM internal constructor(factory: SinkFactory) {
+abstract class AbstractSinkTestJVM internal constructor(
+    factory: SinkFactory,
+) {
     private val data: Buffer = Buffer()
     private val sink: Sink = factory.create(data)
 

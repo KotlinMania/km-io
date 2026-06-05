@@ -5,7 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.isWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

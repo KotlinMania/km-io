@@ -11,11 +11,11 @@ plugins {
 
 kotlin {
     @OptIn(ExperimentalAbiValidation::class)
-    abiValidation {
-        enabled = true
-    }
+    abiValidation()
 }
 
-tasks.check {
-    dependsOn(tasks.checkLegacyAbi)
+tasks.named("check") {
+    dependsOn(
+        tasks.matching { it.name == "checkKotlinAbi" || it.name == "checkLegacyAbi" },
+    )
 }

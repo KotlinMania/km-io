@@ -4,6 +4,6 @@
 */
 package io.github.kotlinmania.io
 
-import kotlin.concurrent.*
+import kotlin.concurrent.Volatile
 
 internal actual typealias BenignDataRace = Volatile

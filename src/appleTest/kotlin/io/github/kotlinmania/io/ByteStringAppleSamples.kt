@@ -7,9 +7,11 @@ package io.github.kotlinmania.io
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
-import io.github.kotlinmania.io.*
-import platform.Foundation.*
-import kotlin.test.*
+import platform.Foundation.NSData
+import platform.Foundation.NSDataCompressionAlgorithmZlib
+import platform.Foundation.compressedDataUsingAlgorithm
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ByteStringSamplesApple {
     @OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
@@ -17,10 +19,11 @@ class ByteStringSamplesApple {
     fun nsDataConversion() {
         val originalByteString: ByteString = "Compress me, please!".encodeToByteString()
 
-        val compressedNSData: NSData = originalByteString.toNSData().compressedDataUsingAlgorithm(
-            algorithm = NSDataCompressionAlgorithmZlib,
-            error = null
-        )!!
+        val compressedNSData: NSData =
+            originalByteString.toNSData().compressedDataUsingAlgorithm(
+                algorithm = NSDataCompressionAlgorithmZlib,
+                error = null,
+            )!!
 
         val compressedByteString: ByteString = compressedNSData.toByteString()
         assertEquals("73cecf2d284a2d2e56c84dd55128c8494d2c4e550400", compressedByteString.toHexString())

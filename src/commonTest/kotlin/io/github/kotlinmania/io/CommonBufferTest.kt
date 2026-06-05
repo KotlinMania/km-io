@@ -20,11 +20,8 @@
  */
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.ByteString
-import io.github.kotlinmania.io.encodeToByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
@@ -57,29 +54,29 @@ class CommonBufferTest {
 
         assertEquals(
             "Buffer(size=10 hex=610d0a620a630d645c65)",
-            Buffer().also { it.writeString("a\r\nb\nc\rd\\e") }.toString()
+            Buffer().also { it.writeString("a\r\nb\nc\rd\\e") }.toString(),
         )
 
         assertEquals(
             "Buffer(size=11 hex=547972616e6e6f73617572)",
-            Buffer().also { it.writeString("Tyrannosaur") }.toString()
+            Buffer().also { it.writeString("Tyrannosaur") }.toString(),
         )
 
         assertEquals(
             "Buffer(size=16 hex=74c999cb8872616ec999cb8c73c3b472)",
-            Buffer().also { it.write("74c999cb8872616ec999cb8c73c3b472".decodeHex()) }.toString()
+            Buffer().also { it.write("74c999cb8872616ec999cb8c73c3b472".decodeHex()) }.toString(),
         )
 
         assertEquals(
             "Buffer(size=64 hex=00000000000000000000000000000000000000000000000000000000000000000000000" +
-                    "000000000000000000000000000000000000000000000000000000000)",
-            Buffer().also { it.write(ByteArray(64)) }.toString()
+                "000000000000000000000000000000000000000000000000000000000)",
+            Buffer().also { it.write(ByteArray(64)) }.toString(),
         )
 
         assertEquals(
             "Buffer(size=66 hex=000000000000000000000000000000000000000000000000000000000000" +
-                    "00000000000000000000000000000000000000000000000000000000000000000000…)",
-            Buffer().also { it.write(ByteArray(66)) }.toString()
+                "00000000000000000000000000000000000000000000000000000000000000000000…)",
+            Buffer().also { it.write(ByteArray(66)) }.toString(),
         )
     }
 
@@ -148,10 +145,16 @@ class CommonBufferTest {
         val segmentSizes = moveBytesBetweenBuffers('a'.repeat(size), 'b'.repeat(size))
         assertEquals(
             listOf(
-                Segment.SIZE, Segment.SIZE, Segment.SIZE, 1,
-                Segment.SIZE, Segment.SIZE, Segment.SIZE, 1
+                Segment.SIZE,
+                Segment.SIZE,
+                Segment.SIZE,
+                1,
+                Segment.SIZE,
+                Segment.SIZE,
+                Segment.SIZE,
+                1,
             ),
-            segmentSizes
+            segmentSizes,
         )
     }
 
@@ -346,15 +349,15 @@ class CommonBufferTest {
         val write1 = Buffer()
         write1.writeString(
             'a'.repeat(Segment.SIZE) +
-                    'b'.repeat(Segment.SIZE) +
-                    'c'.repeat(Segment.SIZE)
+                'b'.repeat(Segment.SIZE) +
+                'c'.repeat(Segment.SIZE),
         )
 
         val source = Buffer()
         source.writeString(
             'a'.repeat(Segment.SIZE) +
-                    'b'.repeat(Segment.SIZE) +
-                    'c'.repeat(Segment.SIZE)
+                'b'.repeat(Segment.SIZE) +
+                'c'.repeat(Segment.SIZE),
         )
 
         val mockSink = MockSink()
@@ -438,8 +441,9 @@ class CommonBufferTest {
         target.writeString(ds)
 
         source.copyTo(
-            target, startIndex = aStr.length.toLong(),
-            endIndex = aStr.length.toLong() + (bs.length + cs.length).toLong()
+            target,
+            startIndex = aStr.length.toLong(),
+            endIndex = aStr.length.toLong() + (bs.length + cs.length).toLong(),
         )
         assertEquals(ds + bs + cs, target.readString())
     }
@@ -460,8 +464,9 @@ class CommonBufferTest {
         target.writeString(ds)
 
         source.copyTo(
-            target, startIndex = aStr.length.toLong(),
-            endIndex = aStr.length.toLong() + (bs.length + cs.length).toLong()
+            target,
+            startIndex = aStr.length.toLong(),
+            endIndex = aStr.length.toLong() + (bs.length + cs.length).toLong(),
         )
         assertEquals(ds + bs + cs, target.readString())
     }
@@ -563,11 +568,11 @@ class CommonBufferTest {
 
         assertEquals(
             "a".repeat(SEGMENT_SIZE * 3) + "b".repeat(SEGMENT_SIZE * 3),
-            original.readString((SEGMENT_SIZE * 6).toLong())
+            original.readString((SEGMENT_SIZE * 6).toLong()),
         )
         assertEquals(
             "a".repeat(SEGMENT_SIZE * 3) + "c".repeat(SEGMENT_SIZE * 3),
-            clone.readString((SEGMENT_SIZE * 6).toLong())
+            clone.readString((SEGMENT_SIZE * 6).toLong()),
         )
     }
 

@@ -32,11 +32,12 @@ import kotlin.math.min
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.constructionFromBytesSample
  */
-public fun ByteString(vararg bytes: Byte): ByteString = if (bytes.isEmpty()) {
-    ByteString.EMPTY
-} else {
-    ByteString.wrap(bytes)
-}
+public fun ByteString(vararg bytes: Byte): ByteString =
+    if (bytes.isEmpty()) {
+        ByteString.EMPTY
+    } else {
+        ByteString.wrap(bytes)
+    }
 
 /**
  * Wraps given [bytes] into a byte string.
@@ -49,11 +50,12 @@ public fun ByteString(vararg bytes: Byte): ByteString = if (bytes.isEmpty()) {
  * @sample io.github.kotlinmania.io.ByteStringSamples.constructionFromUBytesSample
  */
 @OptIn(ExperimentalUnsignedTypes::class)
-public fun ByteString(vararg bytes: UByte): ByteString = if (bytes.isEmpty()) {
-    ByteString.EMPTY
-} else {
-    ByteString.wrap(bytes.asByteArray())
-}
+public fun ByteString(vararg bytes: UByte): ByteString =
+    if (bytes.isEmpty()) {
+        ByteString.EMPTY
+    } else {
+        ByteString.wrap(bytes.asByteArray())
+    }
 
 /**
  * Returns an empty [ByteString].
@@ -78,7 +80,7 @@ public fun ByteString(): ByteString = ByteString.EMPTY
  */
 public class ByteString private constructor(
     private val data: ByteArray,
-    @Suppress("UNUSED_PARAMETER") dummy: Any?
+    @Suppress("UNUSED_PARAMETER") dummy: Any?,
 ) : Comparable<ByteString> {
     /**
      * Wraps a copy of [data] subarray starting at [startIndex] and ending at [endIndex] into a byte string.
@@ -93,7 +95,7 @@ public class ByteString private constructor(
      * @sample io.github.kotlinmania.io.ByteStringSamples.constructionSample
      */
     public constructor(data: ByteArray, startIndex: Int = 0, endIndex: Int = data.size) :
-            this(data.copyOfRange(startIndex, endIndex), null)
+        this(data.copyOfRange(startIndex, endIndex), null)
 
     @BenignDataRace
     private var hashCode: Int = 0
@@ -151,9 +153,11 @@ public class ByteString private constructor(
      * @throws IndexOutOfBoundsException when [index] is negative or greater or equal to the [size].
      */
     public operator fun get(index: Int): Byte {
-        if (index < 0 || index >= size) throw IndexOutOfBoundsException(
-            "index ($index) is out of byte string bounds: [0..$size)"
-        )
+        if (index < 0 || index >= size) {
+            throw IndexOutOfBoundsException(
+                "index ($index) is out of byte string bounds: [0..$size)",
+            )
+        }
         return data[index]
     }
 
@@ -192,8 +196,10 @@ public class ByteString private constructor(
      * @sample io.github.kotlinmania.io.ByteStringSamples.copyToSample
      */
     public fun copyInto(
-        destination: ByteArray, destinationOffset: Int = 0,
-        startIndex: Int = 0, endIndex: Int = size
+        destination: ByteArray,
+        destinationOffset: Int = 0,
+        startIndex: Int = 0,
+        endIndex: Int = size,
     ) {
         require(startIndex <= endIndex) { "startIndex ($startIndex) > endIndex ($endIndex)" }
         data.copyInto(destination, destinationOffset, startIndex, endIndex)
@@ -211,11 +217,12 @@ public class ByteString private constructor(
      *
      * @sample io.github.kotlinmania.io.ByteStringSamples.substringSample
      */
-    public fun substring(startIndex: Int, endIndex: Int = size): ByteString = if (startIndex == endIndex) {
-        EMPTY
-    } else {
-        ByteString(data, startIndex, endIndex)
-    }
+    public fun substring(startIndex: Int, endIndex: Int = size): ByteString =
+        if (startIndex == endIndex) {
+            EMPTY
+        } else {
+            ByteString(data, startIndex, endIndex)
+        }
 
     /**
      * Compares a byte sequence wrapped by this byte string to a byte sequence wrapped by [other]
@@ -435,10 +442,11 @@ public fun ByteString.lastIndexOf(byteArray: ByteArray, startIndex: Int = 0): In
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.startsWithByteArraySample
  */
-public fun ByteString.startsWith(byteArray: ByteArray): Boolean = when {
-    byteArray.size > size -> false
-    else -> rangeEquals(0, byteArray)
-}
+public fun ByteString.startsWith(byteArray: ByteArray): Boolean =
+    when {
+        byteArray.size > size -> false
+        else -> rangeEquals(0, byteArray)
+    }
 
 /**
  * Returns true if this byte string starts with the prefix specified by the [byteString].
@@ -449,11 +457,12 @@ public fun ByteString.startsWith(byteArray: ByteArray): Boolean = when {
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.startsWithByteStringSample
  */
-public fun ByteString.startsWith(byteString: ByteString): Boolean = when {
-    byteString.size > size -> false
-    byteString.size == size -> equals(byteString)
-    else -> rangeEquals(0, byteString)
-}
+public fun ByteString.startsWith(byteString: ByteString): Boolean =
+    when {
+        byteString.size > size -> false
+        byteString.size == size -> equals(byteString)
+        else -> rangeEquals(0, byteString)
+    }
 
 /**
  * Returns true if this byte string ends with the suffix specified by the [byteArray].
@@ -464,10 +473,11 @@ public fun ByteString.startsWith(byteString: ByteString): Boolean = when {
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.endsWithByteArraySample
  */
-public fun ByteString.endsWith(byteArray: ByteArray): Boolean = when {
-    byteArray.size > size -> false
-    else -> rangeEquals(size - byteArray.size, byteArray)
-}
+public fun ByteString.endsWith(byteArray: ByteArray): Boolean =
+    when {
+        byteArray.size > size -> false
+        else -> rangeEquals(size - byteArray.size, byteArray)
+    }
 
 /**
  * Returns true if this byte string ends with the suffix specified by the [byteString].
@@ -478,15 +488,18 @@ public fun ByteString.endsWith(byteArray: ByteArray): Boolean = when {
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.endsWithByteStringSample
  */
-public fun ByteString.endsWith(byteString: ByteString): Boolean = when {
-    byteString.size > size -> false
-    byteString.size == size -> equals(byteString)
-    else -> rangeEquals(size - byteString.size, byteString)
-}
+public fun ByteString.endsWith(byteString: ByteString): Boolean =
+    when {
+        byteString.size > size -> false
+        byteString.size == size -> equals(byteString)
+        else -> rangeEquals(size - byteString.size, byteString)
+    }
 
 private fun ByteString.rangeEquals(
-    offset: Int, other: ByteString, otherOffset: Int = 0,
-    byteCount: Int = other.size - otherOffset
+    offset: Int,
+    other: ByteString,
+    otherOffset: Int = 0,
+    byteCount: Int = other.size - otherOffset,
 ): Boolean {
     val localData = getBackingArrayReference()
     val otherData = other.getBackingArrayReference()
@@ -499,8 +512,10 @@ private fun ByteString.rangeEquals(
 }
 
 private fun ByteString.rangeEquals(
-    offset: Int, other: ByteArray, otherOffset: Int = 0,
-    byteCount: Int = other.size - otherOffset
+    offset: Int,
+    other: ByteArray,
+    otherOffset: Int = 0,
+    byteCount: Int = other.size - otherOffset,
 ): Boolean {
     val localData = getBackingArrayReference()
     for (i in 0 until byteCount) {
@@ -526,24 +541,18 @@ public fun ByteString.isNotEmpty(): Boolean = !isEmpty()
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.encodeAndDecodeUtf8String
  */
-public fun ByteString.decodeToString(): String {
-    return getBackingArrayReference().decodeToString()
-}
+public fun ByteString.decodeToString(): String = getBackingArrayReference().decodeToString()
 
 /**
  * Encodes a string into a byte sequence using UTF8-encoding and wraps it into a byte string.
  *
  * @sample io.github.kotlinmania.io.ByteStringSamples.encodeAndDecodeUtf8String
  */
-public fun String.encodeToByteString(): ByteString {
-    return ByteString.wrap(encodeToByteArray())
-}
+public fun String.encodeToByteString(): ByteString = ByteString.wrap(encodeToByteArray())
 
 /**
  * Returns `true` if the content of this byte string equals to the [array].
  *
  * @param array the array to test this byte string's content against.
  */
-public fun ByteString.contentEquals(array: ByteArray): Boolean {
-    return getBackingArrayReference().contentEquals(array)
-}
+public fun ByteString.contentEquals(array: ByteArray): Boolean = getBackingArrayReference().contentEquals(array)

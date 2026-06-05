@@ -21,7 +21,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.UnsafeBufferOperations
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -38,18 +37,18 @@ public fun OutputStream.asSink(): RawSink = OutputStreamSink(this)
 private open class OutputStreamSink(
     private val out: OutputStream,
 ) : RawSink {
-
     @OptIn(UnsafeIoApi::class)
     override fun write(source: Buffer, byteCount: Long) {
         checkOffsetAndCount(source.size, 0, byteCount)
         var remaining = byteCount
         while (remaining > 0) {
             // io.github.kotlinmania.io TODO: detect Interruption.
-            remaining -= UnsafeBufferOperations.readFromHead(source) { data, pos, limit ->
-                val toCopy = minOf(remaining, limit - pos).toInt()
-                out.write(data, pos, toCopy)
-                toCopy
-            }
+            remaining -=
+                UnsafeBufferOperations.readFromHead(source) { data, pos, limit ->
+                    val toCopy = minOf(remaining, limit - pos).toInt()
+                    out.write(data, pos, toCopy)
+                    toCopy
+                }
         }
     }
 
@@ -72,22 +71,23 @@ public fun InputStream.asSource(): RawSource = InputStreamSource(this)
 private open class InputStreamSource(
     private val input: InputStream,
 ) : RawSource {
-
     @OptIn(UnsafeIoApi::class)
     override fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
         if (byteCount == 0L) return 0L
         checkByteCount(byteCount)
         try {
             var readTotal: Long
-            val _ = UnsafeBufferOperations.writeToTail(sink, 1) { data, pos, limit ->
-                val maxToCopy = minOf(byteCount, limit - pos).toInt()
-                readTotal = input.read(data, pos, maxToCopy).toLong()
-                if (readTotal == -1L) {
-                    0
-                } else {
-                    readTotal.toInt()
-                }
-            }
+            discardReturnValue(
+                UnsafeBufferOperations.writeToTail(sink, 1) { data, pos, limit ->
+                    val maxToCopy = minOf(byteCount, limit - pos).toInt()
+                    readTotal = input.read(data, pos, maxToCopy).toLong()
+                    if (readTotal == -1L) {
+                        0
+                    } else {
+                        readTotal.toInt()
+                    }
+                },
+            )
             return readTotal
         } catch (e: AssertionError) {
             if (e.isAndroidGetsocknameError) throw IOException(e)

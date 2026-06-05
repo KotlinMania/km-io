@@ -20,8 +20,6 @@
  */
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.UnsafeBufferOperations
-import io.github.kotlinmania.io.withData
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
@@ -66,20 +64,22 @@ private fun Buffer.write(input: InputStream, byteCount: Long, forever: Boolean) 
     var remainingByteCount = byteCount
     var exhausted = false
     while (!exhausted && (remainingByteCount > 0L || forever)) {
-        val _ = UnsafeBufferOperations.writeToTail(this, 1) { data, pos, limit ->
-            val maxToCopy = minOf(remainingByteCount, limit - pos).toInt()
-            val bytesRead = input.read(data, pos, maxToCopy)
-            if (bytesRead == -1) {
-                if (!forever) {
-                    throw EOFException("Stream exhausted before $byteCount bytes were read.")
+        discardReturnValue(
+            UnsafeBufferOperations.writeToTail(this, 1) { data, pos, limit ->
+                val maxToCopy = minOf(remainingByteCount, limit - pos).toInt()
+                val bytesRead = input.read(data, pos, maxToCopy)
+                if (bytesRead == -1) {
+                    if (!forever) {
+                        throw EOFException("Stream exhausted before $byteCount bytes were read.")
+                    }
+                    exhausted = true
+                    0
+                } else {
+                    remainingByteCount -= bytesRead
+                    bytesRead
                 }
-                exhausted = true
-                0
-            } else {
-                remainingByteCount -= bytesRead
-                bytesRead
-            }
-        }
+            },
+        )
     }
 }
 
@@ -99,11 +99,12 @@ public fun Buffer.readTo(out: OutputStream, byteCount: Long = size) {
     var remainingByteCount = byteCount
 
     while (remainingByteCount > 0L) {
-        remainingByteCount -= UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
-            val toCopy = minOf(remainingByteCount, limit - pos).toInt()
-            out.write(data, pos, toCopy)
-            toCopy
-        }
+        remainingByteCount -=
+            UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
+                val toCopy = minOf(remainingByteCount, limit - pos).toInt()
+                out.write(data, pos, toCopy)
+                toCopy
+            }
     }
 }
 
@@ -124,7 +125,7 @@ public fun Buffer.readTo(out: OutputStream, byteCount: Long = size) {
 public fun Buffer.copyTo(
     out: OutputStream,
     startIndex: Long = 0L,
-    endIndex: Long = size
+    endIndex: Long = size,
 ) {
     checkBounds(size, startIndex, endIndex)
     if (startIndex == endIndex) return
@@ -157,11 +158,12 @@ public fun Buffer.copyTo(
 @OptIn(UnsafeIoApi::class)
 public fun Buffer.readAtMostTo(sink: ByteBuffer): Int {
     if (exhausted()) return -1
-    val toCopy = UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
-        val toCopy = minOf(sink.remaining(), limit - pos)
-        sink.put(data, pos, toCopy)
-        toCopy
-    }
+    val toCopy =
+        UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
+            val toCopy = minOf(sink.remaining(), limit - pos)
+            sink.put(data, pos, toCopy)
+            toCopy
+        }
 
     return toCopy
 }
@@ -180,11 +182,12 @@ public fun Buffer.transferFrom(source: ByteBuffer): Buffer {
     var remaining = byteCount
 
     while (remaining > 0) {
-        remaining -= UnsafeBufferOperations.writeToTail(this, 1) { data, pos, limit ->
-            val toCopy = minOf(remaining, limit - pos)
-            source.get(data, pos, toCopy)
-            toCopy
-        }
+        remaining -=
+            UnsafeBufferOperations.writeToTail(this, 1) { data, pos, limit ->
+                val toCopy = minOf(remaining, limit - pos)
+                source.get(data, pos, toCopy)
+                toCopy
+            }
     }
 
     return this
@@ -193,16 +196,17 @@ public fun Buffer.transferFrom(source: ByteBuffer): Buffer {
 /**
  * Returns a new [ByteChannel] instance representing this buffer.
  */
-public fun Buffer.asByteChannel(): ByteChannel = object : ByteChannel {
-    override fun read(sink: ByteBuffer): Int = readAtMostTo(sink)
+public fun Buffer.asByteChannel(): ByteChannel =
+    object : ByteChannel {
+        override fun read(sink: ByteBuffer): Int = readAtMostTo(sink)
 
-    override fun write(source: ByteBuffer): Int {
-        val sizeBefore = size
-        transferFrom(source)
-        return (size - sizeBefore).toInt()
+        override fun write(source: ByteBuffer): Int {
+            val sizeBefore = size
+            transferFrom(source)
+            return (size - sizeBefore).toInt()
+        }
+
+        override fun close() {}
+
+        override fun isOpen(): Boolean = true
     }
-
-    override fun close() {}
-
-    override fun isOpen(): Boolean = true
-}

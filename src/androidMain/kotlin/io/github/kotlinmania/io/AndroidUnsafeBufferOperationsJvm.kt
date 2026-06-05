@@ -5,14 +5,11 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.UnsafeBufferOperations.maxSafeWriteCapacity
+import java.nio.ByteBuffer
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import io.github.kotlinmania.io.Buffer
-import io.github.kotlinmania.io.Segment
-import io.github.kotlinmania.io.UnsafeIoApi
-import io.github.kotlinmania.io.UnsafeBufferOperations.maxSafeWriteCapacity
-import java.nio.ByteBuffer
 
 /**
  * Provides read-only access to the data from the head of a [buffer] by calling the [readAction] on head's data and
@@ -92,7 +89,7 @@ public inline fun UnsafeBufferOperations.readFromHead(buffer: Buffer, readAction
 public inline fun UnsafeBufferOperations.writeToTail(
     buffer: Buffer,
     minimumCapacity: Int,
-    writeAction: (ByteBuffer) -> Unit
+    writeAction: (ByteBuffer) -> Unit,
 ): Int {
     contract {
         callsInPlace(writeAction, EXACTLY_ONCE)
@@ -149,7 +146,7 @@ public inline fun UnsafeBufferOperations.writeToTail(
 public inline fun UnsafeBufferOperations.readBulk(
     buffer: Buffer,
     iovec: Array<ByteBuffer?>,
-    readAction: (iovec: Array<ByteBuffer?>, iovecSize: Int) -> Long
+    readAction: (iovec: Array<ByteBuffer?>, iovecSize: Int) -> Long,
 ): Long {
     contract {
         callsInPlace(readAction, EXACTLY_ONCE)
@@ -165,9 +162,11 @@ public inline fun UnsafeBufferOperations.readBulk(
         val pos = currentSegment.pos
         val limit = currentSegment.limit
         val len = limit - pos
-        iovec[idx++] = ByteBuffer.wrap(currentSegment.dataAsByteArray(true), pos, len)
-            .slice()
-            .asReadOnlyBuffer()
+        iovec[idx++] =
+            ByteBuffer
+                .wrap(currentSegment.dataAsByteArray(true), pos, len)
+                .slice()
+                .asReadOnlyBuffer()
         capacity += len
         currentSegment = currentSegment.next ?: break
     } while (idx < iovec.size)
@@ -176,7 +175,7 @@ public inline fun UnsafeBufferOperations.readBulk(
     if (bytesRead != 0L) {
         if (bytesRead < 0 || bytesRead > capacity) {
             throw IllegalStateException(
-                "readAction should return a value in range [0, $capacity], but returned: $bytesRead"
+                "readAction should return a value in range [0, $capacity], but returned: $bytesRead",
             )
         }
         buffer.skip(bytesRead)

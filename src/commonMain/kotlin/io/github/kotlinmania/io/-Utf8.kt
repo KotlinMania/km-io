@@ -21,9 +21,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.and
-import io.github.kotlinmania.io.shr
-
 internal fun ByteArray.commonToUtf8String(beginIndex: Int = 0, endIndex: Int = size): String {
     if (beginIndex < 0 || endIndex > size || beginIndex > endIndex) {
         throw IndexOutOfBoundsException("size=$size beginIndex=$beginIndex endIndex=$endIndex")
@@ -55,7 +52,7 @@ internal inline fun isUtf8Continuation(byte: Byte): Boolean {
 internal inline fun ByteArray.processUtf8CodePoints(
     beginIndex: Int,
     endIndex: Int,
-    yield: (Int) -> Unit
+    yield: (Int) -> Unit,
 ) {
     var index = beginIndex
     while (index < endIndex) {
@@ -106,7 +103,7 @@ internal const val LOG_SURROGATE_HEADER = 0xdc00
 internal inline fun ByteArray.processUtf16Chars(
     beginIndex: Int,
     endIndex: Int,
-    yield: (Char) -> Unit
+    yield: (Char) -> Unit,
 ) {
     var index = beginIndex
     while (index < endIndex) {
@@ -136,19 +133,19 @@ internal inline fun ByteArray.processUtf16Chars(
 
             b0 shr 3 == -2 -> {
                 // 0b11110xxx
-                index += process4Utf8Bytes(index, endIndex) { codePoint ->
-                    if (codePoint != REPLACEMENT_CODE_POINT) {
-                        // Unicode code point:    00010000000000000000 + xxxxxxxxxxyyyyyyyyyy (21 bits)
-                        // UTF-16 high surrogate: 110110xxxxxxxxxx (10 bits)
-                        // UTF-16 low surrogate:  110111yyyyyyyyyy (10 bits)
-                        /* ktlint-disable no-multi-spaces paren-spacing */
-                        yield(((codePoint ushr 10) + HIGH_SURROGATE_HEADER).toChar())
-                        /* ktlint-enable no-multi-spaces paren-spacing */
-                        yield(((codePoint and 0x03ff) + LOG_SURROGATE_HEADER).toChar())
-                    } else {
-                        yield(REPLACEMENT_CHARACTER)
+                index +=
+                    process4Utf8Bytes(index, endIndex) { codePoint ->
+                        @Suppress("ktlint:standard:no-multi-spaces", "ktlint:standard:paren-spacing")
+                        if (codePoint != REPLACEMENT_CODE_POINT) {
+                            // Unicode code point:    00010000000000000000 + xxxxxxxxxxyyyyyyyyyy (21 bits)
+                            // UTF-16 high surrogate: 110110xxxxxxxxxx (10 bits)
+                            // UTF-16 low surrogate:  110111yyyyyyyyyy (10 bits)
+                            yield(((codePoint ushr 10) + HIGH_SURROGATE_HEADER).toChar())
+                            yield(((codePoint and 0x03ff) + LOG_SURROGATE_HEADER).toChar())
+                        } else {
+                            yield(REPLACEMENT_CHARACTER)
+                        }
                     }
-                }
             }
 
             else -> {
@@ -247,7 +244,7 @@ internal const val MASK_2BYTES = 0x0f80
 internal inline fun ByteArray.process2Utf8Bytes(
     beginIndex: Int,
     endIndex: Int,
-    yield: (Int) -> Unit
+    yield: (Int) -> Unit,
 ): Int {
     if (endIndex <= beginIndex + 1) {
         yield(REPLACEMENT_CODE_POINT)
@@ -262,9 +259,11 @@ internal inline fun ByteArray.process2Utf8Bytes(
         return 1
     }
 
-    val codePoint = (MASK_2BYTES
+    val codePoint = (
+        MASK_2BYTES
             xor (b1.toInt())
-            xor (b0.toInt() shl 6))
+            xor (b0.toInt() shl 6)
+    )
 
     when {
         codePoint < 0x80 -> yield(REPLACEMENT_CODE_POINT) // Reject overlong code points.
@@ -283,7 +282,7 @@ internal const val MASK_3BYTES = -0x01e080
 internal inline fun ByteArray.process3Utf8Bytes(
     beginIndex: Int,
     endIndex: Int,
-    yield: (Int) -> Unit
+    yield: (Int) -> Unit,
 ): Int {
     if (endIndex <= beginIndex + 2) {
         // At least 2 bytes remaining
@@ -310,10 +309,12 @@ internal inline fun ByteArray.process3Utf8Bytes(
         return 2
     }
 
-    val codePoint = (MASK_3BYTES
+    val codePoint = (
+        MASK_3BYTES
             xor (b2.toInt())
             xor (b1.toInt() shl 6)
-            xor (b0.toInt() shl 12))
+            xor (b0.toInt() shl 12)
+    )
 
     when {
         codePoint < 0x800 -> {
@@ -342,7 +343,7 @@ internal const val MASK_4BYTES = 0x381f80
 internal inline fun ByteArray.process4Utf8Bytes(
     beginIndex: Int,
     endIndex: Int,
-    yield: (Int) -> Unit
+    yield: (Int) -> Unit,
 ): Int {
     if (endIndex <= beginIndex + 3) {
         // At least 3 bytes remaining
@@ -378,11 +379,13 @@ internal inline fun ByteArray.process4Utf8Bytes(
         return 3
     }
 
-    val codePoint = (MASK_4BYTES
+    val codePoint = (
+        MASK_4BYTES
             xor (b3.toInt())
             xor (b2.toInt() shl 6)
             xor (b1.toInt() shl 12)
-            xor (b0.toInt() shl 18))
+            xor (b0.toInt() shl 18)
+    )
 
     when {
         codePoint > 0x10ffff -> {

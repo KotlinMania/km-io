@@ -190,7 +190,7 @@ class CommonRealSinkTest {
 
         val source = Buffer()
         source.writeString(
-            "${"a".repeat(Segment.SIZE)}${"b".repeat(Segment.SIZE)}${"c".repeat(Segment.SIZE)}"
+            "${"a".repeat(Segment.SIZE)}${"b".repeat(Segment.SIZE)}${"c".repeat(Segment.SIZE)}",
         )
 
         val mockSink = MockSink()
@@ -200,20 +200,23 @@ class CommonRealSinkTest {
         mockSink.assertLog(
             "write($write1, ${write1.size})",
             "write($write2, ${write2.size})",
-            "write($write3, ${write3.size})"
+            "write($write3, ${write3.size})",
         )
     }
 
     @Test
     fun closeMultipleTimes() {
         var closeCalls = 0
-        val rawSink: RawSink = object : RawSink {
-            override fun write(source: Buffer, byteCount: Long) = Unit
-            override fun flush() = Unit
-            override fun close() {
-                closeCalls++
+        val rawSink: RawSink =
+            object : RawSink {
+                override fun write(source: Buffer, byteCount: Long) = Unit
+
+                override fun flush() = Unit
+
+                override fun close() {
+                    closeCalls++
+                }
             }
-        }
         val sink = rawSink.buffered()
 
         sink.close()

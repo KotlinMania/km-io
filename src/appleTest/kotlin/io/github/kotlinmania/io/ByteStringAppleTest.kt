@@ -5,14 +5,22 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.UnsafeByteStringApi
-import io.github.kotlinmania.io.UnsafeByteStringOperations
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.readBytes
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.posix.memset
 import kotlin.io.encoding.Base64
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(UnsafeNumber::class)
 class ByteStringAppleTest {
@@ -30,10 +38,11 @@ class ByteStringAppleTest {
     @Test
     fun fromNSData() {
         assertTrue(NSData().toByteString().isEmpty())
-        val src = NSData.create(
-            base64EncodedString = Base64.encode(byteArrayOf(0, 1, 2, 3, 4, 5)),
-            options = 0u
-        )!!
+        val src =
+            NSData.create(
+                base64EncodedString = Base64.encode(byteArrayOf(0, 1, 2, 3, 4, 5)),
+                options = 0u,
+            )!!
         val copy = src.toByteString()
         assertContentEquals(byteArrayOf(0, 1, 2, 3, 4, 5), copy.toByteArray())
     }
@@ -53,19 +62,22 @@ class ByteStringAppleTest {
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     @Test
-    fun fromNSDataIntegrity() = memScoped {
-        val length = 6
-        val data = allocArray<ByteVar>(length)
-        memset(data, 0, length.convert())
+    fun fromNSDataIntegrity() =
+        memScoped {
+            val length = 6
+            val data = allocArray<ByteVar>(length)
+            memset(data, 0, length.convert())
 
-        val cursedData = NSData.create(
-            bytesNoCopy = data, length = length.convert(),
-            freeWhenDone = false
-        )
+            val cursedData =
+                NSData.create(
+                    bytesNoCopy = data,
+                    length = length.convert(),
+                    freeWhenDone = false,
+                )
 
-        val byteString = cursedData.toByteString()
-        memset(data, 42, length.convert())
+            val byteString = cursedData.toByteString()
+            memset(data, 42, length.convert())
 
-        assertContentEquals(ByteArray(length), byteString.toByteArray())
-    }
+            assertContentEquals(ByteArray(length), byteString.toByteArray())
+        }
 }

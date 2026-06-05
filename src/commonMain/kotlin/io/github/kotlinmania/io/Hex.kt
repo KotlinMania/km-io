@@ -14,9 +14,7 @@ package io.github.kotlinmania.io
  *
  * @throws IllegalArgumentException if the result length is more than [String] maximum capacity.
  */
-public fun ByteString.toHexString(format: HexFormat = HexFormat.Default): String {
-    return getBackingArrayReference().toHexString(0, getBackingArrayReference().size, format)
-}
+public fun ByteString.toHexString(format: HexFormat = HexFormat.Default): String = getBackingArrayReference().toHexString(0, getBackingArrayReference().size, format)
 
 /**
  * Formats bytes in this byte string using the specified [HexFormat].
@@ -34,10 +32,8 @@ public fun ByteString.toHexString(format: HexFormat = HexFormat.Default): String
 public fun ByteString.toHexString(
     startIndex: Int = 0,
     endIndex: Int = size,
-    format: HexFormat = HexFormat.Default
-): String {
-    return getBackingArrayReference().toHexString(startIndex, endIndex, format)
-}
+    format: HexFormat = HexFormat.Default,
+): String = getBackingArrayReference().toHexString(startIndex, endIndex, format)
 
 /**
  * Parses bytes from this string using the specified [HexFormat].
@@ -50,6 +46,4 @@ public fun ByteString.toHexString(
  *
  * @throws IllegalArgumentException if this string does not comply with the specified [format].
  */
-public fun String.hexToByteString(format: HexFormat = HexFormat.Default): ByteString {
-    return ByteString.wrap(hexToByteArray(format))
-}
+public fun String.hexToByteString(format: HexFormat = HexFormat.Default): ByteString = ByteString.wrap(hexToByteArray(format))

@@ -45,4 +45,8 @@ android-kmp-library-gradle-plugin = { group = "com.android.kotlin.multiplatform.
 [bundles]
 km-io-commonMain = [
   "kotlinx-coroutines-core",
+  "kotlinx-serialization-core",
+  "kotlinx-serialization-json",
+  "kotlinx-datetime",
+  "collections-immutable",
 ]

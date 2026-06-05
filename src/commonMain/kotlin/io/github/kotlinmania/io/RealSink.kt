@@ -25,7 +25,7 @@ import kotlin.jvm.JvmField
 
 @OptIn(InternalIoApi::class)
 internal class RealSink(
-    val sink: RawSink
+    val sink: RawSink,
 ) : Sink {
     @JvmField
     var closed: Boolean = false
@@ -70,7 +70,7 @@ internal class RealSink(
             if (read == -1L) {
                 val bytesRead = byteCount - remainingByteCount
                 throw EOFException(
-                    "Source exhausted before reading $byteCount bytes from it (number of bytes read: $bytesRead)."
+                    "Source exhausted before reading $byteCount bytes from it (number of bytes read: $bytesRead).",
                 )
             }
             remainingByteCount -= read

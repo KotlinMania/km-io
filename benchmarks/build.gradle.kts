@@ -28,26 +28,25 @@ kotlin {
             }
         }
 
-        named("jvmMain") {
-            dependsOn(commonMain.get())
-        }
     }
 }
 
 val nativeBenchmarksEnabled: String by project.parent!!
+val nativeBenchmarkTargetName =
+    when {
+        HostManager.host === KonanTarget.MACOS_ARM64 -> "macosArm64"
+        HostManager.hostIsLinux -> "linuxX64"
+        HostManager.hostIsMingw -> "mingwX64"
+        else -> error("Native benchmarks are not configured for host ${HostManager.host}")
+    }
 
 if (nativeBenchmarksEnabled.toBoolean()) {
     kotlin {
         // TODO: consider supporting non-host native targets.
-        if (HostManager.host === KonanTarget.MACOS_X64) macosX64("native")
-        if (HostManager.host === KonanTarget.MACOS_ARM64) macosArm64("native")
-        if (HostManager.hostIsLinux) linuxX64("native")
-        if (HostManager.hostIsMingw) mingwX64("native")
-
-        sourceSets {
-            named("nativeMain") {
-                dependsOn(commonMain.get())
-            }
+        when (nativeBenchmarkTargetName) {
+            "macosArm64" -> macosArm64()
+            "linuxX64" -> linuxX64()
+            "mingwX64" -> mingwX64()
         }
     }
 }
@@ -59,7 +58,7 @@ benchmark {
             jmhVersion = libs.versions.jmh.get()
         }
         if (nativeBenchmarksEnabled.toBoolean()) {
-            register("native")
+            register(nativeBenchmarkTargetName)
         }
     }
 }

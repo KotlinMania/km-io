@@ -5,10 +5,13 @@
 
 package io.github.kotlinmania.io
 
-public actual class Path internal constructor(rawPath: String, @Suppress("UNUSED_PARAMETER") obj: Any?) {
-    internal val path: String = removeTrailingSeparators(rawPath, false)
+public actual class Path internal constructor(
+    rawPath: String,
+    @Suppress("UNUSED_PARAMETER") obj: Any?,
+) {
+    internal val pathString: String = removeTrailingSeparators(rawPath, false)
 
-    actual override fun toString(): String = path
+    actual override fun toString(): String = pathString
 
     actual override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -16,22 +19,20 @@ public actual class Path internal constructor(rawPath: String, @Suppress("UNUSED
         if (this::class != other::class) return false
 
         other as Path
-        return path == other.path
+        return pathString == other.pathString
     }
 
-    actual override fun hashCode(): Int {
-        return path.hashCode()
-    }
+    actual override fun hashCode(): Int = pathString.hashCode()
 
     public actual val parent: Path?
         get() {
-            if (path == SystemPathSeparator.toString()) return null
+            if (pathString == SystemPathSeparator.toString()) return null
 
-            val idx = path.lastIndexOf(SystemPathSeparator)
+            val idx = pathString.lastIndexOf(SystemPathSeparator)
             if (idx < 0) return null
             // path ends with '/', but as it was normalized there is only one case -> it's "/"
-            if (idx == path.length - 1) return null
-            val rawBase = if (idx == 0) "$SystemPathSeparator" else path.substring(0, idx)
+            if (idx == pathString.length - 1) return null
+            val rawBase = if (idx == 0) "$SystemPathSeparator" else pathString.substring(0, idx)
             val base = removeTrailingSeparators(rawBase, false)
             // there was nothing but multiple '/'
             return Path(base, null)
@@ -39,15 +40,15 @@ public actual class Path internal constructor(rawPath: String, @Suppress("UNUSED
 
     public actual val name: String
         get() {
-            val idx = path.lastIndexOf(SystemPathSeparator)
+            val idx = pathString.lastIndexOf(SystemPathSeparator)
             return if (idx < 0) {
-                path
+                pathString
             } else {
-                path.substring(idx + 1)
+                pathString.substring(idx + 1)
             }
         }
 
-    public actual val isAbsolute: Boolean = path.startsWith(SystemPathSeparator)
+    public actual val isAbsolute: Boolean = pathString.startsWith(SystemPathSeparator)
 }
 
 // The path separator is always '/'.

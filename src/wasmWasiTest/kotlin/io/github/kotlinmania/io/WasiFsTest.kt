@@ -5,17 +5,18 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.IOException
-import io.github.kotlinmania.io.buffered
-import io.github.kotlinmania.io.isWindows
-import io.github.kotlinmania.io.readLine
-import io.github.kotlinmania.io.writeString
-import kotlin.test.*
+import kotlin.test.Ignore
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class WasiFsTest {
     @Test
     fun hasTemp() {
-        val preopen = PreOpens.preopens.first()
+        val preopen = PreOpens.preopenEntries.first()
         assertEquals(3, preopen.fd)
         assertEquals(Path("/tmp"), preopen.path)
     }
@@ -79,8 +80,8 @@ class WasiFsTest {
         assertEquals(
             Path("/tmp"),
             SystemFileSystem.resolve(
-                Path("/tmp" + "/p".repeat(128) + "/..".repeat(128))
-            )
+                Path("/tmp" + "/p".repeat(128) + "/..".repeat(128)),
+            ),
         )
 
         SystemFileSystem.createDirectories(Path("/tmp/a/b/c/d/e"))
@@ -173,9 +174,10 @@ class WasiFsTest {
 
         try {
             assertEquals(Path("/tmp/src"), SystemFileSystem.resolve(paths[safeSymlinksDepth]))
-            val exception = assertFailsWith<IOException> {
-                SystemFileSystem.resolve(paths.last())
-            }
+            val exception =
+                assertFailsWith<IOException> {
+                    SystemFileSystem.resolve(paths.last())
+                }
             assertEquals("Too many levels of symbolic links", exception.message)
         } finally {
             paths.asReversed().forEach {
@@ -226,14 +228,15 @@ class WasiFsTest {
         SystemFileSystem.createDirectories(Path("/tmp/a/"))
         try {
             SystemFileSystem.sink(existingFile).close()
-            val exception = assertFailsWith<IOException> {
-                SystemFileSystem.createDirectories(targetPath)
-            }
+            val exception =
+                assertFailsWith<IOException> {
+                    SystemFileSystem.createDirectories(targetPath)
+                }
             assertNotNull(exception.message)
             assertTrue(
                 exception.message!!.startsWith(
-                    "Can't create directory $targetPath. Creation of an intermediate directory /tmp/a/b/c failed"
-                )
+                    "Can't create directory $targetPath. Creation of an intermediate directory /tmp/a/b/c failed",
+                ),
             )
         } finally {
             SystemFileSystem.delete(Path("/tmp/a/b"))

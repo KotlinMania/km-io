@@ -5,9 +5,19 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.*
-import platform.Foundation.*
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.reinterpret
+import platform.Foundation.NSData
+import platform.Foundation.NSInputStream
+import platform.Foundation.NSMutableData
+import platform.Foundation.NSOutputStream
+import platform.Foundation.NSStreamDataWrittenToMemoryStreamKey
+import platform.Foundation.create
+import platform.Foundation.data
+import platform.Foundation.outputStreamToMemory
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 

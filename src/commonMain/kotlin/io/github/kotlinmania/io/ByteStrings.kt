@@ -5,11 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.ByteString
-import io.github.kotlinmania.io.isEmpty
-import io.github.kotlinmania.io.UnsafeByteStringApi
-import io.github.kotlinmania.io.UnsafeByteStringOperations
-import io.github.kotlinmania.io.UnsafeBufferOperations
 import kotlin.math.max
 import kotlin.math.min
 
@@ -39,11 +34,12 @@ public fun Sink.write(byteString: ByteString, startIndex: Int = 0, endIndex: Int
 
         UnsafeByteStringOperations.withByteArrayUnsafe(byteString) { data ->
             while (offset < endIndex) {
-                val written = UnsafeBufferOperations.writeToTail(buffer, 1) { segData, pos, limit ->
-                    val toWrite = min(endIndex - offset, limit - pos)
-                    data.copyInto(segData, pos, offset, offset + toWrite)
-                    toWrite
-                }
+                val written =
+                    UnsafeBufferOperations.writeToTail(buffer, 1) { segData, pos, limit ->
+                        val toWrite = min(endIndex - offset, limit - pos)
+                        data.copyInto(segData, pos, offset, offset + toWrite)
+                        toWrite
+                    }
                 offset += written
             }
         }
@@ -59,9 +55,7 @@ public fun Sink.write(byteString: ByteString, startIndex: Int = 0, endIndex: Int
  * @sample io.github.kotlinmania.io.ByteStringSamples.readByteString
  */
 @OptIn(UnsafeByteStringApi::class)
-public fun Source.readByteString(): ByteString {
-    return UnsafeByteStringOperations.wrapUnsafe(readByteArray())
-}
+public fun Source.readByteString(): ByteString = UnsafeByteStringOperations.wrapUnsafe(readByteArray())
 
 /**
  * Consumes exactly [byteCount] bytes from this source and wraps it into a byte string.
@@ -76,9 +70,7 @@ public fun Source.readByteString(): ByteString {
  * @sample io.github.kotlinmania.io.ByteStringSamples.readByteString
  */
 @OptIn(UnsafeByteStringApi::class)
-public fun Source.readByteString(byteCount: Int): ByteString {
-    return UnsafeByteStringOperations.wrapUnsafe(readByteArray(byteCount))
-}
+public fun Source.readByteString(byteCount: Int): ByteString = UnsafeByteStringOperations.wrapUnsafe(readByteArray(byteCount))
 
 /**
  * Returns the index of the first match for [byteString] in the source at or after [startIndex]. This
@@ -104,7 +96,7 @@ public fun Source.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
 
     if (byteString.isEmpty()) {
         // Ignore the result: we'll use buffer's size if request failed anyway.
-        val _ = request(startIndex)
+        discardReturnValue(request(startIndex))
         return min(startIndex, buffer.size)
     }
 

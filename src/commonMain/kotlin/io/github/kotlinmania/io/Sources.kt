@@ -14,9 +14,7 @@ package io.github.kotlinmania.io
  *
  * @sample io.github.kotlinmania.io.KotlinxIoCoreCommonSamples.readShortLe
  */
-public fun Source.readShortLe(): Short {
-    return readShort().reverseBytes()
-}
+public fun Source.readShortLe(): Short = readShort().reverseBytes()
 
 /**
  * Removes four bytes from this source and returns an integer composed of it according to the little-endian order.
@@ -27,9 +25,7 @@ public fun Source.readShortLe(): Short {
  *
  * @sample io.github.kotlinmania.io.KotlinxIoCoreCommonSamples.readIntLe
  */
-public fun Source.readIntLe(): Int {
-    return readInt().reverseBytes()
-}
+public fun Source.readIntLe(): Int = readInt().reverseBytes()
 
 /**
  * Removes eight bytes from this source and returns a long integer composed of it according to the little-endian order.
@@ -40,9 +36,7 @@ public fun Source.readIntLe(): Int {
  *
  * @sample io.github.kotlinmania.io.KotlinxIoCoreCommonSamples.readLongLe
  */
-public fun Source.readLongLe(): Long {
-    return readLong().reverseBytes()
-}
+public fun Source.readLongLe(): Long = readLong().reverseBytes()
 
 internal const val OVERFLOW_ZONE = Long.MIN_VALUE / 10L
 internal const val OVERFLOW_DIGIT_START = Long.MIN_VALUE % 10L + 1
@@ -75,7 +69,7 @@ public fun Source.readDecimalLong(): Long {
             negative = true
             overflowDigit--
             require(2)
-            if (buffer[1] !in '0'.code .. '9'.code) {
+            if (buffer[1] !in '0'.code..'9'.code) {
                 throw NumberFormatException("Expected a digit but was 0x${buffer[1].toHexString()}")
             }
         }
@@ -91,36 +85,37 @@ public fun Source.readDecimalLong(): Long {
 
     var bufferOffset = 1L
     while (request(bufferOffset + 1)) {
-        val finished = buffer.seek(bufferOffset) { seg, offset ->
-            seg!!
-            var currIdx = (bufferOffset - offset).toInt()
-            val size = seg.size
-            while (currIdx < size) {
-                val b = seg.getUnchecked(currIdx)
-                if (b in '0'.code..'9'.code) {
-                    val digit = '0'.code - b
+        val finished =
+            buffer.seek(bufferOffset) { seg, offset ->
+                seg!!
+                var currIdx = (bufferOffset - offset).toInt()
+                val size = seg.size
+                while (currIdx < size) {
+                    val b = seg.getUnchecked(currIdx)
+                    if (b in '0'.code..'9'.code) {
+                        val digit = '0'.code - b
 
-                    // Detect when the digit would cause an overflow.
-                    if (value < OVERFLOW_ZONE || value == OVERFLOW_ZONE && digit < overflowDigit) {
-                        with(Buffer()) {
-                            writeDecimalLong(value)
-                            writeByte(b)
+                        // Detect when the digit would cause an overflow.
+                        if (value < OVERFLOW_ZONE || value == OVERFLOW_ZONE && digit < overflowDigit) {
+                            with(Buffer()) {
+                                writeDecimalLong(value)
+                                writeByte(b)
 
-                            if (!negative) {
-                                val _ = readByte() // Skip negative sign.
+                                if (!negative) {
+                                    discardReturnValue(readByte()) // Skip negative sign.
+                                }
+                                throw NumberFormatException("Number too large: ${readString()}")
                             }
-                            throw NumberFormatException("Number too large: ${readString()}")
                         }
+                        value = value * 10L + digit
+                        currIdx++
+                        bufferOffset++
+                    } else {
+                        return@seek true
                     }
-                    value = value * 10L + digit
-                    currIdx++
-                    bufferOffset++
-                } else {
-                    return@seek true
                 }
+                false
             }
-            false
-        }
         if (finished) break
     }
     skip(bufferOffset)
@@ -145,39 +140,42 @@ public fun Source.readDecimalLong(): Long {
 @OptIn(InternalIoApi::class)
 public fun Source.readHexadecimalUnsignedLong(): Long {
     require(1)
-    var result = when (val b = buffer[0]) {
-        in '0'.code..'9'.code -> b - '0'.code
-        in 'a'.code..'f'.code -> b - 'a'.code + 10
-        in 'A'.code..'F'.code -> b - 'A'.code + 10
-        else -> throw NumberFormatException("Expected leading [0-9a-fA-F] character but was 0x${b.toHexString()}")
-    }.toLong()
+    var result =
+        when (val b = buffer[0]) {
+            in '0'.code..'9'.code -> b - '0'.code
+            in 'a'.code..'f'.code -> b - 'a'.code + 10
+            in 'A'.code..'F'.code -> b - 'A'.code + 10
+            else -> throw NumberFormatException("Expected leading [0-9a-fA-F] character but was 0x${b.toHexString()}")
+        }.toLong()
 
     var bytesRead = 1L
 
     while (request(bytesRead + 1L)) {
-        val stop = buffer.seek(bytesRead) { seg, offset ->
-            seg!!
-            val startIndex = (bytesRead - offset).toInt()
-            for (localOffset in startIndex until seg.size) {
-                val b = seg.getUnchecked(localOffset)
-                val bDigit = when (b) {
-                    in '0'.code..'9'.code -> b - '0'.code
-                    in 'a'.code..'f'.code -> b - 'a'.code + 10
-                    in 'A'.code..'F'.code -> b - 'A'.code + 10
-                    else -> return@seek true
-                }
-                if (result and -0x1000000000000000L != 0L) {
-                    with(Buffer()) {
-                        writeHexadecimalUnsignedLong(result)
-                        writeByte(b)
-                        throw NumberFormatException("Number too large: " + readString())
+        val stop =
+            buffer.seek(bytesRead) { seg, offset ->
+                seg!!
+                val startIndex = (bytesRead - offset).toInt()
+                for (localOffset in startIndex until seg.size) {
+                    val b = seg.getUnchecked(localOffset)
+                    val bDigit =
+                        when (b) {
+                            in '0'.code..'9'.code -> b - '0'.code
+                            in 'a'.code..'f'.code -> b - 'a'.code + 10
+                            in 'A'.code..'F'.code -> b - 'A'.code + 10
+                            else -> return@seek true
+                        }
+                    if (result and -0x1000000000000000L != 0L) {
+                        with(Buffer()) {
+                            writeHexadecimalUnsignedLong(result)
+                            writeByte(b)
+                            throw NumberFormatException("Number too large: " + readString())
+                        }
                     }
+                    result = result.shl(4) + bDigit
+                    bytesRead++
                 }
-                result = result.shl(4) + bDigit
-                bytesRead++
+                false
             }
-            false
-        }
         if (stop) break
     }
     skip(bytesRead)
@@ -233,9 +231,7 @@ public fun Source.indexOf(byte: Byte, startIndex: Long = 0L, endIndex: Long = Lo
  *
  * @sample io.github.kotlinmania.io.KotlinxIoCoreCommonSamples.readToArraySample
  */
-public fun Source.readByteArray(): ByteArray {
-    return readByteArrayImpl(-1)
-}
+public fun Source.readByteArray(): ByteArray = readByteArrayImpl(-1)
 
 /**
  * Removes [byteCount] bytes from this source and returns them as a byte array.
@@ -272,7 +268,6 @@ private fun Source.readByteArrayImpl(size: Int): ByteArray {
     return array
 }
 
-
 /**
  * Removes exactly `endIndex - startIndex` bytes from this source and copies them into [sink] subrange starting at
  * [startIndex] and ending at [endIndex].
@@ -297,7 +292,7 @@ public fun Source.readTo(sink: ByteArray, startIndex: Int = 0, endIndex: Int = s
         if (bytesRead == -1) {
             throw EOFException(
                 "Source exhausted before reading ${endIndex - startIndex} bytes. " +
-                        "Only $bytesRead bytes were read."
+                    "Only $bytesRead bytes were read.",
             )
         }
         offset += bytesRead

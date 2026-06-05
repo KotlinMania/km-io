@@ -5,10 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.IOException
-import io.github.kotlinmania.io.RawSink
-import io.github.kotlinmania.io.RawSource
-
 /**
  * An interface providing basic operations on a filesystem, such as reading and writing files,
  * creating directories, gathering file metadata and so on.
@@ -204,13 +200,15 @@ public class FileMetadata(
     /**
      * File size. Defined only for regular files, for other filesystem entities it will be `-1`.
      */
-    public val size: Long = 0L
+    public val size: Long = 0L,
 )
 
 /**
  * Signals an I/O operation's failure due to a missing file or directory.
  */
-public expect class FileNotFoundException(message: String?) : IOException
+public expect class FileNotFoundException(
+    message: String?,
+) : IOException
 
 internal const val WindowsPathSeparator: Char = '\\'
 internal const val UnixPathSeparator: Char = '/'
