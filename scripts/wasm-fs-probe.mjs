@@ -12,7 +12,7 @@
  */
 
 import { WASI } from 'wasi';
-import { argv, env, stdout, stderr } from 'node:process';
+import { argv, env } from 'node:process';
 import { readFileSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
