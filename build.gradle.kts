@@ -665,6 +665,7 @@ val codeqlCompileJvm =
                 "-Xmulti-platform",
                 "-Xcommon-sources=${commonSourceFiles.joinToString(",") { it.absolutePath }}",
                 "-Xexpect-actual-classes",
+                "-Xreturn-value-checker=full",
             ) + commonOptIns.flatMap { listOf("-opt-in", it) } + sourceFiles.map { it.absolutePath }
         }
     }
