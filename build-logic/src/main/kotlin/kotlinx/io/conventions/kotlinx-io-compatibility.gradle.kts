@@ -16,6 +16,6 @@ kotlin {
 
 tasks.named("check") {
     dependsOn(
-        tasks.matching { it.name == "checkKotlinAbi" || it.name == "checkLegacyAbi" },
+        tasks.matching { it.name == "checkAbi" || it.name == "checkLegacyAbi" },
     )
 }

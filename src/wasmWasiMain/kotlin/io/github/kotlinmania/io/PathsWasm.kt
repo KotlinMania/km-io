@@ -5,11 +5,9 @@
 
 package io.github.kotlinmania.io
 
-public actual class Path internal constructor(
-    rawPath: String,
-    @Suppress("UNUSED_PARAMETER") obj: Any?,
-) {
-    internal val pathString: String = removeTrailingSeparators(rawPath, false)
+public actual class Path internal constructor(rawPath: String, @Suppress("UNUSED_PARAMETER") obj: Any?) {
+    @Suppress("MemberNameEqualsClassName")
+    internal val path: String = removeTrailingSeparators(rawPath, false)
 
     actual override fun toString(): String = pathString
 

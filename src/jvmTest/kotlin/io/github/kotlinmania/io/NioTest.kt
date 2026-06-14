@@ -21,17 +21,19 @@
 
 package io.github.kotlinmania.io
 
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.channels.ReadableByteChannel
 import java.nio.channels.WritableByteChannel
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.createFile
 import kotlin.io.path.inputStream
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -40,8 +42,17 @@ import kotlin.text.Charsets.UTF_8
 
 /** Test interop with java.nio.  */
 class NioTest {
-    @TempDir
-    lateinit var temporaryFolder: Path
+    private lateinit var temporaryFolder: Path
+
+    @BeforeTest
+    fun setUp() {
+        temporaryFolder = Files.createTempDirectory("km-io-nio-test")
+    }
+
+    @AfterTest
+    fun tearDown() {
+        temporaryFolder.toFile().deleteRecursively()
+    }
 
     @Test
     fun sourceIsOpen() {
