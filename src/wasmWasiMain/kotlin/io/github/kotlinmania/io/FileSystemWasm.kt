@@ -297,29 +297,27 @@ internal object WasiFileSystem : SystemFileSystemImpl() {
         if (metadata.filetype != FileType.DIRECTORY) throw IOException("Not a directory: ${directory.pathString}")
 
         val children = mutableListOf<Path>()
-        val dir_fd =
-            withScopedMemoryAllocator { allocator ->
-                val fdPtr = allocator.allocateInt()
-                val (stringBuffer, stringBufferLength) = allocator.storeString(relativeDirectoryPath.pathString)
+        val dir_fd = withScopedMemoryAllocator { allocator ->
+            val fdPtr = allocator.allocateInt()
+            val (stringBuffer, stringBufferLength) = allocator.storeString(relativeDirectoryPath.path)
 
-                val res =
-                    Errno(
-                        path_open(
-                            fd = preOpen,
-                            dirflags = listOf(LookupFlags.SYMLINK_FOLLOW).toBitset(),
-                            pathPtr = stringBuffer.address.toInt(),
-                            pathLen = stringBufferLength,
-                            oflags = setOf(OpenFlags.DIRECTORY).toBitset(),
-                            fsRightsBase = listOf(Rights.FD_READDIR, Rights.FD_READ).toBitset(),
-                            fsRightsInheriting = 0,
-                            fdFlags = 0,
-                            resultPtr = fdPtr.address.toInt(),
-                        ),
-                    )
-                if (res != Errno.SUCCESS) throw IOException("Can't open directory ${directory.pathString}: ${res.description}")
-                fdPtr.loadInt()
-            }
-        var closeFailure: IOException? = null
+            val res = Errno(
+                path_open(
+                    fd = preOpen,
+                    dirflags = listOf(LookupFlags.symlink_follow).toBitset(),
+                    pathPtr = stringBuffer.address.toInt(), pathLen = stringBufferLength,
+                    oflags = setOf(OpenFlags.directory).toBitset(),
+                    fsRightsBase = listOf(Rights.fd_readdir, Rights.fd_read).toBitset(),
+                    fsRightsInheriting = 0,
+                    fdFlags = 0,
+                    resultPtr = fdPtr.address.toInt()
+                )
+            )
+            if (res != Errno.success) throw IOException("Can't open directory ${directory.path}: ${res.description}")
+            fdPtr.loadInt()
+        }
+        var failure: Throwable? = null
+        val closeResult: Errno
         try {
             withScopedMemoryAllocator { allocator ->
                 val resultSizePtr = allocator.allocateInt()
@@ -358,13 +356,15 @@ internal object WasiFileSystem : SystemFileSystemImpl() {
                     }
                 }
             }
+        } catch (t: Throwable) {
+            failure = t
         } finally {
-            val res = Errno(fd_close(dir_fd))
-            if (res != Errno.SUCCESS) {
-                closeFailure = IOException("fd_close failed for directory '$directory': ${res.description}")
-            }
+            closeResult = Errno(fd_close(dir_fd))
         }
-        closeFailure?.let { throw it }
+        if (failure != null) throw failure
+        if (closeResult != Errno.success) {
+            throw IOException("fd_close failed for directory '$directory': ${closeResult.description}")
+        }
         return children
     }
 }

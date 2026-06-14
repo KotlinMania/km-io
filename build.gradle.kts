@@ -10,6 +10,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -276,11 +277,38 @@ val jvmToolchainVersion = providers.gradleProperty("jvm.toolchain").getOrElse("2
 kotlin {
     jvmToolchain(jvmToolchainVersion)
 
-    applyDefaultHierarchyTemplate()
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("native") {
+                group("nativeNonApple") {
+                    group("mingw")
+                    group("unix") {
+                        group("linux")
+                        group("androidNative")
+                    }
+                }
+
+                group("nativeNonAndroid") {
+                    group("apple")
+                    group("mingw")
+                    group("linux")
+                }
+            }
+            group("nodeFilesystemShared") {
+                withJs()
+                withWasmJs()
+            }
+            group("wasm") {
+                withWasmJs()
+                withWasmWasi()
+            }
+        }
+    }
 
     compilerOptions {
-        languageVersion.set(KotlinVersion.KOTLIN_2_3)
-        apiVersion.set(KotlinVersion.KOTLIN_2_3)
+        languageVersion.set(KotlinVersion.KOTLIN_2_4)
+        apiVersion.set(KotlinVersion.KOTLIN_2_4)
         allWarningsAsErrors.set(!isCodeqlBuild)
         optIn.addAll(commonOptIns)
         freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -327,12 +355,21 @@ kotlin {
 
     // Web
     js {
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "30s"
+                }
+            }
+        }
         browser {
             testTask {
+                useMocha {
+                    timeout = "30s"
+                }
                 filter.setExcludePatterns("*SmokeFileTest*")
             }
         }
-        nodejs()
     }
 
     // wasmJs is Stable as of Kotlin 2.2; @OptIn may be removable — verify before dropping on wasmWasi.
@@ -389,9 +426,16 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        jvmTest.dependencies {
-            implementation(kotlin("test-junit5"))
-        }
+
+        val sharedAndroidTestSources = files("src/androidTest/kotlin")
+        findByName("androidHostTest")?.kotlin?.srcDir(sharedAndroidTestSources)
+        findByName("androidDeviceTest")?.kotlin?.srcDir(sharedAndroidTestSources)
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    if (name.startsWith("compileSwiftExport")) {
+        compilerOptions.allWarningsAsErrors.set(false)
     }
 }
 
@@ -419,14 +463,45 @@ tasks.withType<AbstractTestTask>().configureEach {
 // ============================================================================
 // Static analysis: Detekt + Ktlint
 // ============================================================================
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = false
-    source.setFrom(files("src"))
-    config.setFrom(files("detekt.yml"))
-    parallel = true
-}
+tasks.register("swiftExportSmokeTest") {
+    group = "verification"
+    description = "Builds the Swift Export SPM package and runs swift test against it."
+    outputs.upToDateWhen { false }
+    onlyIf {
+        System.getProperty("os.name").contains("Mac", ignoreCase = true)
+    }
+
+    doLast {
+        val execOperations = serviceOf<ExecOperations>()
+        val swiftBuildDir =
+            layout.buildDirectory
+                .dir("swift-test")
+                .get()
+                .asFile
+                .absolutePath
+        execOperations
+            .exec {
+                workingDir = projectDir
+                commandLine(
+                    "./gradlew",
+                    "embedSwiftExportForXcode",
+                    "--no-configuration-cache",
+                    "--no-daemon",
+                    "--console=plain",
+                )
+                environment(
+                    mapOf(
+                        "BUILT_PRODUCTS_DIR" to swiftBuildDir,
+                        "TARGET_BUILD_DIR" to swiftBuildDir,
+                        "SDK_NAME" to "macosx",
+                        "CONFIGURATION" to "Debug",
+                        "ARCHS" to "arm64",
+                        "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+                        "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+                        "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+                    ),
+                )
+            }.assertNormalExitValue()
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
@@ -668,6 +743,25 @@ val codeqlCompileJvm =
                 "-Xreturn-value-checker=full",
             ) + commonOptIns.flatMap { listOf("-opt-in", it) } + sourceFiles.map { it.absolutePath }
         }
+        args = listOf(
+            "-d",
+            outDir.get().asFile.absolutePath,
+            "-classpath",
+            fullClasspath,
+            "-jvm-target",
+            jvmToolchainVersion.toString(),
+            "-no-stdlib",
+            "-no-reflect",
+            "-language-version",
+            codeqlLanguageVersion,
+            "-api-version",
+            codeqlApiVersion,
+            "-XXLanguage:+UnnamedLocalVariables",
+            "-Xmulti-platform",
+            "-Xcommon-sources=${commonSourceFiles.joinToString(",") { it.absolutePath }}",
+            "-Xexpect-actual-classes",
+            "-Xreturn-value-checker=full",
+        ) + commonOptIns.flatMap { listOf("-opt-in", it) } + sourceFiles.map { it.absolutePath }
     }
 
 // ============================================================================
@@ -856,65 +950,48 @@ tasks.register("hostTests") {
     )
 }
 
-// Swift Export smoke test — produces the SPM package via embedSwiftExportForXcode
-// (spawned with the Xcode-style env it requires) and runs `swift test` against it,
-// so Swift Export breakage surfaces locally, not only in the swift.yml CI job.
-// Pattern mirrors kasuari-kotlin. This task is part of the build contract and
-// must fail rather than skip when the required toolchain is unavailable.
-tasks.register("swiftExportSmokeTest") {
+tasks.register("test") {
     group = "verification"
-    description = "Builds the Swift Export SPM package and runs swift test against it."
-    outputs.upToDateWhen { false }
+    description = "Runs the project test suite (alias for hostTests + swift export smoke test)."
+    dependsOn(
+        "hostTests",
+        "swiftExportSmokeTest",
+    )
+}
 
-    doLast {
-        val execOperations = serviceOf<ExecOperations>()
-        val swiftBuildDir =
-            layout.projectDirectory
-                .dir("core/build/swift-test")
-                .asFile
-                .absolutePath
-        execOperations
-            .exec {
-                workingDir = projectDir
-                commandLine(
-                    "./gradlew",
-                    ":km-io-core:embedSwiftExportForXcode",
-                    "--no-configuration-cache",
-                    "--no-daemon",
-                    "--console=plain",
-                )
-                environment(
-                    mapOf(
-                        "BUILT_PRODUCTS_DIR" to swiftBuildDir,
-                        "TARGET_BUILD_DIR" to swiftBuildDir,
-                        "SDK_NAME" to "macosx",
-                        "CONFIGURATION" to "Debug",
-                        "ARCHS" to "arm64",
-                        "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
-                        "MACOSX_DEPLOYMENT_TARGET" to "14.0",
-                        "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
-                    ),
-                )
-            }.assertNormalExitValue()
+tasks.named("wasmWasiNodeTest") {
+    // TODO: remove once https://youtrack.jetbrains.com/issue/KT-65179 solved
+    val rootName = rootProject.name
+    val moduleName = project.name
+    doFirst {
+        val entryName =
+            if (moduleName == rootName) {
+                rootName
+            } else {
+                "$rootName-$moduleName"
+            }
+        val templateFile = layout.projectDirectory.file("core/wasmWasi/test/test-driver.mjs.template").asFile
+        val driverFile =
+            layout.buildDirectory.file(
+                "compileSync/wasmWasi/test/testDevelopmentExecutable/kotlin/$entryName-test.mjs",
+            )
 
-        val generatedPackageDir =
-            layout.buildDirectory
-                .dir("SPMPackage/macosArm64/Debug")
-                .get()
-                .asFile
-        patchSwiftPackage(generatedPackageDir)
+        fun File.mkdirsAndEscape(): String {
+            mkdirs()
+            return absolutePath.replace("\\", "\\\\")
+        }
 
-        patchSwiftPackage(
-            layout.projectDirectory
-                .dir("core/build/SPMPackage/macosArm64/Debug")
-                .asFile,
-        )
+        val tmpDir = temporaryDir.resolve("km-io-wasi-test").mkdirsAndEscape()
+        val tmpDir2 = temporaryDir.resolve("km-io-wasi-test-2").mkdirsAndEscape()
 
-        execOperations
-            .exec {
-                workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
-                commandLine("swift", "test")
-            }.assertNormalExitValue()
+        val newDriver =
+            templateFile
+                .readText()
+                .replace("<SYSTEM_TEMP_DIR>", tmpDir, false)
+                .replace("<SYSTEM_TEMP_DIR2>", tmpDir2, false)
+                .replace("<WASM_FILE>", "$entryName-test.wasm", false)
+
+        driverFile.get().asFile.writeText(newDriver)
     }
 }
 

@@ -121,15 +121,18 @@ internal actual object SegmentPool {
 
     // For now, keep things on Android as they were before, but on JVM - use second level cache.
     // See https://developer.android.com/reference/java/lang/System#getProperties() for property name.
-    private val DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE = when (System.getProperty("java.vm.name") as String) {
+    private val DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE = when (System.getProperty("java.vm.name").orEmpty()) {
         "Dalvik" -> "0"
         else -> "4194304" // 4MB
     }
 
     // visible for testing
     internal val SECOND_LEVEL_POOL_TOTAL_SIZE =
-        (System.getProperty("io.github.kotlinmania.io.pool.size.bytes", DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE) as String)
-            .toIntOrNull()?.coerceAtLeast(0) ?: 0
+        (System.getProperty("io.github.kotlinmania.io.pool.size.bytes", DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE)
+                ?: DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE)
+            .toIntOrNull()
+            ?.coerceAtLeast(0)
+            ?: 0
 
     private val SECOND_LEVEL_POOL_BUCKET_SIZE =
         (SECOND_LEVEL_POOL_TOTAL_SIZE / HASH_BUCKET_COUNT_L2).coerceAtLeast(Segment.SIZE)

@@ -143,6 +143,7 @@ val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
             "-no-reflect",
             "-language-version", codeqlLanguageVersion,
             "-api-version", codeqlApiVersion,
+            "-XXLanguage:+UnnamedLocalVariables",
             "-Xmulti-platform",
             "-Xcommon-sources=${commonSourceFiles.joinToString(",") { it.absolutePath }}",
             "-Xexpect-actual-classes",
@@ -218,6 +219,8 @@ val fullTargetBuildTasks = listOf(
 tasks.named("build") {
     dependsOn(fullTargetBuildTasks)
 }
+
+
 
 
 
