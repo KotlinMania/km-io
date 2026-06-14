@@ -5,8 +5,13 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class KotlinxIoCoreCommonSamples {
     @Test
@@ -329,8 +334,9 @@ class KotlinxIoCoreCommonSamples {
             byteArrayOf(
                 'e'.code.toByte(),
                 'l'.code.toByte(),
-                'l'.code.toByte()
-            ), buffer.readByteArray()
+                'l'.code.toByte(),
+            ),
+            buffer.readByteArray(),
         )
 
         buffer.writeString("Δ")
@@ -346,8 +352,9 @@ class KotlinxIoCoreCommonSamples {
             byteArrayOf(
                 'e'.code.toByte(),
                 'l'.code.toByte(),
-                'l'.code.toByte()
-            ), buffer.readByteArray()
+                'l'.code.toByte(),
+            ),
+            buffer.readByteArray(),
         )
 
         buffer.writeString(StringBuilder("Δ"))
@@ -423,20 +430,23 @@ class KotlinxIoCoreCommonSamples {
 
     @Test
     fun request() {
-        val singleByteSource = object : RawSource {
-            private var exhausted = false
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = when {
-                byteCount == 0L -> 0L
-                exhausted -> -1L
-                else -> {
-                    exhausted = true
-                    sink.writeByte(42)
-                    1L
-                }
-            }
+        val singleByteSource =
+            object : RawSource {
+                private var exhausted = false
 
-            override fun close() = Unit
-        }
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long =
+                    when {
+                        byteCount == 0L -> 0L
+                        exhausted -> -1L
+                        else -> {
+                            exhausted = true
+                            sink.writeByte(42)
+                            1L
+                        }
+                    }
+
+                override fun close() = Unit
+            }
 
         val source = singleByteSource.buffered()
 
@@ -453,20 +463,23 @@ class KotlinxIoCoreCommonSamples {
 
     @Test
     fun require() {
-        val singleByteSource = object : RawSource {
-            private var exhausted = false
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = when {
-                byteCount == 0L -> 0L
-                exhausted -> -1L
-                else -> {
-                    exhausted = true
-                    sink.writeByte(42)
-                    1L
-                }
-            }
+        val singleByteSource =
+            object : RawSource {
+                private var exhausted = false
 
-            override fun close() = Unit
-        }
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long =
+                    when {
+                        byteCount == 0L -> 0L
+                        exhausted -> -1L
+                        else -> {
+                            exhausted = true
+                            sink.writeByte(42)
+                            1L
+                        }
+                    }
+
+                override fun close() = Unit
+            }
 
         val source = singleByteSource.buffered()
 
@@ -483,20 +496,23 @@ class KotlinxIoCoreCommonSamples {
 
     @Test
     fun exhausted() {
-        val singleByteSource = object : RawSource {
-            private var exhausted = false
-            override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = when {
-                byteCount == 0L -> 0L
-                exhausted -> -1L
-                else -> {
-                    exhausted = true
-                    sink.writeByte(42)
-                    1L
-                }
-            }
+        val singleByteSource =
+            object : RawSource {
+                private var exhausted = false
 
-            override fun close() = Unit
-        }
+                override fun readAtMostTo(sink: Buffer, byteCount: Long): Long =
+                    when {
+                        byteCount == 0L -> 0L
+                        exhausted -> -1L
+                        else -> {
+                            exhausted = true
+                            sink.writeByte(42)
+                            1L
+                        }
+                    }
+
+                override fun close() = Unit
+            }
 
         val source = singleByteSource.buffered()
 
@@ -528,7 +544,6 @@ class KotlinxIoCoreCommonSamples {
         buffer.writeInt(42)
         assertContentEquals(byteArrayOf(0, 0, 0, 42), buffer.readByteArray())
     }
-
 
     @Test
     fun writeLong() {
@@ -635,19 +650,21 @@ class KotlinxIoCoreCommonSamples {
 
     @Test
     fun flush() {
-        val rawSink = object : RawSink {
-            val buffer = Buffer()
-            var flushed = false
-            override fun write(source: Buffer, byteCount: Long) {
-                source.readTo(buffer, byteCount)
-            }
+        val rawSink =
+            object : RawSink {
+                val buffer = Buffer()
+                var flushed = false
 
-            override fun flush() {
-                flushed = true
-            }
+                override fun write(source: Buffer, byteCount: Long) {
+                    source.readTo(buffer, byteCount)
+                }
 
-            override fun close() = Unit
-        }
+                override fun flush() {
+                    flushed = true
+                }
+
+                override fun close() = Unit
+            }
 
         val buffered = rawSink.buffered()
 
@@ -664,19 +681,21 @@ class KotlinxIoCoreCommonSamples {
 
     @Test
     fun emit() {
-        val rawSink = object : RawSink {
-            val buffer = Buffer()
-            var flushed = false
-            override fun write(source: Buffer, byteCount: Long) {
-                source.readTo(buffer, byteCount)
-            }
+        val rawSink =
+            object : RawSink {
+                val buffer = Buffer()
+                var flushed = false
 
-            override fun flush() {
-                flushed = true
-            }
+                override fun write(source: Buffer, byteCount: Long) {
+                    source.readTo(buffer, byteCount)
+                }
 
-            override fun close() = Unit
-        }
+                override fun flush() {
+                    flushed = true
+                }
+
+                override fun close() = Unit
+            }
 
         val buffered = rawSink.buffered()
 

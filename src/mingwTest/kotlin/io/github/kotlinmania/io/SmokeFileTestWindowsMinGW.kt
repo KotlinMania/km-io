@@ -8,7 +8,7 @@ package io.github.kotlinmania.io
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SmokeFileTestWindowsMinGW  {
+class SmokeFileTestWindowsMinGW {
     @Test
     fun uncParent() {
         assertEquals(Path("\\\\server"), Path("\\\\server\\share").parent)

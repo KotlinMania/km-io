@@ -24,7 +24,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.Arrays
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -42,11 +42,11 @@ class BufferTest {
         source.copyTo(out, startIndex = 10L, endIndex = 10L + SEGMENT_SIZE * 3L)
         assertEquals(
             "a".repeat(SEGMENT_SIZE * 2 - 10) + "b".repeat(SEGMENT_SIZE + 10),
-            out.toString()
+            out.toString(),
         )
         assertEquals(
             "a".repeat(SEGMENT_SIZE * 2) + "b".repeat(SEGMENT_SIZE * 2),
-            source.readString(SEGMENT_SIZE * 4L)
+            source.readString(SEGMENT_SIZE * 4L),
         )
     }
 
@@ -60,7 +60,7 @@ class BufferTest {
         assertEquals("bbb", out.toString())
         assertEquals(
             "a".repeat(SEGMENT_SIZE * 2) + "b".repeat(SEGMENT_SIZE * 2),
-            source.readString(SEGMENT_SIZE * 4L)
+            source.readString(SEGMENT_SIZE * 4L),
         )
     }
 

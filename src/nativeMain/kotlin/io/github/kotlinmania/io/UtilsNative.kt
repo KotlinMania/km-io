@@ -6,5 +6,7 @@
 package io.github.kotlinmania.io
 
 internal actual fun Short.reverseBytes(): Short = reverseBytesCommon()
+
 internal actual fun Int.reverseBytes(): Int = reverseBytesCommon()
+
 internal actual fun Long.reverseBytes(): Long = reverseBytesCommon()

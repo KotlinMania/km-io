@@ -7,8 +7,16 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import platform.Foundation.*
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.get
+import kotlinx.cinterop.reinterpret
+import platform.Foundation.NSData
+import platform.Foundation.NSOutputStream
+import platform.Foundation.NSStreamDataWrittenToMemoryStreamKey
+import platform.Foundation.data
+import platform.Foundation.outputStreamToMemory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -18,9 +26,10 @@ class NSOutputStreamSinkTest {
     fun nsOutputStreamSink() {
         val out = NSOutputStream.outputStreamToMemory()
         val sink = out.asSink()
-        val buffer = Buffer().apply {
-            writeString("a")
-        }
+        val buffer =
+            Buffer().apply {
+                writeString("a")
+            }
         sink.write(buffer, 1L)
         val data = out.propertyForKey(NSStreamDataWrittenToMemoryStreamKey) as NSData
         assertEquals(1U, data.length)
@@ -30,11 +39,12 @@ class NSOutputStreamSinkTest {
 
     @Test
     fun sinkFromOutputStream() {
-        val data = Buffer().apply {
-            writeString("a")
-            writeString("b".repeat(9998))
-            writeString("c")
-        }
+        val data =
+            Buffer().apply {
+                writeString("a")
+                writeString("b".repeat(9998))
+                writeString("c")
+            }
         val out = NSOutputStream.outputStreamToMemory()
         val sink = out.asSink()
 

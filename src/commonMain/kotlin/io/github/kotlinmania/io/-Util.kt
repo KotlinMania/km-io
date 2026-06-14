@@ -29,7 +29,7 @@ internal val HEX_DIGIT_CHARS =
 internal fun checkOffsetAndCount(size: Long, offset: Long, byteCount: Long) {
     if (offset < 0 || offset > size || size - offset < byteCount || byteCount < 0) {
         throw IllegalArgumentException(
-            "offset ($offset) and byteCount ($byteCount) are not within the range [0..size($size))"
+            "offset ($offset) and byteCount ($byteCount) are not within the range [0..size($size))",
         )
     }
 }
@@ -40,7 +40,7 @@ internal inline fun checkBounds(size: Int, startIndex: Int, endIndex: Int) =
 internal fun checkBounds(size: Long, startIndex: Long, endIndex: Long) {
     if (startIndex < 0 || endIndex > size) {
         throw IndexOutOfBoundsException(
-            "startIndex ($startIndex) and endIndex ($endIndex) are not within the range [0..size($size))"
+            "startIndex ($startIndex) and endIndex ($endIndex) are not within the range [0..size($size))",
         )
     }
     if (startIndex > endIndex) {
@@ -52,38 +52,39 @@ internal inline fun checkByteCount(byteCount: Long) {
     require(byteCount >= 0) { "byteCount ($byteCount) < 0" }
 }
 
+internal fun discardReturnValue(value: Any?) {
+    if (value == null) return
+}
+
 internal expect fun Short.reverseBytes(): Short
 
 internal inline fun Short.reverseBytesCommon(): Short {
     val i = toInt() and 0xffff
-    val reversed = (i and 0xff00 ushr 8) or
+    val reversed =
+        (i and 0xff00 ushr 8) or
             (i and 0x00ff shl 8)
     return reversed.toShort()
 }
 
 internal expect fun Int.reverseBytes(): Int
 
-internal inline fun Int.reverseBytesCommon(): Int {
-    return (this and -0x1000000 ushr 24) or
-            (this and 0x00ff0000 ushr 8) or
-            (this and 0x0000ff00 shl 8) or
-            (this and 0x000000ff shl 24)
-}
+internal inline fun Int.reverseBytesCommon(): Int =
+    (this and -0x1000000 ushr 24) or
+        (this and 0x00ff0000 ushr 8) or
+        (this and 0x0000ff00 shl 8) or
+        (this and 0x000000ff shl 24)
 
 internal expect fun Long.reverseBytes(): Long
 
-internal inline fun Long.reverseBytesCommon(): Long {
-    return (this and -0x100000000000000L ushr 56) or
-            (this and 0x00ff000000000000L ushr 40) or
-            (this and 0x0000ff0000000000L ushr 24) or
-            (this and 0x000000ff00000000L ushr 8) or
-            (this and 0x00000000ff000000L shl 8) or
-            (this and 0x0000000000ff0000L shl 24) or
-            (this and 0x000000000000ff00L shl 40) or
-            (this and 0x00000000000000ffL shl 56)
-}
-
-/* ktlint-enable no-multi-spaces indent */
+internal inline fun Long.reverseBytesCommon(): Long =
+    (this and -0x100000000000000L ushr 56) or
+        (this and 0x00ff000000000000L ushr 40) or
+        (this and 0x0000ff0000000000L ushr 24) or
+        (this and 0x000000ff00000000L ushr 8) or
+        (this and 0x00000000ff000000L shl 8) or
+        (this and 0x0000000000ff0000L shl 24) or
+        (this and 0x000000000000ff00L shl 40) or
+        (this and 0x00000000000000ffL shl 56)
 
 // Syntactic sugar.
 internal inline infix fun Byte.shr(other: Int): Int = toInt() shr other

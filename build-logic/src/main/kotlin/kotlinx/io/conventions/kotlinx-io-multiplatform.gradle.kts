@@ -69,16 +69,16 @@ kotlin {
                 filter.setExcludePatterns("*SmokeFileTest*")
             }
         }
-        nodejs {
-            testTask {
-                filter.setExcludePatterns("*SmokeFileTest*")
-            }
-        }
+        nodejs()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
+        browser {
+            testTask {
+                filter.setExcludePatterns("*SmokeFileTest*")
+            }
+        }
         nodejs()
     }
 
@@ -102,6 +102,9 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
+        jvmTest.dependencies {
+            implementation(kotlin("test-junit5"))
+        }
     }
 
     explicitApi()
@@ -109,34 +112,7 @@ kotlin {
         configureSourceSet()
     }
 
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    applyDefaultHierarchyTemplate {
-        common {
-            group("native") {
-                group("nativeNonApple") {
-                    group("mingw")
-                    group("unix") {
-                        group("linux")
-                        group("androidNative")
-                    }
-                }
-
-                group("nativeNonAndroid") {
-                    group("apple")
-                    group("mingw")
-                    group("linux")
-                }
-            }
-            group("nodeFilesystemShared") {
-                withJs()
-                withWasmJs()
-            }
-            group("wasm") {
-                withWasmJs()
-                withWasmWasi()
-            }
-        }
-    }
+    applyDefaultHierarchyTemplate()
 
     sourceSets.findByName("androidMain")?.kotlin?.srcDir("android/src")
     sourceSets.findByName("androidHostTest")?.kotlin?.srcDir("android/test")
@@ -178,7 +154,6 @@ fun KotlinSourceSet.configureSourceSet() {
     val srcDir = if (name.endsWith("Main")) "src" else "test"
     val platform = name.dropLast(4)
     if (name == "androidMain" || name == "androidHostTest" || name == "androidDeviceTest") {
-        languageSettings { progressiveMode = true }
         return
     }
     kotlin.srcDir("$platform/$srcDir")
@@ -186,9 +161,6 @@ fun KotlinSourceSet.configureSourceSet() {
         resources.srcDir("$platform/resources")
     } else if (name == "jvmTest") {
         resources.srcDir("$platform/test-resources")
-    }
-    languageSettings {
-        progressiveMode = true
     }
 }
 

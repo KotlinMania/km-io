@@ -9,8 +9,23 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.get
 import kotlinx.cinterop.toKString
-import io.github.kotlinmania.io.IOException
-import platform.posix.*
+import platform.posix.ENOENT
+import platform.posix.S_IFDIR
+import platform.posix.S_IFMT
+import platform.posix.S_IFREG
+import platform.posix.__posix_basename
+import platform.posix.closedir
+import platform.posix.dirname
+import platform.posix.errno
+import platform.posix.free
+import platform.posix.getenv
+import platform.posix.mkdir
+import platform.posix.opendir
+import platform.posix.readdir
+import platform.posix.realpath
+import platform.posix.rename
+import platform.posix.stat
+import platform.posix.strerror
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun dirnameImpl(path: String): String {
@@ -21,9 +36,7 @@ internal actual fun dirnameImpl(path: String): String {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun basenameImpl(path: String): String {
-    return __posix_basename(path)?.toKString() ?: ""
-}
+internal actual fun basenameImpl(path: String): String = __posix_basename(path)?.toKString() ?: ""
 
 internal actual fun isAbsoluteImpl(path: String): Boolean = path.startsWith('/')
 

@@ -21,10 +21,11 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.REPLACEMENT_CHARACTER
-import io.github.kotlinmania.io.REPLACEMENT_CODE_POINT
-import io.github.kotlinmania.io.processUtf8CodePoints
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class Utf8Test {
     @Test
@@ -204,7 +205,7 @@ class Utf8Test {
 
     @Test
     fun bufferWriteUtf8CharSequence() {
-        bufferWriteUtf8StringCheck(0) { buffer, string ->  buffer.writeString(StringBuilder(string)) }
+        bufferWriteUtf8StringCheck(0) { buffer, string -> buffer.writeString(StringBuilder(string)) }
     }
 
     @Test
@@ -216,22 +217,27 @@ class Utf8Test {
 
     private inline fun bufferWriteUtf8StringCheck(
         prefixLength: Int,
-        writeAction: (Buffer, String) -> Unit = { b, s -> b.writeString(s) }
+        writeAction: (Buffer, String) -> Unit = { b, s -> b.writeString(s) },
     ) {
         val buffer = Buffer()
         buffer.assertUtf8StringEncoded("68656c6c6f", "hello", prefixLength, writeAction)
-        buffer.assertUtf8StringEncoded("cf87ceb5cf81ceb5cf84ceb9cf83cebccf8ccf82", "χερετισμός",
-            prefixLength, writeAction)
+        buffer.assertUtf8StringEncoded(
+            "cf87ceb5cf81ceb5cf84ceb9cf83cebccf8ccf82",
+            "χερετισμός",
+            prefixLength,
+            writeAction,
+        )
         buffer.assertUtf8StringEncoded(
             "e18392e18390e1839be18390e183a0e183afe1839de18391e18390",
             "გამარჯობა",
             prefixLength,
-            writeAction
+            writeAction,
         )
         buffer.assertUtf8StringEncoded(
             "f093878bf0938bb4f09380a5",
-            "\uD80C\uDDCB\uD80C\uDEF4\uD80C\uDC25",/* 𓇋𓋴𓀥, to hail, AN EGYPTIAN HIEROGLYPHIC DICTIONARY, p. 79b */
-            prefixLength, writeAction
+            "\uD80C\uDDCB\uD80C\uDEF4\uD80C\uDC25", // 𓇋𓋴𓀥, to hail, AN EGYPTIAN HIEROGLYPHIC DICTIONARY, p. 79b
+            prefixLength,
+            writeAction,
         )
 
         // two consecutive high surrogates, replace with '?'
@@ -250,18 +256,21 @@ class Utf8Test {
 
     private fun bufferReadUtf8StringCheck(prefixLength: Int) {
         val buffer = Buffer()
-        buffer.assertUtf8StringDecoded("hello","68656c6c6f",  prefixLength)
-        buffer.assertUtf8StringDecoded("χερετισμός", "cf87ceb5cf81ceb5cf84ceb9cf83cebccf8ccf82",
-            prefixLength)
+        buffer.assertUtf8StringDecoded("hello", "68656c6c6f", prefixLength)
+        buffer.assertUtf8StringDecoded(
+            "χερετισμός",
+            "cf87ceb5cf81ceb5cf84ceb9cf83cebccf8ccf82",
+            prefixLength,
+        )
         buffer.assertUtf8StringDecoded(
             "გამარჯობა",
             "e18392e18390e1839be18390e183a0e183afe1839de18391e18390",
-            prefixLength
+            prefixLength,
         )
         buffer.assertUtf8StringDecoded(
-            "\uD80C\uDDCB\uD80C\uDEF4\uD80C\uDC25",/* 𓇋𓋴𓀥, to hail, AN EGYPTIAN HIEROGLYPHIC DICTIONARY, p. 79b */
+            "\uD80C\uDDCB\uD80C\uDEF4\uD80C\uDC25", // 𓇋𓋴𓀥, to hail, AN EGYPTIAN HIEROGLYPHIC DICTIONARY, p. 79b
             "f093878bf0938bb4f09380a5",
-            prefixLength
+            prefixLength,
         )
     }
 
@@ -385,21 +394,27 @@ class Utf8Test {
     @Test
     fun writeCodePointBeyondUnicodeMaximum() {
         val buffer = Buffer()
-        val ex = assertFailsWith<IllegalArgumentException> {
-            buffer.writeCodePointValue(0x110000)
-        }
-        assertEquals("Code point value is out of Unicode codespace 0..0x10ffff: 0x110000 (1114112)",
-            ex.message)
+        val ex =
+            assertFailsWith<IllegalArgumentException> {
+                buffer.writeCodePointValue(0x110000)
+            }
+        assertEquals(
+            "Code point value is out of Unicode codespace 0..0x10ffff: 0x110000 (1114112)",
+            ex.message,
+        )
     }
 
     @Test
     fun writeCodePointBelowUnicodeMinimum() {
         val buffer = Buffer()
-        val ex = assertFailsWith<IllegalArgumentException> {
-            buffer.writeCodePointValue(-1)
-        }
-        assertEquals("Code point value is out of Unicode codespace 0..0x10ffff: 0xffffffff (-1)",
-            ex.message)
+        val ex =
+            assertFailsWith<IllegalArgumentException> {
+                buffer.writeCodePointValue(-1)
+            }
+        assertEquals(
+            "Code point value is out of Unicode codespace 0..0x10ffff: 0xffffffff (-1)",
+            ex.message,
+        )
     }
 
     @Test
@@ -467,8 +482,12 @@ class Utf8Test {
         assertEquals(expectedCodePoint, readCodePointValue())
     }
 
-    private inline fun Buffer.assertUtf8StringEncoded(expectedHex: String, string: String, prefixLength: Int = 0,
-                                               writeAction: (Buffer, String) -> Unit) {
+    private inline fun Buffer.assertUtf8StringEncoded(
+        expectedHex: String,
+        string: String,
+        prefixLength: Int = 0,
+        writeAction: (Buffer, String) -> Unit,
+    ) {
         write(ByteArray(prefixLength))
         writeAction(this, string)
         skip(prefixLength.toLong())

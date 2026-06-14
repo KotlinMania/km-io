@@ -5,14 +5,12 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import io.github.kotlinmania.io.ByteString
-import io.github.kotlinmania.io.UnsafeBufferOperations
-import io.github.kotlinmania.io.withData
 import kotlin.io.encoding.Base64
 import kotlin.math.min
 import kotlin.random.Random
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class UnsafeBufferOperationsSamples {
     @OptIn(UnsafeIoApi::class)
@@ -23,16 +21,17 @@ class UnsafeBufferOperationsSamples {
             var remaining = byteCount
             while (remaining > 0) {
                 // writeToTail returns the total number of bytes written
-                remaining -= UnsafeBufferOperations.writeToTail(this, 1) { data, startIndex, endIndex ->
-                    // data's slice from startIndex to endIndex is available for writing,
-                    // but that slice could be much larger than what remained to write.
-                    val correctedEndIndex = min(endIndex, startIndex + remaining)
-                    // write random bytes
-                    Random.Default.nextBytes(data, startIndex, correctedEndIndex)
-                    // number of bytes written,
-                    // that many bytes will be committed to the buffer
-                    correctedEndIndex - startIndex
-                }
+                remaining -=
+                    UnsafeBufferOperations.writeToTail(this, 1) { data, startIndex, endIndex ->
+                        // data's slice from startIndex to endIndex is available for writing,
+                        // but that slice could be much larger than what remained to write.
+                        val correctedEndIndex = min(endIndex, startIndex + remaining)
+                        // write random bytes
+                        Random.Default.nextBytes(data, startIndex, correctedEndIndex)
+                        // number of bytes written,
+                        // that many bytes will be committed to the buffer
+                        correctedEndIndex - startIndex
+                    }
             }
         }
 
@@ -70,27 +69,30 @@ class UnsafeBufferOperationsSamples {
             while (!complete) {
                 require(1) // check if we still have something to read
 
-                val _ = UnsafeBufferOperations.readFromHead(this) { data, startOffset, endOffset ->
-                    var offset = startOffset
-                    do {
-                        val b = data[offset++]
-                        result = result.or(0x7fL.and(b.toLong()).shl(shift))
-                        shift += 7
-                        complete = b >= 0 // we're done if the most significant bit was not set
-                    } while (!complete && offset < endOffset)
-                    // return the number of consumed bytes
-                    offset - startOffset
-                }
+                discardReturnValue(
+                    UnsafeBufferOperations.readFromHead(this) { data, startOffset, endOffset ->
+                        var offset = startOffset
+                        do {
+                            val b = data[offset++]
+                            result = result.or(0x7fL.and(b.toLong()).shl(shift))
+                            shift += 7
+                            complete = b >= 0 // we're done if the most significant bit was not set
+                        } while (!complete && offset < endOffset)
+                        // return the number of consumed bytes
+                        offset - startOffset
+                    },
+                )
             }
 
             return result.toULong()
         }
 
-        val buffer = Buffer().apply {
-            write(byteArrayOf(0)) // 0
-            write(byteArrayOf(0xed.toByte(), 0x9b.toByte(), 0xb0.toByte(), 0x6f)) // dec0ded
-            write(byteArrayOf(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1)) // ffffffffffffffff
-        }
+        val buffer =
+            Buffer().apply {
+                write(byteArrayOf(0)) // 0
+                write(byteArrayOf(0xed.toByte(), 0x9b.toByte(), 0xb0.toByte(), 0x6f)) // dec0ded
+                write(byteArrayOf(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1)) // ffffffffffffffff
+            }
         assertEquals(0U, buffer.readULeb128())
         assertEquals(0xDEC0DEDu, buffer.readULeb128())
         assertEquals((-1).toULong(), buffer.readULeb128())
@@ -109,25 +111,27 @@ class UnsafeBufferOperationsSamples {
                 if (exhausted()) throw EOFException()
                 // Pick the first segment and read from it either until the segment exhausted,
                 // or the number if finished.
-                val _ = UnsafeBufferOperations.readFromHead(this) { readCtx, segment ->
-                    // Iterate over every byte contained in the segment
-                    for (offset in 0..< segment.size) {
-                        if (shift > 28) throw NumberFormatException("Overflow")
-                        // Read the byte at the offset
-                        val b = readCtx.getUnchecked(segment, offset)
-                        val lsb = b.toUInt() and 0x7fu
-                        result = result or (lsb shl shift)
-                        shift += 7
-                        if (b >= 0) {
-                            finished = true
-                            // We're done, return how many bytes were consumed from the segment
-                            return@readFromHead offset + 1
+                discardReturnValue(
+                    UnsafeBufferOperations.readFromHead(this) { readCtx, segment ->
+                        // Iterate over every byte contained in the segment
+                        for (offset in 0..<segment.size) {
+                            if (shift > 28) throw NumberFormatException("Overflow")
+                            // Read the byte at the offset
+                            val b = readCtx.getUnchecked(segment, offset)
+                            val lsb = b.toUInt() and 0x7fu
+                            result = result or (lsb shl shift)
+                            shift += 7
+                            if (b >= 0) {
+                                finished = true
+                                // We're done, return how many bytes were consumed from the segment
+                                return@readFromHead offset + 1
+                            }
                         }
-                    }
-                    // We read all the data from segment, but not finished yet.
-                    // Return segment.size to indicate that the head segment was consumed in full.
-                    segment.size
-                }
+                        // We read all the data from segment, but not finished yet.
+                        // Return segment.size to indicate that the head segment was consumed in full.
+                        segment.size
+                    },
+                )
             }
             return result
         }
@@ -152,22 +156,24 @@ class UnsafeBufferOperationsSamples {
             // In the worst case, int will be encoded using 5 bytes
             val minCapacity = 5
             // Acquire a segment that can fit at least 5 bytes
-            val _ = UnsafeBufferOperations.writeToTail(this, minCapacity) { ctx, segment ->
-                // Count how many bytes were actually written
-                var bytesWritten = 0
-                var remainingBits = value
-                do {
-                    var b = remainingBits and 0x7fu
-                    remainingBits = remainingBits shr 7
-                    if (remainingBits != 0u) {
-                        b = 0x80u or b
-                    }
-                    // Append a byte to the segment
-                    ctx.setUnchecked(segment, bytesWritten++, b.toByte())
-                } while (remainingBits != 0u)
-                // Return how many bytes were actually written
-                bytesWritten
-            }
+            discardReturnValue(
+                UnsafeBufferOperations.writeToTail(this, minCapacity) { ctx, segment ->
+                    // Count how many bytes were actually written
+                    var bytesWritten = 0
+                    var remainingBits = value
+                    do {
+                        var b = remainingBits and 0x7fu
+                        remainingBits = remainingBits shr 7
+                        if (remainingBits != 0u) {
+                            b = 0x80u or b
+                        }
+                        // Append a byte to the segment
+                        ctx.setUnchecked(segment, bytesWritten++, b.toByte())
+                    } while (remainingBits != 0u)
+                    // Return how many bytes were actually written
+                    bytesWritten
+                },
+            )
         }
 
         val buffer = Buffer()
@@ -180,20 +186,22 @@ class UnsafeBufferOperationsSamples {
         // update buffer's state after writing all bytes
 
         val minCapacity = 5 // in the worst case, int will be encoded using 5 bytes
-        val _ = UnsafeBufferOperations.writeToTail(this, minCapacity) { ctx, seg ->
-            var bytesWritten = 0
-            var remainingBits = value
-            do {
-                var b = remainingBits and 0x7fu
-                remainingBits = remainingBits shr 7
-                if (remainingBits != 0u) {
-                    b = 0x80u or b
-                }
-                ctx.setUnchecked(seg, bytesWritten++, b.toByte())
-            } while (remainingBits != 0u)
-            // return how many bytes were actually written
-            bytesWritten
-        }
+        discardReturnValue(
+            UnsafeBufferOperations.writeToTail(this, minCapacity) { ctx, seg ->
+                var bytesWritten = 0
+                var remainingBits = value
+                do {
+                    var b = remainingBits and 0x7fu
+                    remainingBits = remainingBits shr 7
+                    if (remainingBits != 0u) {
+                        b = 0x80u or b
+                    }
+                    ctx.setUnchecked(seg, bytesWritten++, b.toByte())
+                } while (remainingBits != 0u)
+                // return how many bytes were actually written
+                bytesWritten
+            },
+        )
     }
 
     @OptIn(ExperimentalUnsignedTypes::class, UnsafeIoApi::class)
@@ -211,21 +219,23 @@ class UnsafeBufferOperationsSamples {
                 // optimize small values encoding: anything below 127 will be encoded using a single byte anyway
                 if (value < 0x80u) {
                     // we need a space for a single byte, but if there's more - we'll try to fill it
-                    val _ = UnsafeBufferOperations.writeToTail(this, 1) { ctx, seg ->
-                        var bytesWritten = 0
-                        ctx.setUnchecked(seg, bytesWritten++, value.toByte())
+                    discardReturnValue(
+                        UnsafeBufferOperations.writeToTail(this, 1) { ctx, seg ->
+                            var bytesWritten = 0
+                            ctx.setUnchecked(seg, bytesWritten++, value.toByte())
 
-                        // let's save as much succeeding small values as possible
-                        val remainingDataLength = data.size - index
-                        val remainingCapacity = seg.remainingCapacity - 1
-                        for (i in 0 until min(remainingDataLength, remainingCapacity)) {
-                            val b = data[index]
-                            if (b >= 0x80u) break
-                            ctx.setUnchecked(seg, bytesWritten++, b.toByte())
-                            index++
-                        }
-                        bytesWritten
-                    }
+                            // let's save as much succeeding small values as possible
+                            val remainingDataLength = data.size - index
+                            val remainingCapacity = seg.remainingCapacity - 1
+                            for (i in 0 until min(remainingDataLength, remainingCapacity)) {
+                                val b = data[index]
+                                if (b >= 0x80u) break
+                                ctx.setUnchecked(seg, bytesWritten++, b.toByte())
+                                index++
+                            }
+                            bytesWritten
+                        },
+                    )
                 } else {
                     writeULEB128(value)
                 }
@@ -246,11 +256,12 @@ class UnsafeBufferOperationsSamples {
             for (idx in table.indices) {
                 table[idx] = idx.toUInt()
                 for (bit in 8 downTo 1) {
-                    table[idx] = if (table[idx] % 2U == 0U) {
-                        table[idx].shr(1)
-                    } else {
-                        table[idx].shr(1).xor(0xEDB88320U)
-                    }
+                    table[idx] =
+                        if (table[idx] % 2U == 0U) {
+                            table[idx].shr(1)
+                        } else {
+                            table[idx].shr(1).xor(0xEDB88320U)
+                        }
                 }
             }
             return table
@@ -289,11 +300,12 @@ class UnsafeBufferOperationsSamples {
             for (idx in table.indices) {
                 table[idx] = idx.toUInt()
                 for (bit in 8 downTo 1) {
-                    table[idx] = if (table[idx] % 2U == 0U) {
-                        table[idx].shr(1)
-                    } else {
-                        table[idx].shr(1).xor(0xEDB88320U)
-                    }
+                    table[idx] =
+                        if (table[idx] % 2U == 0U) {
+                            table[idx].shr(1)
+                        } else {
+                            table[idx].shr(1).xor(0xEDB88320U)
+                        }
                 }
             }
             return table

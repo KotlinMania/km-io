@@ -6,11 +6,13 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.Buffer
-import io.github.kotlinmania.io.UnsafeIoApi
-import io.github.kotlinmania.io.assertArrayEquals
-import io.github.kotlinmania.io.writeString
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class UnsafeBufferOperationsIterationTest {
     @Test
@@ -64,7 +66,7 @@ class UnsafeBufferOperationsIterationTest {
         val buffer = Buffer()
 
         val expectedSegments = 10
-        for (i in 0 ..< expectedSegments) {
+        for (i in 0..<expectedSegments) {
             UnsafeBufferOperations.moveToTail(buffer, byteArrayOf(i.toByte()))
         }
 
@@ -118,26 +120,27 @@ class UnsafeBufferOperationsIterationTest {
         val thirdSegmentData = "; that's a third segment".encodeToByteArray()
         UnsafeBufferOperations.moveToTail(buffer, thirdSegmentData)
 
-        val startOfSegmentOffsets = longArrayOf(
-            0,
-            firstSegmentData.size.toLong(),
-            (firstSegmentData.size + secondSegmentData.size).toLong(),
-            (firstSegmentData.size + secondSegmentData.size + thirdSegmentData.size).toLong()
-        )
+        val startOfSegmentOffsets =
+            longArrayOf(
+                0,
+                firstSegmentData.size.toLong(),
+                (firstSegmentData.size + secondSegmentData.size).toLong(),
+                (firstSegmentData.size + secondSegmentData.size + thirdSegmentData.size).toLong(),
+            )
 
         val segmentsData = arrayOf(firstSegmentData, secondSegmentData, thirdSegmentData)
 
-        for (limitIdx in 1 ..< startOfSegmentOffsets.size) {
+        for (limitIdx in 1..<startOfSegmentOffsets.size) {
             val startOffset = startOfSegmentOffsets[limitIdx - 1]
             val limitOffset = startOfSegmentOffsets[limitIdx]
 
-            for (offset in startOffset ..< limitOffset) {
+            for (offset in startOffset..<limitOffset) {
                 UnsafeBufferOperations.iterate(buffer, offset) { ctx, seg, o ->
                     assertNotNull(seg)
                     assertEquals(startOffset, o)
 
                     ctx.withData(seg) { data, startIndex, endIndex ->
-                        val slice = data.sliceArray(startIndex ..< endIndex)
+                        val slice = data.sliceArray(startIndex..<endIndex)
                         assertArrayEquals(segmentsData[limitIdx - 1], slice)
                     }
                 }

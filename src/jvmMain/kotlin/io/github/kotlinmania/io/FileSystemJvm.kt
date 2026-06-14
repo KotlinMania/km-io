@@ -24,8 +24,10 @@ private class NioMover : Mover {
         }
         try {
             Files.move(
-                source.file.toPath(), destination.file.toPath(),
-                StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING
+                source.file.toPath(),
+                destination.file.toPath(),
+                StandardCopyOption.ATOMIC_MOVE,
+                StandardCopyOption.REPLACE_EXISTING,
             )
         } catch (e: Throwable) {
             if (e is IOException) throw e
@@ -40,75 +42,74 @@ private val mover: Mover by lazy {
         NioMover()
     } catch (e: ClassNotFoundException) {
         object : Mover {
-            override fun move(source: Path, destination: Path) {
-                throw UnsupportedOperationException("Atomic move not supported")
-            }
+            override fun move(source: Path, destination: Path): Unit = throw UnsupportedOperationException("Atomic move not supported")
         }
     }
 }
 
 @JvmField
-public actual val SystemFileSystem: FileSystem = object : SystemFileSystemImpl() {
+public actual val SystemFileSystem: FileSystem =
+    object : SystemFileSystemImpl() {
+        override fun exists(path: Path): Boolean = path.file.exists()
 
-    override fun exists(path: Path): Boolean {
-        return path.file.exists()
-    }
-
-    override fun delete(path: Path, mustExist: Boolean) {
-        if (!exists(path)) {
-            if (mustExist) {
-                throw FileNotFoundException("File does not exist: ${path.file}")
+        override fun delete(path: Path, mustExist: Boolean) {
+            if (!exists(path)) {
+                if (mustExist) {
+                    throw FileNotFoundException("File does not exist: ${path.file}")
+                }
+                return
             }
-            return
-        }
-        if (!path.file.delete()) {
-            throw IOException("Deletion failed")
-        }
-    }
-
-    override fun createDirectories(path: Path, mustCreate: Boolean) {
-        if (!path.file.mkdirs()) {
-            if (mustCreate) {
-                throw IOException("Path already exist: $path")
-            }
-            if (path.file.isFile) {
-                throw IOException("Path already exists and it's a file: $path")
+            if (!path.file.delete()) {
+                throw IOException("Deletion failed")
             }
         }
-    }
 
-    override fun atomicMove(source: Path, destination: Path) {
-        mover.move(source, destination)
-    }
+        override fun createDirectories(path: Path, mustCreate: Boolean) {
+            if (!path.file.mkdirs()) {
+                if (mustCreate) {
+                    throw IOException("Path already exist: $path")
+                }
+                if (path.file.isFile) {
+                    throw IOException("Path already exists and it's a file: $path")
+                }
+            }
+        }
 
-    override fun metadataOrNull(path: Path): FileMetadata? {
-        if (!path.file.exists()) return null
-        return FileMetadata(path.file.isFile, path.file.isDirectory,
-            if (path.file.isFile) path.file.length() else -1L)
-    }
+        override fun atomicMove(source: Path, destination: Path) {
+            mover.move(source, destination)
+        }
 
-    override fun source(path: Path): RawSource = FileInputStream(path.file).asSource()
+        override fun metadataOrNull(path: Path): FileMetadata? {
+            if (!path.file.exists()) return null
+            return FileMetadata(
+                path.file.isFile,
+                path.file.isDirectory,
+                if (path.file.isFile) path.file.length() else -1L,
+            )
+        }
 
-    override fun sink(path: Path, append: Boolean): RawSink = FileOutputStream(path.file, append).asSink()
+        override fun source(path: Path): RawSource = FileInputStream(path.file).asSource()
 
-    override fun resolve(path: Path): Path {
-        if (!path.file.exists()) throw FileNotFoundException(path.file.absolutePath)
-        return Path(path.file.canonicalFile)
-    }
+        override fun sink(path: Path, append: Boolean): RawSink = FileOutputStream(path.file, append).asSink()
 
-    override fun list(directory: Path): Collection<Path> {
-        val file = directory.file
-        if (!file.exists()) throw FileNotFoundException(file.absolutePath)
-        if (!file.isDirectory) throw IOException("Not a directory: ${file.absolutePath}")
-        return buildList {
-            file.list()?.forEach { childName ->
-                add(Path(directory, childName))
+        override fun resolve(path: Path): Path {
+            if (!path.file.exists()) throw FileNotFoundException(path.file.absolutePath)
+            return Path(path.file.canonicalFile)
+        }
+
+        override fun list(directory: Path): Collection<Path> {
+            val file = directory.file
+            if (!file.exists()) throw FileNotFoundException(file.absolutePath)
+            if (!file.isDirectory) throw IOException("Not a directory: ${file.absolutePath}")
+            return buildList {
+                file.list()?.forEach { childName ->
+                    add(Path(directory, childName))
+                }
             }
         }
     }
-}
 
 @JvmField
-public actual val SystemTemporaryDirectory: Path = Path(System.getProperty("java.io.tmpdir") ?: "/tmp")
+public actual val SystemTemporaryDirectory: Path = Path(System.getProperty("java.io.tmpdir"))
 
 public actual typealias FileNotFoundException = java.io.FileNotFoundException

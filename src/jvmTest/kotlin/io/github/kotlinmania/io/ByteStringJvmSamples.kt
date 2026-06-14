@@ -5,10 +5,11 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
 import java.nio.ByteBuffer
 import java.nio.ReadOnlyBufferException
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 public class ByteStringSamplesJvm {
     @Test

@@ -69,9 +69,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import io.github.kotlinmania.io.UnsafeBufferOperations
-import io.github.kotlinmania.io.withData
 import kotlin.math.min
 
 /**
@@ -206,7 +203,7 @@ public fun Sink.writeString(chars: CharSequence, startIndex: Int = 0, endIndex: 
  */
 @OptIn(InternalIoApi::class)
 public fun Source.readString(): String {
-    val _ = request(Long.MAX_VALUE) // Request all data
+    discardReturnValue(request(Long.MAX_VALUE)) // Request all data
     return buffer.commonReadUtf8(buffer.size)
 }
 
@@ -217,9 +214,7 @@ public fun Source.readString(): String {
  *
  * @sample io.github.kotlinmania.io.KotlinxIoCoreCommonSamples.readUtf8
  */
-public fun Buffer.readString(): String {
-    return commonReadUtf8(size)
-}
+public fun Buffer.readString(): String = commonReadUtf8(size)
 
 /**
  * Removes [byteCount] bytes from this source, decodes them as UTF-8, and returns the string.
@@ -474,49 +469,57 @@ private inline fun Buffer.commonWriteUtf8(beginIndex: Int, endIndex: Int, charAt
 
         when {
             c < 0x80 -> {
-                val _ = UnsafeBufferOperations.writeToTail(this, 1) { ctx, segment ->
-                    val segmentOffset = -i
-                    val runLimit = minOf(endIndex, i + segment.remainingCapacity)
+                discardReturnValue(
+                    UnsafeBufferOperations.writeToTail(this, 1) { ctx, segment ->
+                        val segmentOffset = -i
+                        val runLimit = minOf(endIndex, i + segment.remainingCapacity)
 
-                    // Emit a 7-bit character with 1 byte.
-                    ctx.setUnchecked(segment, segmentOffset + i++, c.toByte()) // 0xxxxxxx
-
-                    // Fast-path contiguous runs of ASCII characters. This is ugly, but yields a ~4x performance
-                    // improvement over independent calls to writeByte().
-                    while (i < runLimit) {
-                        c = charAt(i).code
-                        if (c >= 0x80) break
+                        // Emit a 7-bit character with 1 byte.
                         ctx.setUnchecked(segment, segmentOffset + i++, c.toByte()) // 0xxxxxxx
-                    }
 
-                    i + segmentOffset // Equivalent to i - (previous i).
-                }
+                        // Fast-path contiguous runs of ASCII characters. This is ugly, but yields a ~4x performance
+                        // improvement over independent calls to writeByte().
+                        while (i < runLimit) {
+                            c = charAt(i).code
+                            if (c >= 0x80) break
+                            ctx.setUnchecked(segment, segmentOffset + i++, c.toByte()) // 0xxxxxxx
+                        }
+
+                        i + segmentOffset // Equivalent to i - (previous i).
+                    },
+                )
             }
 
             c < 0x800 -> {
                 // Emit a 11-bit character with 2 bytes.
-                val _ = UnsafeBufferOperations.writeToTail(this, 2) { ctx, segment ->
-                    ctx.setUnchecked(
-                        segment, 0,
-                        (c shr 6 or 0xc0).toByte(), // 110xxxxx
-                        (c and 0x3f or 0x80).toByte() // 10xxxxxx
-                    )
-                    2
-                }
+                discardReturnValue(
+                    UnsafeBufferOperations.writeToTail(this, 2) { ctx, segment ->
+                        ctx.setUnchecked(
+                            segment,
+                            0,
+                            (c shr 6 or 0xc0).toByte(), // 110xxxxx
+                            (c and 0x3f or 0x80).toByte(), // 10xxxxxx
+                        )
+                        2
+                    },
+                )
                 i++
             }
 
             c < 0xd800 || c > 0xdfff -> {
                 // Emit a 16-bit character with 3 bytes.
-                val _ = UnsafeBufferOperations.writeToTail(this, 3) { ctx, segment ->
-                    ctx.setUnchecked(
-                        segment, 0,
-                        (c shr 12 or 0xe0).toByte(), // 1110xxxx
-                        (c shr 6 and 0x3f or 0x80).toByte(), // 10xxxxxx
-                        (c and 0x3f or 0x80).toByte() // 10xxxxxx
-                    )
-                    3
-                }
+                discardReturnValue(
+                    UnsafeBufferOperations.writeToTail(this, 3) { ctx, segment ->
+                        ctx.setUnchecked(
+                            segment,
+                            0,
+                            (c shr 12 or 0xe0).toByte(), // 1110xxxx
+                            (c shr 6 and 0x3f or 0x80).toByte(), // 10xxxxxx
+                            (c and 0x3f or 0x80).toByte(), // 10xxxxxx
+                        )
+                        3
+                    },
+                )
                 i++
             }
 
@@ -535,15 +538,19 @@ private inline fun Buffer.commonWriteUtf8(beginIndex: Int, endIndex: Int, charAt
                     val codePoint = 0x010000 + (c and 0x03ff shl 10 or (low and 0x03ff))
 
                     // Emit a 21-bit character with 4 bytes.
-                    val _ = UnsafeBufferOperations.writeToTail(this, 4) { ctx, segment ->
-                        ctx.setUnchecked(segment, 0,
-                            (codePoint shr 18 or 0xf0).toByte(), // 11110xxx
-                            (codePoint shr 12 and 0x3f or 0x80).toByte(), // 10xxxxxx
-                            (codePoint shr 6 and 0x3f or 0x80).toByte(), // 10xxyyyy
-                            (codePoint and 0x3f or 0x80).toByte() // 10yyyyyy
-                        )
-                        4
-                    }
+                    discardReturnValue(
+                        UnsafeBufferOperations.writeToTail(this, 4) { ctx, segment ->
+                            ctx.setUnchecked(
+                                segment,
+                                0,
+                                (codePoint shr 18 or 0xf0).toByte(), // 11110xxx
+                                (codePoint shr 12 and 0x3f or 0x80).toByte(), // 10xxxxxx
+                                (codePoint shr 6 and 0x3f or 0x80).toByte(), // 10xxyyyy
+                                (codePoint and 0x3f or 0x80).toByte(), // 10yyyyyy
+                            )
+                            4
+                        },
+                    )
                     i += 2
                 }
             }
@@ -556,7 +563,7 @@ private fun Buffer.commonWriteUtf8CodePoint(codePoint: Int) {
     when {
         codePoint < 0 || codePoint > 0x10ffff -> {
             throw IllegalArgumentException(
-                "Code point value is out of Unicode codespace 0..0x10ffff: 0x${codePoint.toHexString()} ($codePoint)"
+                "Code point value is out of Unicode codespace 0..0x10ffff: 0x${codePoint.toHexString()} ($codePoint)",
             )
         }
 
@@ -567,11 +574,13 @@ private fun Buffer.commonWriteUtf8CodePoint(codePoint: Int) {
 
         codePoint < 0x800 -> {
             // Emit a 11-bit code point with 2 bytes.
-            val _ = UnsafeBufferOperations.writeToTail(this, 2) { ctx, segment ->
-                ctx.setUnchecked(segment, 0, (codePoint shr 6 or 0xc0).toByte()) // 110xxxxx
-                ctx.setUnchecked(segment, 1, (codePoint and 0x3f or 0x80).toByte()) // 10xxxxxx
-                2
-            }
+            discardReturnValue(
+                UnsafeBufferOperations.writeToTail(this, 2) { ctx, segment ->
+                    ctx.setUnchecked(segment, 0, (codePoint shr 6 or 0xc0).toByte()) // 110xxxxx
+                    ctx.setUnchecked(segment, 1, (codePoint and 0x3f or 0x80).toByte()) // 10xxxxxx
+                    2
+                },
+            )
         }
 
         codePoint in 0xd800..0xdfff -> {
@@ -581,23 +590,27 @@ private fun Buffer.commonWriteUtf8CodePoint(codePoint: Int) {
 
         codePoint < 0x10000 -> {
             // Emit a 16-bit code point with 3 bytes.
-            val _ = UnsafeBufferOperations.writeToTail(this, 3) { ctx, segment ->
-                ctx.setUnchecked(segment, 0, (codePoint shr 12 or 0xe0).toByte()) // 1110xxxx
-                ctx.setUnchecked(segment, 1, (codePoint shr 6 and 0x3f or 0x80).toByte()) // 10xxxxxx
-                ctx.setUnchecked(segment, 2, (codePoint and 0x3f or 0x80).toByte()) // 10xxxxxx
-                3
-            }
+            discardReturnValue(
+                UnsafeBufferOperations.writeToTail(this, 3) { ctx, segment ->
+                    ctx.setUnchecked(segment, 0, (codePoint shr 12 or 0xe0).toByte()) // 1110xxxx
+                    ctx.setUnchecked(segment, 1, (codePoint shr 6 and 0x3f or 0x80).toByte()) // 10xxxxxx
+                    ctx.setUnchecked(segment, 2, (codePoint and 0x3f or 0x80).toByte()) // 10xxxxxx
+                    3
+                },
+            )
         }
 
         else -> { // [0x10000, 0x10ffff]
             // Emit a 21-bit code point with 4 bytes.
-            val _ = UnsafeBufferOperations.writeToTail(this, 4) { ctx, segment ->
-                ctx.setUnchecked(segment,0, (codePoint shr 18 or 0xf0).toByte()) // 11110xxx
-                ctx.setUnchecked(segment,1, (codePoint shr 12 and 0x3f or 0x80).toByte()) // 10xxxxxx
-                ctx.setUnchecked(segment,2, (codePoint shr 6 and 0x3f or 0x80).toByte()) // 10xxyyyy
-                ctx.setUnchecked(segment,3, (codePoint and 0x3f or 0x80).toByte()) // 10yyyyyy
-                4
-            }
+            discardReturnValue(
+                UnsafeBufferOperations.writeToTail(this, 4) { ctx, segment ->
+                    ctx.setUnchecked(segment, 0, (codePoint shr 18 or 0xf0).toByte()) // 11110xxx
+                    ctx.setUnchecked(segment, 1, (codePoint shr 12 and 0x3f or 0x80).toByte()) // 10xxxxxx
+                    ctx.setUnchecked(segment, 2, (codePoint shr 6 and 0x3f or 0x80).toByte()) // 10xxyyyy
+                    ctx.setUnchecked(segment, 3, (codePoint and 0x3f or 0x80).toByte()) // 10yyyyyy
+                    4
+                },
+            )
         }
     }
 }

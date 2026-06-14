@@ -25,7 +25,9 @@ import kotlin.math.max
  * @sample io.github.kotlinmania.io.ByteStringSamples.builderSample
  * @sample io.github.kotlinmania.io.ByteStringSamples.builderSampleWithoutAdditionalAllocs
  */
-public class ByteStringBuilder(initialCapacity: Int = 0) {
+public class ByteStringBuilder(
+    initialCapacity: Int = 0,
+) {
     private var buffer = ByteArray(initialCapacity)
     private var offset: Int = 0
 
@@ -79,8 +81,10 @@ public class ByteStringBuilder(initialCapacity: Int = 0) {
     public fun append(array: ByteArray, startIndex: Int = 0, endIndex: Int = array.size) {
         require(startIndex <= endIndex) { "startIndex ($startIndex) > endIndex ($endIndex)" }
         if (startIndex < 0 || endIndex > array.size) {
-            throw IndexOutOfBoundsException("startIndex ($startIndex) and endIndex ($endIndex) represents " +
-                    "an interval out of array's bounds [0..${array.size}).")
+            throw IndexOutOfBoundsException(
+                "startIndex ($startIndex) and endIndex ($endIndex) represents " +
+                    "an interval out of array's bounds [0..${array.size}).",
+            )
         }
         ensureCapacity(offset + endIndex - startIndex)
 
@@ -118,11 +122,8 @@ public fun ByteStringBuilder.append(byteString: ByteString) {
  */
 public fun ByteStringBuilder.append(vararg bytes: Byte): Unit = append(bytes)
 
-
 /**
  * Builds new byte string by populating newly created [ByteStringBuilder] initialized with the given [capacity]
  * using provided [builderAction] and then converting it to [ByteString].
  */
-public inline fun buildByteString(capacity: Int = 0, builderAction: ByteStringBuilder.() -> Unit): ByteString {
-    return ByteStringBuilder(capacity).apply(builderAction).toByteString()
-}
+public inline fun buildByteString(capacity: Int = 0, builderAction: ByteStringBuilder.() -> Unit): ByteString = ByteStringBuilder(capacity).apply(builderAction).toByteString()

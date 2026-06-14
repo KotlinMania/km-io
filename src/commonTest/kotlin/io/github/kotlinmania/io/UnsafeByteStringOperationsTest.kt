@@ -7,7 +7,6 @@ package io.github.kotlinmania.io
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import io.github.kotlinmania.io.encodeToByteString
 
 @OptIn(UnsafeByteStringApi::class)
 class UnsafeByteStringOperationsTest {

@@ -91,13 +91,14 @@ class ByteStringBuilderTest {
 
     @Test
     fun appendMultipleValues() {
-        val string = with(ByteStringBuilder()) {
-            append(42)
-            append(ByteArray(10) { it.toByte() })
-            append(42U)
-            append(ByteString(10, 5, 57))
-            toByteString()
-        }
+        val string =
+            with(ByteStringBuilder()) {
+                append(42)
+                append(ByteArray(10) { it.toByte() })
+                append(42U)
+                append(ByteString(10, 5, 57))
+                toByteString()
+            }
 
         assertEquals(ByteString(42, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 42, 10, 5, 57), string)
     }

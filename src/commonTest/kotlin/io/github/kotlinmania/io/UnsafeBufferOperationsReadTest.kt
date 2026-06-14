@@ -5,10 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.Buffer
-import io.github.kotlinmania.io.UnsafeIoApi
-import io.github.kotlinmania.io.assertArrayEquals
-import io.github.kotlinmania.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -24,18 +20,19 @@ class UnsafeBufferOperationsReadTest {
         val buffer = Buffer().apply { writeString("hello world") }
 
         val bytesCalled: Boolean
-        UnsafeBufferOperations.readFromHead(buffer) { _, _, _ ->
-            bytesCalled = true
-            0
-        }.also { assertEquals(0, it) }
+        UnsafeBufferOperations
+            .readFromHead(buffer) { _, _, _ ->
+                bytesCalled = true
+                0
+            }.also { assertEquals(0, it) }
         assertTrue(bytesCalled)
 
-
         val segmentsCalled: Boolean
-        UnsafeBufferOperations.readFromHead(buffer) { _, _ ->
-            segmentsCalled = true
-            0
-        }.also { assertEquals(0, it) }
+        UnsafeBufferOperations
+            .readFromHead(buffer) { _, _ ->
+                segmentsCalled = true
+                0
+            }.also { assertEquals(0, it) }
         assertTrue(segmentsCalled)
     }
 
@@ -44,12 +41,13 @@ class UnsafeBufferOperationsReadTest {
         val buffer = Buffer().apply { writeString("hello world") }
 
         val head = buffer.head!!
-        UnsafeBufferOperations.readFromHead(buffer) { data, startIndex, endIndex ->
-            assertTrue(endIndex <= data.size)
-            assertEquals(0, startIndex)
-            assertEquals(head.size, endIndex)
-            0
-        }.also { assertEquals(0, it) }
+        UnsafeBufferOperations
+            .readFromHead(buffer) { data, startIndex, endIndex ->
+                assertTrue(endIndex <= data.size)
+                assertEquals(0, startIndex)
+                assertEquals(head.size, endIndex)
+                0
+            }.also { assertEquals(0, it) }
     }
 
     @Test
@@ -59,10 +57,11 @@ class UnsafeBufferOperationsReadTest {
 
         val buffer = Buffer().apply { write(expectedData) }
         for (idx in actualData.indices) {
-            val read = UnsafeBufferOperations.readFromHead(buffer) { data, startIndex, _ ->
-                actualData[idx] = data[startIndex]
-                1
-            }
+            val read =
+                UnsafeBufferOperations.readFromHead(buffer) { data, startIndex, _ ->
+                    actualData[idx] = data[startIndex]
+                    1
+                }
             assertEquals(1, read)
             assertEquals(actualData.size - idx - 1, buffer.size.toInt())
         }
@@ -86,9 +85,10 @@ class UnsafeBufferOperationsReadTest {
     @Test
     fun readEverything() {
         val buffer = Buffer().apply { writeString("hello world") }
-        val read1 = UnsafeBufferOperations.readFromHead(buffer) { _, startIndex, endIndex ->
-            endIndex - startIndex
-        }
+        val read1 =
+            UnsafeBufferOperations.readFromHead(buffer) { _, startIndex, endIndex ->
+                endIndex - startIndex
+            }
         assertEquals(11, read1)
         assertTrue(buffer.exhausted())
 
@@ -121,10 +121,11 @@ class UnsafeBufferOperationsReadTest {
         val head = buffer.head!!
         assertEquals(bytesToSkip, head.pos)
 
-        UnsafeBufferOperations.readFromHead(buffer) { _, startIndex, endIndex ->
-            assertEquals(2, endIndex - startIndex)
-            2
-        }.also { assertEquals(2, it) }
+        UnsafeBufferOperations
+            .readFromHead(buffer) { _, startIndex, endIndex ->
+                assertEquals(2, endIndex - startIndex)
+                2
+            }.also { assertEquals(2, it) }
 
         assertEquals(extraBytesCount, buffer.size.toInt())
     }
@@ -140,10 +141,11 @@ class UnsafeBufferOperationsReadTest {
         val head = buffer.head!!
         assertEquals(bytesToSkip, head.pos)
 
-        UnsafeBufferOperations.readFromHead(buffer) { _, seg ->
-            assertEquals(2, seg.size)
-            2
-        }.also { assertEquals(2, it) }
+        UnsafeBufferOperations
+            .readFromHead(buffer) { _, seg ->
+                assertEquals(2, seg.size)
+                2
+            }.also { assertEquals(2, it) }
 
         assertEquals(extraBytesCount, buffer.size.toInt())
     }

@@ -7,9 +7,25 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.*
-import platform.posix.*
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.ByteVarOf
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.get
+import kotlinx.cinterop.toKString
+import kotlinx.cinterop.usePinned
+import platform.posix.FILE
+import platform.posix.errno
+import platform.posix.fclose
+import platform.posix.feof
+import platform.posix.ferror
+import platform.posix.fflush
+import platform.posix.fread
+import platform.posix.fwrite
+import platform.posix.strerror
 
 /*
  * The very base skeleton just to play around
@@ -17,40 +33,39 @@ import platform.posix.*
 
 public actual class Path internal constructor(
     rawPath: String,
-    @Suppress("UNUSED_PARAMETER") any: Any?
+    @Suppress("UNUSED_PARAMETER") any: Any?,
 ) {
-    internal val path = removeTrailingSeparators(rawPath)
+    internal val pathString = removeTrailingSeparators(rawPath)
 
     public actual val parent: Path?
         get() {
             when {
-                path.isEmpty() -> return null
+                pathString.isEmpty() -> return null
             }
-            val parentName = dirnameImpl(path)
+            val parentName = dirnameImpl(pathString)
             return when {
                 parentName.isEmpty() -> return null
-                parentName == path -> return null
+                parentName == pathString -> return null
                 else -> Path(parentName)
             }
         }
 
-    public actual override fun toString(): String = path
+    public actual override fun toString(): String = pathString
+
     actual override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Path) return false
 
-        return path == other.path
+        return pathString == other.pathString
     }
 
-    actual override fun hashCode(): Int {
-        return path.hashCode()
-    }
+    actual override fun hashCode(): Int = pathString.hashCode()
 
-    public actual val isAbsolute: Boolean = isAbsoluteImpl(path)
+    public actual val isAbsolute: Boolean = isAbsoluteImpl(pathString)
     public actual val name: String
         get() {
-            if (path.isEmpty() || path == SystemPathSeparator.toString()) return ""
-            return basenameImpl(path)
+            if (pathString.isEmpty() || pathString == SystemPathSeparator.toString()) return ""
+            return basenameImpl(pathString)
         }
 }
 
@@ -71,20 +86,21 @@ private fun throwIOExceptionForErrno(operation: String): Nothing {
 }
 
 internal class FileSource(
-    private val file: CPointer<FILE>
+    private val file: CPointer<FILE>,
 ) : RawSource {
     private var closed = false
 
     override fun readAtMostTo(
         sink: Buffer,
-        byteCount: Long
+        byteCount: Long,
     ): Long {
         val temporaryBuffer = ByteArray(byteCount.toInt())
 
         // Copy bytes from the file to the segment.
-        val bytesRead = temporaryBuffer.usePinned { pinned ->
-            variantFread(pinned.addressOf(0), byteCount.toUInt(), file).toLong()
-        }
+        val bytesRead =
+            temporaryBuffer.usePinned { pinned ->
+                variantFread(pinned.addressOf(0), byteCount.toUInt(), file).toLong()
+            }
 
         sink.write(temporaryBuffer, 0, bytesRead.toInt())
 
@@ -109,24 +125,24 @@ internal class FileSource(
 internal fun variantFread(
     target: CPointer<ByteVarOf<Byte>>,
     byteCount: UInt,
-    file: CPointer<FILE>
+    file: CPointer<FILE>,
 ): UInt = fread(target, 1u, byteCount.convert(), file).convert()
 
 @OptIn(UnsafeNumber::class)
 internal fun variantFwrite(
     source: CPointer<ByteVar>,
     byteCount: UInt,
-    file: CPointer<FILE>
+    file: CPointer<FILE>,
 ): UInt = fwrite(source, 1u, byteCount.convert(), file).convert()
 
 internal class FileSink(
-    private val file: CPointer<FILE>
+    private val file: CPointer<FILE>,
 ) : RawSink {
     private var closed = false
 
     override fun write(
         source: Buffer,
-        byteCount: Long
+        byteCount: Long,
     ) {
         require(byteCount >= 0L) { "byteCount: $byteCount" }
         require(source.size >= byteCount) { "source.size=${source.size} < byteCount=$byteCount" }
@@ -134,9 +150,10 @@ internal class FileSink(
 
         val allContent = source.readByteArray(byteCount.toInt())
         // Copy bytes from that segment into the file.
-        val bytesWritten = allContent.usePinned { pinned ->
-            variantFwrite(pinned.addressOf(0), byteCount.toUInt(), file).toLong()
-        }
+        val bytesWritten =
+            allContent.usePinned { pinned ->
+                variantFwrite(pinned.addressOf(0), byteCount.toUInt(), file).toLong()
+            }
         if (bytesWritten < byteCount) {
             throwIOExceptionForErrno("file write")
         }

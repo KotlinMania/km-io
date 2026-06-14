@@ -5,8 +5,12 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(UnsafeIoApi::class)
 class UnsafeBufferOperationsMoveTest {
@@ -81,7 +85,7 @@ class UnsafeBufferOperationsMoveTest {
     fun moveMultipleSegments() {
         val buffer = Buffer()
         val segmentsCount = 10
-        for (i in 0 ..< segmentsCount) {
+        for (i in 0..<segmentsCount) {
             UnsafeBufferOperations.moveToTail(buffer, byteArrayOf(i.toByte()))
         }
         assertEquals(10, buffer.size)

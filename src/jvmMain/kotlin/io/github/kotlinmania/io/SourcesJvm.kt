@@ -20,7 +20,6 @@
  */
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.UnsafeBufferOperations
 import java.io.EOFException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -38,15 +37,17 @@ private fun Buffer.readStringImpl(byteCount: Long, charset: Charset): String {
     if (byteCount == 0L) return ""
 
     var result: String? = null
-    val _ = UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
-        val len = limit - pos
-        if (len >= byteCount) {
-            result = String(data, pos, byteCount.toInt(), charset)
-            byteCount.toInt()
-        } else {
-            0
-        }
-    }
+    discardReturnValue(
+        UnsafeBufferOperations.readFromHead(this) { data, pos, limit ->
+            val len = limit - pos
+            if (len >= byteCount) {
+                result = String(data, pos, byteCount.toInt(), charset)
+                byteCount.toInt()
+            } else {
+                0
+            }
+        },
+    )
     return result ?: String(readByteArray(byteCount.toInt()), charset)
 }
 
@@ -95,12 +96,13 @@ public fun Source.readString(byteCount: Long, charset: Charset): String {
  */
 @OptIn(InternalIoApi::class)
 public fun Source.asInputStream(): InputStream {
-    val isClosed: () -> Boolean = when (this) {
-        is RealSource -> this::closed
-        is Buffer -> {
-            { false }
+    val isClosed: () -> Boolean =
+        when (this) {
+            is RealSource -> this::closed
+            is Buffer -> {
+                { false }
+            }
         }
-    }
 
     return object : InputStream() {
         override fun read(): Int {
@@ -142,7 +144,7 @@ public fun Source.asInputStream(): InputStream {
 @OptIn(InternalIoApi::class)
 public fun Source.readAtMostTo(sink: ByteBuffer): Int {
     if (buffer.size == 0L) {
-        val _ = request(Segment.SIZE.toLong())
+        discardReturnValue(request(Segment.SIZE.toLong()))
         if (buffer.size == 0L) return -1
     }
 
@@ -153,12 +155,13 @@ public fun Source.readAtMostTo(sink: ByteBuffer): Int {
  * Returns [ReadableByteChannel] backed by this source. Closing the source will close the source.
  */
 public fun Source.asByteChannel(): ReadableByteChannel {
-    val isClosed: () -> Boolean = when (this) {
-        is RealSource -> this::closed
-        is Buffer -> {
-            { false }
+    val isClosed: () -> Boolean =
+        when (this) {
+            is RealSource -> this::closed
+            is Buffer -> {
+                { false }
+            }
         }
-    }
 
     return object : ReadableByteChannel {
         override fun close() {

@@ -8,11 +8,11 @@ package io.github.kotlinmania.io
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import io.github.kotlinmania.io.UnsafeBufferOperations
 
-private val HEX_DIGIT_BYTES = ByteArray(16) {
-    ((if (it < 10) '0'.code else ('a'.code - 10)) + it).toByte()
-}
+private val HEX_DIGIT_BYTES =
+    ByteArray(16) {
+        ((if (it < 10) '0'.code else ('a'.code - 10)) + it).toByte()
+    }
 
 /**
  * Writes two bytes containing [short], in the little-endian order, to this sink.
@@ -89,49 +89,79 @@ public fun Sink.writeDecimalLong(long: Long) {
 
     // Binary search for character width which favors matching lower numbers.
     var width =
-        if (v < 100000000L)
-            if (v < 10000L)
-                if (v < 100L)
-                    if (v < 10L) 1
-                    else 2
-                else if (v < 1000L) 3
-                else 4
-            else if (v < 1000000L)
-                if (v < 100000L) 5
-                else 6
-            else if (v < 10000000L) 7
-            else 8
-        else if (v < 1000000000000L)
-            if (v < 10000000000L)
-                if (v < 1000000000L) 9
-                else 10
-            else if (v < 100000000000L) 11
-            else 12
-        else if (v < 1000000000000000L)
-            if (v < 10000000000000L) 13
-            else if (v < 100000000000000L) 14
-            else 15
-        else if (v < 100000000000000000L)
-            if (v < 10000000000000000L) 16
-            else 17
-        else if (v < 1000000000000000000L) 18
-        else 19
+        if (v < 100000000L) {
+            if (v < 10000L) {
+                if (v < 100L) {
+                    if (v < 10L) {
+                        1
+                    } else {
+                        2
+                    }
+                } else if (v < 1000L) {
+                    3
+                } else {
+                    4
+                }
+            } else if (v < 1000000L) {
+                if (v < 100000L) {
+                    5
+                } else {
+                    6
+                }
+            } else if (v < 10000000L) {
+                7
+            } else {
+                8
+            }
+        } else if (v < 1000000000000L) {
+            if (v < 10000000000L) {
+                if (v < 1000000000L) {
+                    9
+                } else {
+                    10
+                }
+            } else if (v < 100000000000L) {
+                11
+            } else {
+                12
+            }
+        } else if (v < 1000000000000000L) {
+            if (v < 10000000000000L) {
+                13
+            } else if (v < 100000000000000L) {
+                14
+            } else {
+                15
+            }
+        } else if (v < 100000000000000000L) {
+            if (v < 10000000000000000L) {
+                16
+            } else {
+                17
+            }
+        } else if (v < 1000000000000000000L) {
+            18
+        } else {
+            19
+        }
     if (negative) {
         ++width
     }
 
     writeToInternalBuffer { buffer ->
-        val _ = UnsafeBufferOperations.writeToTail(buffer, width) { ctx, segment ->
-            for (pos in width - 1 downTo if (negative) 1 else 0) {
-                val digit = (v % 10).toByte()
-                ctx.setUnchecked(segment, pos, HEX_DIGIT_BYTES[digit.toInt()])
-                v /= 10
-            }
-            if (negative) {
-                ctx.setUnchecked(segment, 0, '-'.code.toByte())
-            }
-            width
-        }
+        discardReturnValue(
+            UnsafeBufferOperations.writeToTail(buffer, width) { ctx, segment ->
+                for (pos in width - 1 downTo if (negative) 1 else 0) {
+                    val digit = (v % 10).toByte()
+                    ctx.setUnchecked(segment, pos, HEX_DIGIT_BYTES[digit.toInt()])
+                    v /= 10
+                }
+                if (negative) {
+                    ctx.setUnchecked(segment, 0, '-'.code.toByte())
+                }
+                width
+            },
+        )
     }
 }
 
@@ -159,13 +189,15 @@ public fun Sink.writeHexadecimalUnsignedLong(long: Long) {
     val width = hexNumberLength(v)
 
     writeToInternalBuffer { buffer ->
-        val _ = UnsafeBufferOperations.writeToTail(buffer, width) { ctx, segment ->
-            for (pos in width - 1 downTo 0) {
-                ctx.setUnchecked(segment, pos, HEX_DIGIT_BYTES[v.toInt().and(0xF)])
-                v = v ushr 4
-            }
-            width
-        }
+        discardReturnValue(
+            UnsafeBufferOperations.writeToTail(buffer, width) { ctx, segment ->
+                for (pos in width - 1 downTo 0) {
+                    ctx.setUnchecked(segment, pos, HEX_DIGIT_BYTES[v.toInt().and(0xF)])
+                    v = v ushr 4
+                }
+                width
+            },
+        )
     }
 }
 

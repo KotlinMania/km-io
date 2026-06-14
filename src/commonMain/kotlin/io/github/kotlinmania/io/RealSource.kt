@@ -24,7 +24,7 @@ package io.github.kotlinmania.io
 import kotlin.jvm.JvmField
 
 internal class RealSource(
-    val source: RawSource
+    val source: RawSource,
 ) : Source {
     @JvmField
     var closed: Boolean = false
@@ -131,7 +131,7 @@ internal class RealSource(
             if (bufferField.size == 0L && source.readAtMostTo(bufferField, Segment.SIZE.toLong()) == -1L) {
                 throw EOFException(
                     "Source exhausted before skipping $byteCount bytes " +
-                            "(only ${remainingByteCount - byteCount} bytes were skipped)."
+                        "(only ${remainingByteCount - byteCount} bytes were skipped).",
                 )
             }
             val toSkip = minOf(remainingByteCount, bufferField.size)

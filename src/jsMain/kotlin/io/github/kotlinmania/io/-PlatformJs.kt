@@ -50,8 +50,9 @@ internal actual val isWindows: Boolean by lazy {
     getPlatformName().startsWith("Win", ignoreCase = true)
 }
 
-private fun getPlatformName(): String = js(
-    """
+private fun getPlatformName(): String =
+    js(
+        """
         (typeof navigator !== "undefined" && navigator.platform) || "unknown"
-    """
-)
+    """,
+    )

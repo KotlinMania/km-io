@@ -20,10 +20,29 @@ class ByteStringJvmTest {
         assertEquals(
             ByteString(
                 byteArrayOf(
-                    0, 0, 0, 0x68, 0, 0, 0, 0x65, 0, 0, 0, 0x6c,
-                    0, 0, 0, 0x6c, 0, 0, 0, 0x6f
-                )
-            ), str.encodeToByteString(Charsets.UTF_32)
+                    0,
+                    0,
+                    0,
+                    0x68,
+                    0,
+                    0,
+                    0,
+                    0x65,
+                    0,
+                    0,
+                    0,
+                    0x6c,
+                    0,
+                    0,
+                    0,
+                    0x6c,
+                    0,
+                    0,
+                    0,
+                    0x6f,
+                ),
+            ),
+            str.encodeToByteString(Charsets.UTF_32),
         )
     }
 
@@ -31,7 +50,7 @@ class ByteStringJvmTest {
     fun decodeToString() {
         assertEquals(
             "Ϭ",
-            ByteString(0xfeU.toByte(), 0xffU.toByte(), 0x03, 0xecU.toByte()).decodeToString(Charsets.UTF_16)
+            ByteString(0xfeU.toByte(), 0xffU.toByte(), 0x03, 0xecU.toByte()).decodeToString(Charsets.UTF_16),
         )
 
         assertEquals("123", ByteString("123".encodeToByteArray()).decodeToString(Charsets.UTF_8))

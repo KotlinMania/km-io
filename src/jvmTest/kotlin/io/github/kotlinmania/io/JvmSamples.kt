@@ -5,13 +5,15 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class KotlinxIoSamplesJvm {
     @Test
@@ -43,9 +45,10 @@ class KotlinxIoSamplesJvm {
         GZIPOutputStream(buffer.asOutputStream()).use {
             it.write(data)
         }
-        val decodedData = GZIPInputStream(buffer.asInputStream()).use {
-            it.readBytes()
-        }
+        val decodedData =
+            GZIPInputStream(buffer.asInputStream()).use {
+                it.readBytes()
+            }
         assertContentEquals(data, decodedData)
     }
 

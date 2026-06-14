@@ -36,4 +36,3 @@ internal actual val buffer: NodeJsBufferModule by lazy {
         throw UnsupportedOperationException("Module 'buffer' could not be imported", e)
     }
 }
-

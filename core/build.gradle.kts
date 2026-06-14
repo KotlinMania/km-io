@@ -66,14 +66,14 @@ kotlin {
                 useMocha {
                     timeout = "300s"
                 }
-                filter.setExcludePatterns("io.github.kotlinmania.io.files.*")
+                filter.setExcludePatterns("*SmokeFileTest*")
             }
         }
     }
     wasmJs {
         browser {
             testTask {
-                filter.setExcludePatterns("io.github.kotlinmania.io.files.*")
+                filter.setExcludePatterns("*SmokeFileTest*")
             }
         }
         nodejs()
@@ -154,6 +154,138 @@ tasks.named("wasmWasiNodeTest") {
     }
 }
 
+fun patchSwiftPackage(packageDir: File) {
+    val swiftExportArchiveName = "KmIo"
+    val packageSwift = packageDir.resolve("Package.swift")
+    if (packageSwift.exists()) {
+        val text = packageSwift.readText()
+        if (!text.contains("platforms:")) {
+            packageSwift.writeText(
+                text.replaceFirst(
+                    Regex("(name:\\s*\"[^\"]*\",)"),
+                    "\$1\n    platforms: [.macOS(.v14)],",
+                ),
+            )
+        }
+    }
+
+    val sourcesDir = packageDir.resolve("Sources")
+    if (!sourcesDir.exists()) return
+    sourcesDir
+        .walkTopDown()
+        .filter { it.isFile && it.extension == "swift" }
+        .forEach { swiftFile ->
+            val text = swiftFile.readText()
+            val patched =
+                text
+                    .replace("Foundation.NSInputStream", "Foundation.InputStream")
+                    .replace("Foundation.NSOutputStream", "Foundation.OutputStream")
+            if (patched != text) {
+                swiftFile.writeText(patched)
+            }
+        }
+    packageDir
+        .walkTopDown()
+        .filter { it.isFile && it.name == "module.modulemap" }
+        .forEach { moduleMap ->
+            val text = moduleMap.readText()
+            val patched =
+                Regex("""link "[^"]+"""").replace(text) {
+                    "link \"$swiftExportArchiveName\""
+                }
+            if (patched != text) {
+                moduleMap.writeText(patched)
+            }
+        }
+}
+
+fun patchSwiftExportGeneratedKotlin(filesDir: File) {
+    if (!filesDir.exists()) return
+    val unitBridgeReturn =
+        Regex("""(?m)^([ \t]*)val _result = run \{ ([^\n{}]*) \}\R\1return run \{ _result; true \}""")
+    val swiftUnitCallback =
+        Regex("""(?m)^([ \t]*)val _result = kotlinFun\((.*)\)\s*\R\1run<Unit> \{ _result \}\s*$""")
+    val patchedSwiftUnitCallback =
+        Regex("""(?m)^([ \t]*)kotlinFun\((.*)\)\s*\R\1Unit\s*$""")
+
+    filesDir
+        .walkTopDown()
+        .filter { it.isFile && it.extension == "kt" }
+        .forEach { kotlinFile ->
+            var text = kotlinFile.readText()
+            var patched =
+                unitBridgeReturn.replace(text) { match ->
+                    val indent = match.groupValues[1]
+                    val expression = match.groupValues[2]
+                    "$indent run { $expression }\n${indent}return true"
+                }
+            patched =
+                swiftUnitCallback.replace(patched) { match ->
+                    val indent = match.groupValues[1]
+                    val expression = match.groupValues[2]
+                    "$indent kotlinFun($expression).let { Unit }"
+                }
+            patched =
+                patchedSwiftUnitCallback.replace(patched) { match ->
+                    val indent = match.groupValues[1]
+                    val expression = match.groupValues[2]
+                    "$indent kotlinFun($expression).let { Unit }"
+                }
+            if (
+                patched.contains("writeToInternalBuffer") &&
+                !patched.contains("@file:kotlin.OptIn(io.github.kotlinmania.io.DelicateIoApi::class)")
+            ) {
+                patched =
+                    if (patched.startsWith("@file:")) {
+                        patched.replaceFirst(
+                            Regex("""\A((?:@file:[^\n]*\n)+)"""),
+                            "$1@file:kotlin.OptIn(io.github.kotlinmania.io.DelicateIoApi::class)\n",
+                        )
+                    } else {
+                        "@file:kotlin.OptIn(io.github.kotlinmania.io.DelicateIoApi::class)\n$patched"
+                    }
+            }
+            if (patched != text) {
+                kotlinFile.writeText(patched)
+            }
+        }
+}
+
+val patchMacosArm64DebugSwiftPackage =
+    tasks.register("patchMacosArm64DebugSwiftPackage") {
+        dependsOn("macosArm64DebugGenerateSPMPackage")
+        doLast {
+            patchSwiftPackage(
+                layout.buildDirectory
+                    .dir("SPMPackage/macosArm64/Debug")
+                    .get()
+                    .asFile,
+            )
+        }
+    }
+
+val patchMacosArm64DebugSwiftExportKotlin =
+    tasks.register("patchMacosArm64DebugSwiftExportKotlin") {
+        dependsOn("macosArm64DebugSwiftExport")
+        doLast {
+            patchSwiftExportGeneratedKotlin(
+                layout.buildDirectory
+                    .dir("SwiftExport/macosArm64/Debug/files")
+                    .get()
+                    .asFile,
+            )
+        }
+    }
+
+tasks.configureEach {
+    if (name == "macosArm64DebugBuildSPMPackage") {
+        dependsOn(patchMacosArm64DebugSwiftPackage)
+    }
+    if (name == "compileSwiftExportMainKotlinMacosArm64") {
+        dependsOn(patchMacosArm64DebugSwiftExportKotlin)
+    }
+}
+
 animalsniffer {
     annotation = "io.github.kotlinmania.io.files.AnimalSnifferIgnore"
 }
@@ -181,7 +313,8 @@ val codeqlAndroidAar: Configuration by configurations.creating {
 }
 
 dependencies {
-    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
+    val codeqlKotlinVersion = providers.gradleProperty("codeql.kotlin.version").getOrElse(libs.versions.kotlin.get())
+    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:$codeqlKotlinVersion")
     codeqlSourceClasspath("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
     codeqlSourceClasspath(project(":km-io-bytestring"))
 }

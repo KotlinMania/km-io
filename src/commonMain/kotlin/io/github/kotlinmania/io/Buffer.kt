@@ -23,7 +23,6 @@ package io.github.kotlinmania.io
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import io.github.kotlinmania.io.UnsafeBufferOperations
 import kotlin.jvm.JvmSynthetic
 
 /**
@@ -48,7 +47,9 @@ import kotlin.jvm.JvmSynthetic
  * If a [Buffer] needs to be accessed from multiple threads, an additional synchronization is required.
  * Failure to do so will result in possible data corruption, loss, and runtime errors.
  */
-public class Buffer : Source, Sink {
+public class Buffer :
+    Source,
+    Sink {
     @PublishedApi
     @get:JvmSynthetic
     @set:JvmSynthetic
@@ -165,9 +166,7 @@ public class Buffer : Source, Sink {
         return v
     }
 
-    private fun throwEof(byteCount: Long): Nothing {
-        throw EOFException("Buffer doesn't contain required number of bytes (size: $size, required: $byteCount)")
-    }
+    private fun throwEof(byteCount: Long): Nothing = throw EOFException("Buffer doesn't contain required number of bytes (size: $size, required: $byteCount)")
 
     /**
      * This method does not affect the buffer's content as there is no upstream to write data to.
@@ -203,7 +202,7 @@ public class Buffer : Source, Sink {
     public fun copyTo(
         out: Buffer,
         startIndex: Long = 0L,
-        endIndex: Long = size
+        endIndex: Long = size,
     ) {
         checkBounds(size, startIndex, endIndex)
         if (startIndex == endIndex) return
@@ -381,7 +380,7 @@ public class Buffer : Source, Sink {
             tail.write(source, currentOffset, currentOffset + toCopy)
             currentOffset += toCopy
         }
-        sizeMut  += endIndex - startIndex
+        sizeMut += endIndex - startIndex
     }
 
     override fun write(source: RawSource, byteCount: Long) {
@@ -392,7 +391,7 @@ public class Buffer : Source, Sink {
             if (read == -1L) {
                 throw EOFException(
                     "Source exhausted before reading $byteCount bytes. " +
-                            "Only ${byteCount - remainingByteCount} were read."
+                        "Only ${byteCount - remainingByteCount} were read.",
                 )
             }
             remainingByteCount -= read
@@ -459,7 +458,8 @@ public class Buffer : Source, Sink {
             // Is a prefix of the source's head segment all that we need to move?
             if (remainingByteCount < source.head!!.size) {
                 val tail = tail
-                if (tail != null && tail.owner &&
+                if (tail != null &&
+                    tail.owner &&
                     remainingByteCount + tail.limit - (if (tail.shared) 0 else tail.pos) <= Segment.SIZE
                 ) {
                     // Our existing segments are sufficient. Move bytes from source's head to our tail.
@@ -650,7 +650,7 @@ public class Buffer : Source, Sink {
 @OptIn(ExperimentalContracts::class)
 internal inline fun <T> Buffer.seek(
     fromIndex: Long,
-    lambda: (Segment?, Long) -> T
+    lambda: (Segment?, Long) -> T,
 ): T {
     contract {
         callsInPlace(lambda, EXACTLY_ONCE)

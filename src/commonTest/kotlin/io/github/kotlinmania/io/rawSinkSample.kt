@@ -5,8 +5,8 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class Crc32Sample {
     @OptIn(ExperimentalUnsignedTypes::class)
@@ -18,7 +18,9 @@ class Crc32Sample {
          *
          * See https://en.wikipedia.org/wiki/Cyclic_redundancy_check for more information about CRC-32.
          */
-        class CRC32Sink(private val upstream: RawSink): RawSink {
+        class CRC32Sink(
+            private val upstream: RawSink,
+        ) : RawSink {
             private val tempBuffer = Buffer()
             private val crc32Table = generateCrc32Table()
             private var crc32: UInt = 0xffffffffU
@@ -50,11 +52,12 @@ class Crc32Sample {
                 for (idx in table.indices) {
                     table[idx] = idx.toUInt()
                     for (bit in 8 downTo 1) {
-                        table[idx] = if (table[idx] % 2U == 0U) {
-                            table[idx].shr(1)
-                        } else {
-                            table[idx].shr(1).xor(0xEDB88320U)
-                        }
+                        table[idx] =
+                            if (table[idx] % 2U == 0U) {
+                                table[idx].shr(1)
+                            } else {
+                                table[idx].shr(1).xor(0xEDB88320U)
+                            }
                     }
                 }
 

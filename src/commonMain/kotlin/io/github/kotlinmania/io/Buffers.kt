@@ -53,15 +53,16 @@ public fun Buffer.indexOf(byte: Byte, startIndex: Long = 0, endIndex: Long = siz
         do {
             check(endOffset > offset)
             segment!!
-            val idx = segment.indexOf(
-                byte,
-                // If start index within this segment, the diff will be positive and
-                // we'll scan the segment starting from the corresponding offset.
-                // Otherwise, the diff will be negative and we'll scan the segment from the beginning.
-                maxOf((startIndex - offset).toInt(), 0),
-                // If endOffset is within this segment - scan until it, otherwise - scan whole segment.
-                minOf(segment.size, (endOffset - offset).toInt())
-            )
+            val idx =
+                segment.indexOf(
+                    byte,
+                    // If start index within this segment, the diff will be positive and
+                    // we'll scan the segment starting from the corresponding offset.
+                    // Otherwise, the diff will be negative and we'll scan the segment from the beginning.
+                    maxOf((startIndex - offset).toInt(), 0),
+                    // If endOffset is within this segment - scan until it, otherwise - scan whole segment.
+                    minOf(segment.size, (endOffset - offset).toInt()),
+                )
             if (idx != -1) {
                 // offset corresponds to the segment's start, idx - to offset within the segment.
                 return offset + idx.toLong()

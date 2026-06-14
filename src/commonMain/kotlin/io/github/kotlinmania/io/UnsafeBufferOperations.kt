@@ -8,7 +8,6 @@ package io.github.kotlinmania.io
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
-import io.github.kotlinmania.io.*
 import kotlin.jvm.JvmSynthetic
 
 @UnsafeIoApi
@@ -41,11 +40,14 @@ public object UnsafeBufferOperations {
      */
     public fun moveToTail(buffer: Buffer, bytes: ByteArray, startIndex: Int = 0, endIndex: Int = bytes.size) {
         checkBounds(bytes.size, startIndex, endIndex)
-        val segment = Segment.new(
-            bytes, startIndex, endIndex,
-            AlwaysSharedCopyTracker, /* to prevent recycling */
-            owner = false /* can't append to it */
-        )
+        val segment =
+            Segment.new(
+                bytes,
+                startIndex,
+                endIndex,
+                AlwaysSharedCopyTracker, // to prevent recycling
+                owner = false, // can't append to it
+            )
         val tail = buffer.tail
         if (tail == null) {
             buffer.head = segment
@@ -90,7 +92,7 @@ public object UnsafeBufferOperations {
      */
     public inline fun readFromHead(
         buffer: Buffer,
-        readAction: (bytes: ByteArray, startIndexInclusive: Int, endIndexExclusive: Int) -> Int
+        readAction: (bytes: ByteArray, startIndexInclusive: Int, endIndexExclusive: Int) -> Int,
     ): Int {
         contract {
             callsInPlace(readAction, EXACTLY_ONCE)
@@ -185,8 +187,9 @@ public object UnsafeBufferOperations {
      * @sample io.github.kotlinmania.io.UnsafeBufferOperationsSamples.writeByteArrayToTail
      */
     public inline fun writeToTail(
-        buffer: Buffer, minimumCapacity: Int,
-        writeAction: (bytes: ByteArray, startIndexInclusive: Int, endIndexExclusive: Int) -> Int
+        buffer: Buffer,
+        minimumCapacity: Int,
+        writeAction: (bytes: ByteArray, startIndexInclusive: Int, endIndexExclusive: Int) -> Int,
     ): Int {
         contract {
             callsInPlace(writeAction, EXACTLY_ONCE)
@@ -254,7 +257,7 @@ public object UnsafeBufferOperations {
     public inline fun writeToTail(
         buffer: Buffer,
         minimumCapacity: Int,
-        writeAction: (context: SegmentWriteContext, tail: Segment) -> Int
+        writeAction: (context: SegmentWriteContext, tail: Segment) -> Int,
     ): Int {
         contract {
             callsInPlace(writeAction, EXACTLY_ONCE)
@@ -306,7 +309,7 @@ public object UnsafeBufferOperations {
      */
     public inline fun iterate(
         buffer: Buffer,
-        iterationAction: (context: BufferIterationContext, head: Segment?) -> Unit
+        iterationAction: (context: BufferIterationContext, head: Segment?) -> Unit,
     ) {
         contract {
             callsInPlace(iterationAction, EXACTLY_ONCE)
@@ -337,8 +340,9 @@ public object UnsafeBufferOperations {
      * @throws IndexOutOfBoundsException when [offset] is greater or equal to [Buffer.size]
      */
     public inline fun iterate(
-        buffer: Buffer, offset: Long,
-        iterationAction: (context: BufferIterationContext, segment: Segment?, startOfTheSegmentOffset: Long) -> Unit
+        buffer: Buffer,
+        offset: Long,
+        iterationAction: (context: BufferIterationContext, segment: Segment?, startOfTheSegmentOffset: Long) -> Unit,
     ) {
         contract {
             callsInPlace(iterationAction, EXACTLY_ONCE)
@@ -373,7 +377,7 @@ public object UnsafeBufferOperations {
      */
     public inline fun forEachSegment(
         buffer: Buffer,
-        action: (context: SegmentReadContext, segment: Segment) -> Unit
+        action: (context: SegmentReadContext, segment: Segment) -> Unit,
     ) {
         var curr: Segment? = buffer.head
         while (curr != null) {
@@ -426,7 +430,7 @@ public interface SegmentReadContext {
 @OptIn(ExperimentalContracts::class)
 public inline fun SegmentReadContext.withData(
     segment: Segment,
-    readAction: (bytes: ByteArray, startIndexInclusive: Int, endIndexExclusive: Int) -> Unit
+    readAction: (bytes: ByteArray, startIndexInclusive: Int, endIndexExclusive: Int) -> Unit,
 ) {
     contract {
         callsInPlace(readAction, EXACTLY_ONCE)
@@ -531,37 +535,40 @@ public interface BufferIterationContext : SegmentReadContext {
 @UnsafeIoApi
 @PublishedApi
 @get:JvmSynthetic
-internal val SegmentReadContextImpl: SegmentReadContext = object : SegmentReadContext {
-    override fun getUnchecked(segment: Segment, offset: Int): Byte = segment.getUnchecked(offset)
-}
+internal val SegmentReadContextImpl: SegmentReadContext =
+    object : SegmentReadContext {
+        override fun getUnchecked(segment: Segment, offset: Int): Byte = segment.getUnchecked(offset)
+    }
 
 @UnsafeIoApi
 @PublishedApi
 @get:JvmSynthetic
-internal val SegmentWriteContextImpl: SegmentWriteContext = object : SegmentWriteContext {
-    override fun setUnchecked(segment: Segment, offset: Int, value: Byte) {
-        segment.setUnchecked(offset, value)
-    }
+internal val SegmentWriteContextImpl: SegmentWriteContext =
+    object : SegmentWriteContext {
+        override fun setUnchecked(segment: Segment, offset: Int, value: Byte) {
+            segment.setUnchecked(offset, value)
+        }
 
-    override fun setUnchecked(segment: Segment, offset: Int, b0: Byte, b1: Byte) {
-        segment.setUnchecked(offset, b0, b1)
-    }
+        override fun setUnchecked(segment: Segment, offset: Int, b0: Byte, b1: Byte) {
+            segment.setUnchecked(offset, b0, b1)
+        }
 
-    override fun setUnchecked(segment: Segment, offset: Int, b0: Byte, b1: Byte, b2: Byte) {
-        segment.setUnchecked(offset, b0, b1, b2)
-    }
+        override fun setUnchecked(segment: Segment, offset: Int, b0: Byte, b1: Byte, b2: Byte) {
+            segment.setUnchecked(offset, b0, b1, b2)
+        }
 
-    override fun setUnchecked(segment: Segment, offset: Int, b0: Byte, b1: Byte, b2: Byte, b3: Byte) {
-        segment.setUnchecked(offset, b0, b1, b2, b3)
+        override fun setUnchecked(segment: Segment, offset: Int, b0: Byte, b1: Byte, b2: Byte, b3: Byte) {
+            segment.setUnchecked(offset, b0, b1, b2, b3)
+        }
     }
-}
 
 @UnsafeIoApi
 @PublishedApi
 @get:JvmSynthetic
-internal val BufferIterationContextImpl: BufferIterationContext = object : BufferIterationContext {
-    override fun next(segment: Segment): Segment? = segment.next
+internal val BufferIterationContextImpl: BufferIterationContext =
+    object : BufferIterationContext {
+        override fun next(segment: Segment): Segment? = segment.next
 
-    override fun getUnchecked(segment: Segment, offset: Int): Byte =
-        SegmentReadContextImpl.getUnchecked(segment, offset)
-}
+        override fun getUnchecked(segment: Segment, offset: Int): Byte =
+            SegmentReadContextImpl.getUnchecked(segment, offset)
+    }

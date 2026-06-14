@@ -63,7 +63,8 @@ val codeqlAndroidAar: Configuration by configurations.creating {
 }
 
 dependencies {
-    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
+    val codeqlKotlinVersion = providers.gradleProperty("codeql.kotlin.version").getOrElse(libs.versions.kotlin.get())
+    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:$codeqlKotlinVersion")
     codeqlSourceClasspath("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
 }
 

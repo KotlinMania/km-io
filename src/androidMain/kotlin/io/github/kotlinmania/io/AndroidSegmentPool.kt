@@ -128,8 +128,9 @@ internal actual object SegmentPool {
 
     // visible for testing
     internal val SECOND_LEVEL_POOL_TOTAL_SIZE =
-        (System.getProperty("io.github.kotlinmania.io.pool.size.bytes", DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE) ?: DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE)
-            .toIntOrNull()?.coerceAtLeast(0) ?: 0
+        (System.getProperty("io.github.kotlinmania.io.pool.size.bytes", DEFAULT_SECOND_LEVEL_POOL_TOTAL_SIZE) as String)
+            .toIntOrNull()
+            ?.coerceAtLeast(0) ?: 0
 
     private val SECOND_LEVEL_POOL_BUCKET_SIZE =
         (SECOND_LEVEL_POOL_TOTAL_SIZE / HASH_BUCKET_COUNT_L2).coerceAtLeast(Segment.SIZE)
@@ -292,9 +293,9 @@ internal actual object SegmentPool {
     @JvmStatic
     actual fun tracker(): SegmentCopyTracker = RefCountingCopyTracker()
 
-    private fun l1BucketId() = bucketId (HASH_BUCKET_COUNT - 1L)
+    private fun l1BucketId() = bucketId(HASH_BUCKET_COUNT - 1L)
 
-    private fun l2BucketId() = bucketId (HASH_BUCKET_COUNT_L2 - 1L)
+    private fun l2BucketId() = bucketId(HASH_BUCKET_COUNT_L2 - 1L)
 
     private fun bucketId(mask: Long): Int {
         // Get a value in [0..HASH_BUCKET_COUNT_L2) based on the current thread.

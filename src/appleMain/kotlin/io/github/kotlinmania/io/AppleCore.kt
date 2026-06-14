@@ -7,8 +7,13 @@
 
 package io.github.kotlinmania.io
 
-import kotlinx.cinterop.*
-import io.github.kotlinmania.io.UnsafeBufferOperations
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.get
+import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.usePinned
 import platform.Foundation.NSInputStream
 import platform.Foundation.NSOutputStream
 import platform.Foundation.NSStreamStatusClosed
@@ -27,7 +32,6 @@ public fun NSOutputStream.asSink(): RawSink = OutputStreamSink(this)
 private open class OutputStreamSink(
     private val out: NSOutputStream,
 ) : RawSink {
-
     init {
         if (out.streamStatus == NSStreamStatusNotOpen) out.open()
     }
@@ -40,15 +44,18 @@ private open class OutputStreamSink(
         var remaining = byteCount
         var bytesWritten = 0L
         while (remaining > 0) {
-            val _ = UnsafeBufferOperations.readFromHead(source) { data, pos, limit ->
-                val toCopy = minOf(remaining, limit - pos).toInt()
-                bytesWritten = data.usePinned {
-                    val bytes = it.addressOf(pos).reinterpret<uint8_tVar>()
-                    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD") // https://youtrack.jetbrains.com/issue/KT-81896
-                    out.write(bytes, toCopy.convert()).toLong()
-                }
-                0
-            }
+            discardReturnValue(
+                UnsafeBufferOperations.readFromHead(source) { data, pos, limit ->
+                    val toCopy = minOf(remaining, limit - pos).toInt()
+                    bytesWritten =
+                        data.usePinned {
+                            val bytes = it.addressOf(pos).reinterpret<uint8_tVar>()
+                            @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD") // https://youtrack.jetbrains.com/issue/KT-81896
+                            out.write(bytes, toCopy.convert()).toLong()
+                        }
+                    0
+                },
+            )
 
             if (bytesWritten < 0L) throw IOException(out.streamError?.localizedDescription ?: "Unknown error")
             if (bytesWritten == 0L) throw IOException("NSOutputStream reached capacity")
@@ -79,7 +86,6 @@ public fun NSInputStream.asSource(): RawSource = NSInputStreamSource(this)
 private open class NSInputStreamSource(
     private val input: NSInputStream,
 ) : RawSource {
-
     init {
         if (input.streamStatus == NSStreamStatusNotOpen) input.open()
     }
@@ -91,15 +97,17 @@ private open class NSInputStreamSource(
         if (byteCount == 0L) return 0L
         checkByteCount(byteCount)
 
-        val bytesRead = UnsafeBufferOperations.writeToTail(sink, 1) { data, pos, limit ->
-            val maxToCopy = minOf(byteCount, limit - pos)
-            val read = data.usePinned { ba ->
-                val bytes = ba.addressOf(pos).reinterpret<uint8_tVar>()
-                @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD") // https://youtrack.jetbrains.com/issue/KT-81896
-                input.read(bytes, maxToCopy.convert()).toLong()
+        val bytesRead =
+            UnsafeBufferOperations.writeToTail(sink, 1) { data, pos, limit ->
+                val maxToCopy = minOf(byteCount, limit - pos)
+                val read =
+                    data.usePinned { ba ->
+                        val bytes = ba.addressOf(pos).reinterpret<uint8_tVar>()
+                        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD") // https://youtrack.jetbrains.com/issue/KT-81896
+                        input.read(bytes, maxToCopy.convert()).toLong()
+                    }
+                maxOf(read.toInt(), 0)
             }
-            maxOf(read.toInt(), 0)
-        }
 
         if (bytesRead < 0) throw IOException(input.streamError?.localizedDescription ?: "Unknown error")
         if (bytesRead == 0) return -1

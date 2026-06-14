@@ -5,8 +5,6 @@
 
 package io.github.kotlinmania.io
 
-import io.github.kotlinmania.io.Path
-import io.github.kotlinmania.io.SystemFileSystem
 import platform.Foundation.NSInputStream
 import platform.Foundation.NSURL
 import kotlin.test.Test

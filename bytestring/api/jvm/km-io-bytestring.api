@@ -23,7 +23,6 @@ public final class io/github/kotlinmania/io/bytestring/ByteString : java/lang/Co
 	public static final field Companion Lio/github/kotlinmania/io/bytestring/ByteString$Companion;
 	public fun <init> ([BII)V
 	public synthetic fun <init> ([BIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> ([BLjava/lang/Object;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun compareTo (Lio/github/kotlinmania/io/bytestring/ByteString;)I
 	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public final fun copyInto ([BIII)V
