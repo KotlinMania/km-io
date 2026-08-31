@@ -12,7 +12,7 @@ detekt = "1.23.8"
 ktlint = "14.2.0"
 dokka = "2.2.0"
 kover = "0.9.9"
-benchmark = "0.4.17"
+benchmark = "0.4.19"
 jmh = "1.37"
 animalsniffer = "2.0.1"
 
