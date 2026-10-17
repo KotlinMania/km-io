@@ -5,6 +5,8 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.files.Path
+import io.github.kotlinmania.io.files.SystemTemporaryDirectory
 import kotlin.random.Random
 
 actual fun tempFileName(): String =

@@ -102,7 +102,7 @@ interface SourceFactory {
                             override fun write(source: Buffer, byteCount: Long) {
                                 // Write each byte into a new buffer, then clone it so that the segments are shared.
                                 // Shared segments cannot be compacted so we'll get a long chain of short segments.
-                                for (i in 0 until byteCount) {
+                                for (_ in 0 until byteCount) {
                                     val box = Buffer()
                                     box.write(source, 1)
                                     buffer.write(box.copy(), 1)

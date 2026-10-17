@@ -1,6 +1,5 @@
 import XCTest
 import KmIo
-import KmIoByteString
 
 final class KmIoExportTests: XCTestCase {
     func testBufferRoundTrip() throws {
@@ -15,9 +14,10 @@ final class KmIoExportTests: XCTestCase {
     }
 
     func testByteStringRoundTrip() throws {
-        let value = encodeToByteString("km-io")
+        typealias ByteStrings = ExportedKotlinPackages.io.github.kotlinmania.io.bytestring
+        let value = ByteStrings.encodeToByteString("km-io")
 
-        XCTAssertFalse(isEmpty(value))
-        XCTAssertEqual(decodeToString(value), "km-io")
+        XCTAssertFalse(ByteStrings.isEmpty(value))
+        XCTAssertEqual(ByteStrings.decodeToString(value), "km-io")
     }
 }

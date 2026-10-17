@@ -48,8 +48,10 @@ internal class PeekSource(
         // do not match the current head and head position of the upstream buffer
         check(
             expectedSegment == null ||
-                expectedSegment === buffer.head &&
-                expectedPos == buffer.head!!.pos,
+                (
+                    expectedSegment === buffer.head &&
+                        expectedPos == buffer.head!!.pos
+                ),
         ) {
             "Peek source is invalid because upstream source was used"
         }

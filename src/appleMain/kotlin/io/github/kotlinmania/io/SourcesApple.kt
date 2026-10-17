@@ -66,7 +66,10 @@ private class SourceNSInputStream(
     NSStreamDelegateProtocol {
     private val isClosed: () -> Boolean =
         when (source) {
-            is RealSource -> source::closed
+            is RealSource -> {
+                source::closed
+            }
+
             is Buffer -> {
                 { false }
             }
@@ -102,7 +105,7 @@ private class SourceNSInputStream(
     }
 
     override fun read(buffer: CPointer<uint8_tVar>?, maxLength: NSUInteger): NSInteger {
-        if (streamStatus != NSStreamStatusOpen && streamStatus != NSStreamStatusAtEnd || buffer == null) return -1
+        if ((streamStatus != NSStreamStatusOpen && streamStatus != NSStreamStatusAtEnd) || buffer == null) return -1
         status = NSStreamStatusReading
         try {
             if (source.exhausted()) {

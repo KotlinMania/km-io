@@ -69,6 +69,10 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.internal.REPLACEMENT_CODE_POINT
+import io.github.kotlinmania.io.internal.commonToUtf8String
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
 import kotlin.math.min
 
 /**
@@ -294,7 +298,10 @@ public fun Source.readLine(): String? {
 
     var lfIndex = this.indexOf('\n'.code.toByte())
     return when (lfIndex) {
-        -1L -> readString()
+        -1L -> {
+            readString()
+        }
+
         0L -> {
             skip(1)
             ""
@@ -456,7 +463,9 @@ private fun Buffer.commonReadUtf8CodePoint(): Int {
             REPLACEMENT_CODE_POINT // Reject overlong code points.
         }
 
-        else -> codePoint
+        else -> {
+            codePoint
+        }
     }
 }
 

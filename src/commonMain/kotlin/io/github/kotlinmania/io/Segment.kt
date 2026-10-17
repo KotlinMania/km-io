@@ -226,7 +226,7 @@ public class Segment {
      * data so that segments can be recycled.
      */
     internal fun compact(): Segment {
-        check(this.prev != null) { "cannot compact" }
+        checkNotNull(this.prev) { "cannot compact" }
         if (!this.prev!!.owner) return this // Cannot compact: prev isn't writable.
         val byteCount = limit - pos
         val availableByteCount = SIZE - this.prev!!.limit + if (this.prev!!.shared) 0 else this.prev!!.pos

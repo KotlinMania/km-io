@@ -1,0 +1,74 @@
+/*
+ * Copyright 2017-2023 JetBrains s.r.o. and respective authors and developers.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
+ */
+
+package io.github.kotlinmania.io.samples
+
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.asNSInputStream
+import io.github.kotlinmania.io.asNSOutputStream
+import io.github.kotlinmania.io.asSink
+import io.github.kotlinmania.io.asSource
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.toByteArray
+import io.github.kotlinmania.io.toNSData
+import io.github.kotlinmania.io.write
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.reinterpret
+import platform.Foundation.NSData
+import platform.Foundation.NSInputStream
+import platform.Foundation.NSMutableData
+import platform.Foundation.NSOutputStream
+import platform.Foundation.NSStreamDataWrittenToMemoryStreamKey
+import platform.Foundation.create
+import platform.Foundation.data
+import platform.Foundation.outputStreamToMemory
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+
+class KotlinxIoSamplesApple {
+    @Test
+    fun inputStreamAsSource() {
+        val data = ByteArray(100) { it.toByte() }
+        val inputStream = NSInputStream(data = data.toNSData())
+
+        val receivedData = inputStream.asSource().buffered().readByteArray()
+        assertContentEquals(data, receivedData)
+    }
+
+    @Test
+    fun outputStreamAsSink() {
+        val data = ByteArray(100) { it.toByte() }
+        val outputStream = NSOutputStream.outputStreamToMemory()
+
+        val sink = outputStream.asSink().buffered()
+        sink.write(data)
+        sink.flush()
+
+        val writtenData = outputStream.propertyForKey(NSStreamDataWrittenToMemoryStreamKey) as NSData
+        assertContentEquals(data, writtenData.toByteArray())
+    }
+
+    @Test
+    @OptIn(UnsafeNumber::class, ExperimentalForeignApi::class, BetaInteropApi::class)
+    fun asStream() {
+        val buffer = Buffer()
+        val data = ByteArray(100) { it.toByte() }.toNSData()
+
+        val outputStream = buffer.asNSOutputStream()
+        outputStream.open()
+        outputStream.write(data.bytes?.reinterpret(), data.length)
+
+        val inputStream = buffer.asNSInputStream()
+        inputStream.open()
+        val readData = NSMutableData.create(length = 100.convert())!!
+        inputStream.read(readData.bytes?.reinterpret(), 100.convert())
+
+        assertContentEquals(data.toByteArray(), readData.toByteArray())
+    }
+}

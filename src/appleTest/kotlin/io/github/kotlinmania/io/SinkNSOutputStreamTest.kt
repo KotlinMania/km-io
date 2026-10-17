@@ -105,7 +105,9 @@ class SinkNSOutputStreamTest {
                     assertContentEquals(byteArray, sink.buffer.readByteArray())
                 }
 
-                is RealSink -> assertContentEquals(byteArray, (sink.sink as Buffer).readByteArray())
+                is RealSink -> {
+                    assertContentEquals(byteArray, (sink.sink as Buffer).readByteArray())
+                }
             }
         }
     }
@@ -149,7 +151,10 @@ class SinkNSOutputStreamTest {
                     override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
                         assertEquals("run-loop", NSThread.currentThread.name)
                         when (handleEvent) {
-                            NSStreamEventOpenCompleted -> opened.unlock()
+                            NSStreamEventOpenCompleted -> {
+                                opened.unlock()
+                            }
+
                             NSStreamEventHasSpaceAvailable -> {
                                 if (source.isNotEmpty()) {
                                     source.usePinned {
@@ -168,7 +173,9 @@ class SinkNSOutputStreamTest {
                                 completed.unlock()
                             }
 
-                            else -> fail("unexpected event ${handleEvent.asString()}")
+                            else -> {
+                                fail("unexpected event ${handleEvent.asString()}")
+                            }
                         }
                     }
                 }

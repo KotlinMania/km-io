@@ -26,9 +26,11 @@ which includes the `FileSystem` interface and its default implementation - `Syst
 
 `FileSystem` provides basic operations for working with files and directories, which are represented by yet another class under the same package - `Path`.
 
-There are several `km-io` modules:
-- [km-io-bytestring](./bytestring) - provides `ByteString`.
-- [km-io](./core) - provides IO primitives (`Buffer`, `Source`, `Sink`), filesystems support, depends on `km-io-bytestring`.
+`km-io` ships as a single artifact. Its packages are:
+- `io.github.kotlinmania.io` - IO primitives (`Buffer`, `Source`, `Sink`);
+- `io.github.kotlinmania.io.bytestring` - `ByteString`;
+- `io.github.kotlinmania.io.files` - filesystem support;
+- `io.github.kotlinmania.io.unsafe` - unsafe buffer and byte string access.
 
 ## Using in your projects
 
@@ -46,7 +48,7 @@ repositories {
 Add the library to dependencies:
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:km-io:0.1.5")
+    implementation("io.github.kotlinmania:km-io:0.2.0")
 }
 ```
 
@@ -56,7 +58,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.kotlinmania:km-io:0.1.5")
+                implementation("io.github.kotlinmania:km-io:0.2.0")
             }
         }
     }
@@ -70,23 +72,14 @@ Add the library to dependencies:
 <dependency>
     <groupId>io.github.kotlinmania</groupId>
     <artifactId>km-io-jvm</artifactId>
-    <version>0.1.5</version>
+    <version>0.2.0</version>
 </dependency>
 ```
-
-### JPMS support
-
-On JVM, `km-io` supports Java Modules:
-- `km-io-bytestring` library provides `io.github.kotlinmania.io.bytestring` module;
-- `km-io` library provides `io.github.kotlinmania.io.core` module.
-
-Read [this](https://kotlinlang.org/docs/gradle-configure-project.html#configure-with-java-modules-jpms-enabled) article
-for details on how to configure a Gradle project to utilize JPMS.
 
 ### Android
 
 `km-io` is not tested on Android on a regular basis,
-but the library is compatible with Android 5.0+ (API level 21+).
+but the library is compatible with Android 7.0+ (API level 24+).
 
 ### Segment pooling
 

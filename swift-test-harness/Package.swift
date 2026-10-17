@@ -1,11 +1,13 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
     name: "SwiftTestHarness",
-    platforms: [.macOS(.v14)],
+    platforms: [
+        .macOS(.v15),
+    ],
     dependencies: [
-        .package(name: "KmIo", path: "../core/build/SPMPackage/macosArm64/Debug")
+        .package(name: "KmIo", path: "../build/SPMPackage/macosArm64/Debug")
     ],
     targets: [
         .testTarget(
@@ -13,10 +15,18 @@ let package = Package(
             dependencies: [
                 .product(name: "KmIoLibrary", package: "KmIo")
             ],
+            swiftSettings: [
+                .unsafeFlags([
+                    "-F", "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+                ]),
+            ],
             linkerSettings: [
                 .unsafeFlags([
-                    "-L", "../core/build/swift-test",
+                    "-L", "../build/swift-test",
                     "-lKmIo",
+                    "-F", "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+                    "-Xlinker", "-rpath", "-Xlinker", "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+                    "-Xlinker", "-rpath", "-Xlinker", "/Library/Developer/CommandLineTools/Library/Developer/usr/lib",
                 ]),
             ]
         ),

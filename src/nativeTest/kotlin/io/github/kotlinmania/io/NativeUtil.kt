@@ -7,6 +7,7 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.files.SystemTemporaryDirectory
 import platform.posix.F_OK
 import platform.posix.access
 import kotlin.random.Random

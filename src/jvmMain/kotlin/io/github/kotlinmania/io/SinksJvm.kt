@@ -58,7 +58,10 @@ public fun Sink.writeString(string: String, charset: Charset, startIndex: Int = 
 public fun Sink.asOutputStream(): OutputStream {
     val isClosed: () -> Boolean =
         when (this) {
-            is RealSink -> this::closed
+            is RealSink -> {
+                this::closed
+            }
+
             is Buffer -> {
                 { false }
             }
@@ -113,7 +116,10 @@ public fun Sink.write(source: ByteBuffer): Int {
 public fun Sink.asByteChannel(): WritableByteChannel {
     val isClosed: () -> Boolean =
         when (this) {
-            is RealSink -> this::closed
+            is RealSink -> {
+                this::closed
+            }
+
             is Buffer -> {
                 { false }
             }

@@ -5,6 +5,11 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.isEmpty
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
+import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import kotlin.math.max
 import kotlin.math.min
 
@@ -92,15 +97,15 @@ public fun Source.readByteString(byteCount: Int): ByteString = UnsafeByteStringO
  */
 @OptIn(InternalIoApi::class, UnsafeByteStringApi::class)
 public fun Source.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
-    val startIndex = max(0, startIndex)
+    val fromIndex = max(0, startIndex)
 
     if (byteString.isEmpty()) {
         // Ignore the result: we'll use buffer's size if request failed anyway.
-        discardReturnValue(request(startIndex))
-        return min(startIndex, buffer.size)
+        discardReturnValue(request(fromIndex))
+        return min(fromIndex, buffer.size)
     }
 
-    var offset = startIndex
+    var offset = fromIndex
     while (request(offset + byteString.size)) {
         val idx = buffer.indexOf(byteString, offset)
         if (idx < 0) {
@@ -128,13 +133,13 @@ public fun Source.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
  */
 @OptIn(UnsafeByteStringApi::class)
 public fun Buffer.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
-    val startIndex = max(0, min(startIndex, size))
+    val fromIndex = max(0, min(startIndex, size))
 
-    if (byteString.isEmpty()) return startIndex
-    if (startIndex > size - byteString.size) return -1L
+    if (byteString.isEmpty()) return fromIndex
+    if (fromIndex > size - byteString.size) return -1L
 
     UnsafeByteStringOperations.withByteArrayUnsafe(byteString) { byteStringData ->
-        seek(startIndex) { seg, o ->
+        seek(fromIndex) { seg, o ->
             if (o == -1L) {
                 return -1L
             }
@@ -145,7 +150,7 @@ public fun Buffer.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
                 // If start index within this segment, the diff will be positive and
                 // we'll scan the segment starting from the corresponding offset.
                 // Otherwise, the diff will be negative and we'll scan the segment from the beginning.
-                val startOffset = maxOf((startIndex - offset).toInt(), 0)
+                val startOffset = maxOf((fromIndex - offset).toInt(), 0)
                 // Try to search the pattern within the current segment.
                 val idx = segment.indexOfBytesInbound(byteStringData, startOffset)
                 if (idx != -1) {
@@ -170,5 +175,4 @@ public fun Buffer.indexOf(byteString: ByteString, startIndex: Long = 0): Long {
             return -1L
         }
     }
-    return -1
 }

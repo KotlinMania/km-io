@@ -20,6 +20,7 @@
  */
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import java.io.EOFException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -98,7 +99,10 @@ public fun Source.readString(byteCount: Long, charset: Charset): String {
 public fun Source.asInputStream(): InputStream {
     val isClosed: () -> Boolean =
         when (this) {
-            is RealSource -> this::closed
+            is RealSource -> {
+                this::closed
+            }
+
             is Buffer -> {
                 { false }
             }
@@ -157,7 +161,10 @@ public fun Source.readAtMostTo(sink: ByteBuffer): Int {
 public fun Source.asByteChannel(): ReadableByteChannel {
     val isClosed: () -> Boolean =
         when (this) {
-            is RealSource -> this::closed
+            is RealSource -> {
+                this::closed
+            }
+
             is Buffer -> {
                 { false }
             }

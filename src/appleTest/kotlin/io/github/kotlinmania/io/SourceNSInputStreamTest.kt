@@ -171,7 +171,10 @@ class SourceNSInputStreamTest {
                     override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
                         assertEquals("run-loop", NSThread.currentThread.name)
                         when (handleEvent) {
-                            NSStreamEventOpenCompleted -> opened.unlock()
+                            NSStreamEventOpenCompleted -> {
+                                opened.unlock()
+                            }
+
                             NSStreamEventHasBytesAvailable -> {
                                 sink.usePinned {
                                     assertEquals(1, input.read(it.addressOf(read.getAndIncrement()).reinterpret(), 1U))
@@ -184,7 +187,9 @@ class SourceNSInputStreamTest {
                                 completed.unlock()
                             }
 
-                            else -> fail("unexpected event ${handleEvent.asString()}")
+                            else -> {
+                                fail("unexpected event ${handleEvent.asString()}")
+                            }
                         }
                     }
                 }
@@ -228,7 +233,10 @@ class SourceNSInputStreamTest {
                                 assertEquals("run-loop-2", NSThread.currentThread.name)
                             }
                             when (handleEvent) {
-                                NSStreamEventOpenCompleted -> opened.unlock()
+                                NSStreamEventOpenCompleted -> {
+                                    opened.unlock()
+                                }
+
                                 NSStreamEventHasBytesAvailable -> {
                                     if (read == 0) {
                                         // switch to other run loop before first read
@@ -250,8 +258,13 @@ class SourceNSInputStreamTest {
                                     }
                                 }
 
-                                NSStreamEventEndEncountered -> fail("$data shouldn't be subscribed")
-                                else -> fail("unexpected event ${handleEvent.asString()}")
+                                NSStreamEventEndEncountered -> {
+                                    fail("$data shouldn't be subscribed")
+                                }
+
+                                else -> {
+                                    fail("unexpected event ${handleEvent.asString()}")
+                                }
                             }
                         }
                     }
@@ -284,7 +297,10 @@ class SourceNSInputStreamTest {
                     override fun stream(aStream: NSStream, handleEvent: NSStreamEvent) {
                         assertEquals("run-loop", NSThread.currentThread.name)
                         when (handleEvent) {
-                            NSStreamEventOpenCompleted -> fail("opened before subscribe")
+                            NSStreamEventOpenCompleted -> {
+                                fail("opened before subscribe")
+                            }
+
                             NSStreamEventHasBytesAvailable -> {
                                 val sink = ByteArray(data.length)
                                 sink.usePinned {
@@ -298,7 +314,9 @@ class SourceNSInputStreamTest {
                                 available.unlock()
                             }
 
-                            else -> fail("unexpected event ${handleEvent.asString()}")
+                            else -> {
+                                fail("unexpected event ${handleEvent.asString()}")
+                            }
                         }
                     }
                 }
