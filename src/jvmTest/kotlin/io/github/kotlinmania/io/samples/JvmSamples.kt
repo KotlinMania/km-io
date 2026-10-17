@@ -5,8 +5,20 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.asInputStream
+import io.github.kotlinmania.io.asOutputStream
+import io.github.kotlinmania.io.asSink
+import io.github.kotlinmania.io.asSource
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.copyTo
+import io.github.kotlinmania.io.readAtMostTo
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.readTo
+import io.github.kotlinmania.io.transferFrom
+import io.github.kotlinmania.io.write
+import io.github.kotlinmania.io.writeString
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer

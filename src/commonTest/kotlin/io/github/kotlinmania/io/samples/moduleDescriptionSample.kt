@@ -5,8 +5,17 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Sink
+import io.github.kotlinmania.io.Source
+import io.github.kotlinmania.io.indexOf
+import io.github.kotlinmania.io.readIntLe
+import io.github.kotlinmania.io.readLongLe
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.utf8Size
+import io.github.kotlinmania.io.writeIntLe
+import io.github.kotlinmania.io.writeLongLe
+import io.github.kotlinmania.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -44,11 +53,11 @@ fun Message.Companion.fromBson(source: Source): Message {
     val length = source.readIntLe() - 4L
     source.require(length) // check if the source contains the whole message
 
-    fun readFieldName(source: Source): String {
-        val delimiterOffset = source.indexOf(0) // find offset of the 0-byte terminating the name
+    fun readFieldName(input: Source): String {
+        val delimiterOffset = input.indexOf(0) // find offset of the 0-byte terminating the name
         check(delimiterOffset >= 0) // indexOf return -1 if value not found
-        val fieldName = source.readString(delimiterOffset) // read the string until terminator
-        source.skip(1) // skip the terminator
+        val fieldName = input.readString(delimiterOffset) // read the string until terminator
+        input.skip(1) // skip the terminator
         return fieldName
     }
 

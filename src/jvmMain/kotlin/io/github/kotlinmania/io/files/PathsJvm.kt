@@ -8,7 +8,6 @@ package io.github.kotlinmania.io.files
 import io.github.kotlinmania.io.Sink
 import io.github.kotlinmania.io.Source
 import io.github.kotlinmania.io.buffered
-
 import java.io.File
 
 public actual class Path internal constructor(

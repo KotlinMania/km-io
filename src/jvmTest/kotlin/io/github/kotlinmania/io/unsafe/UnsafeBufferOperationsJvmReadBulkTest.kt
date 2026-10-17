@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io.unsafe
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Segment
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.writeString
 import java.nio.ByteBuffer
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

@@ -5,8 +5,15 @@
 
 package io.github.kotlinmania.io.bytestring.samples
 
-import io.github.kotlinmania.io.bytestring.*
-
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.buildByteString
+import io.github.kotlinmania.io.bytestring.decodeToString
+import io.github.kotlinmania.io.bytestring.encodeToByteString
+import io.github.kotlinmania.io.bytestring.endsWith
+import io.github.kotlinmania.io.bytestring.indexOf
+import io.github.kotlinmania.io.bytestring.isEmpty
+import io.github.kotlinmania.io.bytestring.lastIndexOf
+import io.github.kotlinmania.io.bytestring.startsWith
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

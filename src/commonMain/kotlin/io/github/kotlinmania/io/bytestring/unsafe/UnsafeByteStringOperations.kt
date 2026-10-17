@@ -6,7 +6,6 @@
 package io.github.kotlinmania.io.bytestring.unsafe
 
 import io.github.kotlinmania.io.bytestring.ByteString
-
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract

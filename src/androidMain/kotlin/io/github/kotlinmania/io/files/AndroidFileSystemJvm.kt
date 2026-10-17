@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io.files
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.asSink
+import io.github.kotlinmania.io.asSource
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.file.Files

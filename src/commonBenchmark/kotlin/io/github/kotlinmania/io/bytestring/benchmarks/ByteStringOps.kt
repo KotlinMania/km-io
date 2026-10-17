@@ -5,8 +5,16 @@
 
 package io.github.kotlinmania.io.bytestring.benchmarks
 
-import kotlinx.benchmark.*
-import io.github.kotlinmania.io.bytestring.*
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.endsWith
+import io.github.kotlinmania.io.bytestring.indexOf
+import io.github.kotlinmania.io.bytestring.lastIndexOf
+import io.github.kotlinmania.io.bytestring.startsWith
+import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.Param
+import kotlinx.benchmark.Scope
+import kotlinx.benchmark.Setup
+import kotlinx.benchmark.State
 import kotlin.math.min
 
 const val TARGET_BYTE: Byte = 42
@@ -24,7 +32,6 @@ abstract class IndexOfByteBenchmarkBase {
         require(paramsParsed.size == 2)
         val size = paramsParsed[0]
         val targetByteIndex = paramsParsed[1]
-
 
         require(targetByteIndex == -1 || targetByteIndex in 0 until size)
         val data = ByteArray(size)
@@ -136,7 +143,6 @@ open class LastIndexOfByteStringWithRepeatedMismatch : IndexOfByteStringWithRepe
 }
 
 @State(Scope.Benchmark)
-
 abstract class StartsWithBenchmarkBase {
     protected abstract fun getRawParams(): String
 
@@ -188,7 +194,6 @@ open class EndsWithBenchmark : StartsWithBenchmarkBase() {
 }
 
 @State(Scope.Benchmark)
-
 abstract class ByteStringComparisonBenchmarkBase {
     @Param("128")
     var length: Int = 0
@@ -205,11 +210,14 @@ abstract class ByteStringComparisonBenchmarkBase {
         require(mismatchOffset == -1 || mismatchOffset in 0 until length)
 
         stringA = ByteString(ByteArray(length))
-        stringB = ByteString(ByteArray(length).apply {
-            if (mismatchOffset != -1) {
-                this[mismatchOffset] = TARGET_BYTE
-            }
-        })
+        stringB =
+            ByteString(
+                ByteArray(length).apply {
+                    if (mismatchOffset != -1) {
+                        this[mismatchOffset] = TARGET_BYTE
+                    }
+                },
+            )
     }
 }
 
@@ -256,7 +264,6 @@ open class ByteStringHashCode {
         } else {
             check(ba.contentHashCode() != 0) { "Hash code is zero" }
         }
-
 
         byteString = ByteString(ba)
     }

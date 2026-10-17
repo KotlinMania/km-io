@@ -7,8 +7,13 @@
 
 package io.github.kotlinmania.io.files
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.isEmpty
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.write
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ByteVarOf
 import kotlinx.cinterop.CPointer

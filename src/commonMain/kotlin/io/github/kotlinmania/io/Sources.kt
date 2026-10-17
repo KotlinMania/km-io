@@ -96,7 +96,7 @@ public fun Source.readDecimalLong(): Long {
                         val digit = '0'.code - b
 
                         // Detect when the digit would cause an overflow.
-                        if (value < OVERFLOW_ZONE || value == OVERFLOW_ZONE && digit < overflowDigit) {
+                        if (value < OVERFLOW_ZONE || (value == OVERFLOW_ZONE && digit < overflowDigit)) {
                             with(Buffer()) {
                                 writeDecimalLong(value)
                                 writeByte(b)

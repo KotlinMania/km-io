@@ -6,7 +6,6 @@
 package io.github.kotlinmania.io.bytestring.unsafe
 
 import io.github.kotlinmania.io.bytestring.encodeToByteString
-
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

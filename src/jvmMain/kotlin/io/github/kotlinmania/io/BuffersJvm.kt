@@ -22,7 +22,6 @@ package io.github.kotlinmania.io
 
 import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import io.github.kotlinmania.io.unsafe.withData
-
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream

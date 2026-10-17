@@ -5,9 +5,48 @@
 
 package io.github.kotlinmania.io.files
 
-import io.github.kotlinmania.io.*
-import io.github.kotlinmania.io.wasi.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.allocateInt
+import io.github.kotlinmania.io.allocateString
+import io.github.kotlinmania.io.isEmpty
+import io.github.kotlinmania.io.loadBytes
+import io.github.kotlinmania.io.loadInt
+import io.github.kotlinmania.io.loadString
+import io.github.kotlinmania.io.minOf
+import io.github.kotlinmania.io.readToLinearMemory
+import io.github.kotlinmania.io.storeString
+import io.github.kotlinmania.io.wasi.Ciovec
+import io.github.kotlinmania.io.wasi.Errno
+import io.github.kotlinmania.io.wasi.Fd
+import io.github.kotlinmania.io.wasi.FdFlags
+import io.github.kotlinmania.io.wasi.FileStat
+import io.github.kotlinmania.io.wasi.FileType
+import io.github.kotlinmania.io.wasi.LookupFlags
+import io.github.kotlinmania.io.wasi.OpenFlags
+import io.github.kotlinmania.io.wasi.Prestat
+import io.github.kotlinmania.io.wasi.PrestatType
+import io.github.kotlinmania.io.wasi.Rights
+import io.github.kotlinmania.io.wasi.fd_close
+import io.github.kotlinmania.io.wasi.fd_prestat_dir_name
+import io.github.kotlinmania.io.wasi.fd_prestat_get
+import io.github.kotlinmania.io.wasi.fd_read
+import io.github.kotlinmania.io.wasi.fd_readdir
+import io.github.kotlinmania.io.wasi.fd_sync
+import io.github.kotlinmania.io.wasi.fd_write
+import io.github.kotlinmania.io.wasi.path_create_directory
+import io.github.kotlinmania.io.wasi.path_filestat_get
+import io.github.kotlinmania.io.wasi.path_open
+import io.github.kotlinmania.io.wasi.path_readlink
+import io.github.kotlinmania.io.wasi.path_remove_directory
+import io.github.kotlinmania.io.wasi.path_rename
+import io.github.kotlinmania.io.wasi.path_symlink
+import io.github.kotlinmania.io.wasi.path_unlink_file
+import io.github.kotlinmania.io.wasi.toBitset
+import io.github.kotlinmania.io.write
+import io.github.kotlinmania.io.writeFromLinearMemory
 import kotlin.math.min
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi
 import kotlin.wasm.unsafe.withScopedMemoryAllocator
@@ -134,6 +173,7 @@ internal object WasiFileSystem : SystemFileSystemImpl() {
                 )
             when (res) {
                 Errno.SUCCESS -> return
+
                 Errno.NOENT -> throw FileNotFoundException(
                     "Failed to rename $source to $destination as either source file/directory, " +
                         "or destination's parent directory does not exist.",
@@ -300,25 +340,28 @@ internal object WasiFileSystem : SystemFileSystemImpl() {
         if (metadata.filetype != FileType.DIRECTORY) throw IOException("Not a directory: ${directory.pathString}")
 
         val children = mutableListOf<Path>()
-        val dir_fd = withScopedMemoryAllocator { allocator ->
-            val fdPtr = allocator.allocateInt()
-            val (stringBuffer, stringBufferLength) = allocator.storeString(relativeDirectoryPath.pathString)
+        val dir_fd =
+            withScopedMemoryAllocator { allocator ->
+                val fdPtr = allocator.allocateInt()
+                val (stringBuffer, stringBufferLength) = allocator.storeString(relativeDirectoryPath.pathString)
 
-            val res = Errno(
-                path_open(
-                    fd = preOpen,
-                    dirflags = listOf(LookupFlags.SYMLINK_FOLLOW).toBitset(),
-                    pathPtr = stringBuffer.address.toInt(), pathLen = stringBufferLength,
-                    oflags = setOf(OpenFlags.DIRECTORY).toBitset(),
-                    fsRightsBase = listOf(Rights.FD_READDIR, Rights.FD_READ).toBitset(),
-                    fsRightsInheriting = 0,
-                    fdFlags = 0,
-                    resultPtr = fdPtr.address.toInt()
-                )
-            )
-            if (res != Errno.SUCCESS) throw IOException("Can't open directory ${directory.pathString}: ${res.description}")
-            fdPtr.loadInt()
-        }
+                val res =
+                    Errno(
+                        path_open(
+                            fd = preOpen,
+                            dirflags = listOf(LookupFlags.SYMLINK_FOLLOW).toBitset(),
+                            pathPtr = stringBuffer.address.toInt(),
+                            pathLen = stringBufferLength,
+                            oflags = setOf(OpenFlags.DIRECTORY).toBitset(),
+                            fsRightsBase = listOf(Rights.FD_READDIR, Rights.FD_READ).toBitset(),
+                            fsRightsInheriting = 0,
+                            fdFlags = 0,
+                            resultPtr = fdPtr.address.toInt(),
+                        ),
+                    )
+                if (res != Errno.SUCCESS) throw IOException("Can't open directory ${directory.pathString}: ${res.description}")
+                fdPtr.loadInt()
+            }
         var failure: Throwable? = null
         val closeResult: Errno
         try {

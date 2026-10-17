@@ -5,8 +5,10 @@
 
 package io.github.kotlinmania.io.files
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Sink
+import io.github.kotlinmania.io.Source
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.isWindows
 import kotlin.jvm.JvmName
 
 /**

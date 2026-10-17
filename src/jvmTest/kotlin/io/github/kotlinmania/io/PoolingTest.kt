@@ -93,7 +93,7 @@ class PoolingTest {
                         segments.add(seg)
                         observedSegments[seg] = seg
                     }
-                    segments.forEach { SegmentPool.recycle(it) }
+                    segments.forEach { segment -> SegmentPool.recycle(segment) }
                 }
             }
         }
@@ -125,7 +125,11 @@ class PoolingTest {
                                 segments.add(seg)
                                 observedSegments[seg] = seg
                             }
-                            segmentsPerThread -> SegmentPool.recycle(segments.removeLast())
+
+                            segmentsPerThread -> {
+                                SegmentPool.recycle(segments.removeLast())
+                            }
+
                             else -> {
                                 val rnd = Random.nextDouble()
                                 // More segments we have, higher the probability to return one of them back
@@ -139,7 +143,7 @@ class PoolingTest {
                             }
                         }
                     }
-                    segments.forEach { SegmentPool.recycle(it) }
+                    segments.forEach { segment -> SegmentPool.recycle(segment) }
                 }
             }
         }

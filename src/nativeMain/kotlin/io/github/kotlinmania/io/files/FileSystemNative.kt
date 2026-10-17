@@ -8,7 +8,6 @@ package io.github.kotlinmania.io.files
 import io.github.kotlinmania.io.IOException
 import io.github.kotlinmania.io.RawSink
 import io.github.kotlinmania.io.RawSource
-
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString

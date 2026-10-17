@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.discardingSink
+import io.github.kotlinmania.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -53,7 +56,7 @@ class Crc32Sample {
 
                 for (idx in table.indices) {
                     table[idx] = idx.toUInt()
-                    for (bit in 8 downTo 1) {
+                    for (_ in 8 downTo 1) {
                         table[idx] =
                             if (table[idx] % 2U == 0U) {
                                 table[idx].shr(1)

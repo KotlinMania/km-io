@@ -9,7 +9,6 @@ package io.github.kotlinmania.io.files
 
 import io.github.kotlinmania.io.IOException
 import io.github.kotlinmania.io.isWindows
-
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber

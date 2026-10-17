@@ -7,7 +7,6 @@
 package io.github.kotlinmania.io.files
 
 import io.github.kotlinmania.io.IOException
-
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.cstr

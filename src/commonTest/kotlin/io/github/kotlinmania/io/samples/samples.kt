@@ -5,8 +5,55 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.EOFException
+import io.github.kotlinmania.io.RawSink
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.Source
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.indexOf
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.readCodePointValue
+import io.github.kotlinmania.io.readDecimalLong
+import io.github.kotlinmania.io.readDouble
+import io.github.kotlinmania.io.readDoubleLe
+import io.github.kotlinmania.io.readFloat
+import io.github.kotlinmania.io.readFloatLe
+import io.github.kotlinmania.io.readHexadecimalUnsignedLong
+import io.github.kotlinmania.io.readIntLe
+import io.github.kotlinmania.io.readLine
+import io.github.kotlinmania.io.readLineStrict
+import io.github.kotlinmania.io.readLongLe
+import io.github.kotlinmania.io.readShortLe
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.readTo
+import io.github.kotlinmania.io.readUByte
+import io.github.kotlinmania.io.readUInt
+import io.github.kotlinmania.io.readUIntLe
+import io.github.kotlinmania.io.readULong
+import io.github.kotlinmania.io.readULongLe
+import io.github.kotlinmania.io.readUShort
+import io.github.kotlinmania.io.readUShortLe
+import io.github.kotlinmania.io.startsWith
+import io.github.kotlinmania.io.utf8Size
+import io.github.kotlinmania.io.writeCodePointValue
+import io.github.kotlinmania.io.writeDecimalLong
+import io.github.kotlinmania.io.writeDouble
+import io.github.kotlinmania.io.writeDoubleLe
+import io.github.kotlinmania.io.writeFloat
+import io.github.kotlinmania.io.writeFloatLe
+import io.github.kotlinmania.io.writeHexadecimalUnsignedLong
+import io.github.kotlinmania.io.writeIntLe
+import io.github.kotlinmania.io.writeLongLe
+import io.github.kotlinmania.io.writeShortLe
+import io.github.kotlinmania.io.writeString
+import io.github.kotlinmania.io.writeUByte
+import io.github.kotlinmania.io.writeUInt
+import io.github.kotlinmania.io.writeUIntLe
+import io.github.kotlinmania.io.writeULong
+import io.github.kotlinmania.io.writeULongLe
+import io.github.kotlinmania.io.writeUShort
+import io.github.kotlinmania.io.writeUShortLe
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -438,8 +485,14 @@ class KotlinxIoCoreCommonSamples {
 
                 override fun readAtMostTo(sink: Buffer, byteCount: Long): Long =
                     when {
-                        byteCount == 0L -> 0L
-                        exhausted -> -1L
+                        byteCount == 0L -> {
+                            0L
+                        }
+
+                        exhausted -> {
+                            -1L
+                        }
+
                         else -> {
                             exhausted = true
                             sink.writeByte(42)
@@ -471,8 +524,14 @@ class KotlinxIoCoreCommonSamples {
 
                 override fun readAtMostTo(sink: Buffer, byteCount: Long): Long =
                     when {
-                        byteCount == 0L -> 0L
-                        exhausted -> -1L
+                        byteCount == 0L -> {
+                            0L
+                        }
+
+                        exhausted -> {
+                            -1L
+                        }
+
                         else -> {
                             exhausted = true
                             sink.writeByte(42)
@@ -504,8 +563,14 @@ class KotlinxIoCoreCommonSamples {
 
                 override fun readAtMostTo(sink: Buffer, byteCount: Long): Long =
                     when {
-                        byteCount == 0L -> 0L
-                        exhausted -> -1L
+                        byteCount == 0L -> {
+                            0L
+                        }
+
+                        exhausted -> {
+                            -1L
+                        }
+
                         else -> {
                             exhausted = true
                             sink.writeByte(42)

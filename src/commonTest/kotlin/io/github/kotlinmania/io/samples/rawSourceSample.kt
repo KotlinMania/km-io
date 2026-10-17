@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.RawSource
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.xor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

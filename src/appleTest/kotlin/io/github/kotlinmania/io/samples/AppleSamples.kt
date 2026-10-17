@@ -5,8 +5,16 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.asNSInputStream
+import io.github.kotlinmania.io.asNSOutputStream
+import io.github.kotlinmania.io.asSink
+import io.github.kotlinmania.io.asSource
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.toByteArray
+import io.github.kotlinmania.io.toNSData
+import io.github.kotlinmania.io.write
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber

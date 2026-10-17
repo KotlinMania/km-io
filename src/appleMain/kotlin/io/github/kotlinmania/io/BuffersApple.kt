@@ -9,7 +9,6 @@ package io.github.kotlinmania.io
 
 import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import io.github.kotlinmania.io.unsafe.withData
-
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi

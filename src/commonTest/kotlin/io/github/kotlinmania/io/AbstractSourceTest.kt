@@ -24,7 +24,6 @@ package io.github.kotlinmania.io
 import io.github.kotlinmania.io.bytestring.ByteString
 import io.github.kotlinmania.io.bytestring.decodeToString
 import io.github.kotlinmania.io.bytestring.encodeToByteString
-
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -1612,7 +1611,7 @@ abstract class AbstractBufferedSourceTest internal constructor(
     @Test
     fun readTooShortUnsignedLongThrows() {
         assertFailsWith<EOFException> { source.readULong() }
-        for (i in 0 until 7) {
+        for (_ in 0 until 7) {
             sink.writeByte(0)
             sink.flush()
             assertFailsWith<EOFException> { source.readULong() }
@@ -1623,7 +1622,7 @@ abstract class AbstractBufferedSourceTest internal constructor(
     @Test
     fun readTooShortUnsignedLongLeThrows() {
         assertFailsWith<EOFException> { source.readULongLe() }
-        for (i in 0 until 7) {
+        for (_ in 0 until 7) {
             sink.writeByte(0)
             sink.flush()
             assertFailsWith<EOFException> { source.readULongLe() }

@@ -5,8 +5,10 @@
 
 package io.github.kotlinmania.io.benchmarks
 
-import io.github.kotlinmania.io.*
-import kotlinx.benchmark.*
+import io.github.kotlinmania.io.Buffer
+import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.Scope
+import kotlinx.benchmark.State
 
 @State(Scope.Benchmark)
 open class SegmentPoolBenchmark {

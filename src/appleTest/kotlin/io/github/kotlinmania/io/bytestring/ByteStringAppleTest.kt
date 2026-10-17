@@ -7,7 +7,6 @@ package io.github.kotlinmania.io.bytestring
 
 import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringApi
 import io.github.kotlinmania.io.bytestring.unsafe.UnsafeByteStringOperations
-
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi

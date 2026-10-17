@@ -21,7 +21,6 @@
 package io.github.kotlinmania.io
 
 import io.github.kotlinmania.io.internal.REPLACEMENT_BYTE
-
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

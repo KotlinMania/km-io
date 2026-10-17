@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io.bytestring.samples
 
-import io.github.kotlinmania.io.bytestring.*
-
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.encodeToByteString
+import io.github.kotlinmania.io.bytestring.toByteString
+import io.github.kotlinmania.io.bytestring.toHexString
+import io.github.kotlinmania.io.bytestring.toNSData
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import platform.Foundation.NSData

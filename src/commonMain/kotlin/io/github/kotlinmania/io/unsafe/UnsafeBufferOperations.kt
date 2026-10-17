@@ -5,8 +5,13 @@
 
 package io.github.kotlinmania.io.unsafe
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.AlwaysSharedCopyTracker
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Segment
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.checkBounds
+import io.github.kotlinmania.io.isEmpty
+import io.github.kotlinmania.io.seek
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract

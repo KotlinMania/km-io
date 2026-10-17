@@ -5,11 +5,11 @@
 
 package io.github.kotlinmania.io.benchmarks
 
+import io.github.kotlinmania.io.readAtMostTo
+import io.github.kotlinmania.io.write
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Param
 import kotlinx.benchmark.Setup
-import io.github.kotlinmania.io.readAtMostTo
-import io.github.kotlinmania.io.write
 import java.nio.ByteBuffer
 
 open class ByteBufferReadWrite : BufferRWBenchmarkBase() {

@@ -5,8 +5,10 @@
 
 package io.github.kotlinmania.io.benchmarks
 
-import kotlinx.benchmark.*
-import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.Buffer
+import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.Scope
+import kotlinx.benchmark.State
 import org.openjdk.jmh.annotations.Group
 import org.openjdk.jmh.annotations.GroupThreads
 

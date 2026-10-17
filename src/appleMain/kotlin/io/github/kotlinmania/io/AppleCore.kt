@@ -8,7 +8,6 @@
 package io.github.kotlinmania.io
 
 import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
-
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf

@@ -11,13 +11,14 @@ import io.github.kotlinmania.io.loadByte
 import io.github.kotlinmania.io.loadInt
 import io.github.kotlinmania.io.loadLong
 import io.github.kotlinmania.io.storeInt
-
 import kotlin.wasm.unsafe.MemoryAllocator
 import kotlin.wasm.unsafe.Pointer
 import kotlin.wasm.unsafe.UnsafeWasmMemoryApi
 
 // https://github.com/WebAssembly/WASI/blob/main/legacy/preview1/docs.md
-internal enum class Errno(val description: String) {
+internal enum class Errno(
+    val description: String,
+) {
     SUCCESS("No error occurred. System call completed successfully"),
     TOOBIG("Argument list too long"),
     ACCES("Permission denied"),
@@ -94,7 +95,7 @@ internal enum class Errno(val description: String) {
     TIMEDOUT("Connection timed out"),
     TXTBSY("Text file busy"),
     XDEV("Cross-device link"),
-    NOTCAPABLE("Extension: Capabilities insufficient")
+    NOTCAPABLE("Extension: Capabilities insufficient"),
 }
 
 internal fun Errno(errno: Int): Errno {

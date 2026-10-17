@@ -5,8 +5,13 @@
 
 package io.github.kotlinmania.io.unsafe
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.Segment
+import io.github.kotlinmania.io.UnsafeIoApi
+import io.github.kotlinmania.io.assertArrayEquals
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.readUInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

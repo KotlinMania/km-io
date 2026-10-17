@@ -5,10 +5,13 @@
 
 package io.github.kotlinmania.io.samples
 
-import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.Buffer
 import io.github.kotlinmania.io.bytestring.ByteString
 import io.github.kotlinmania.io.bytestring.encodeToByteString
-
+import io.github.kotlinmania.io.indexOf
+import io.github.kotlinmania.io.readByteString
+import io.github.kotlinmania.io.write
+import io.github.kotlinmania.io.writeString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

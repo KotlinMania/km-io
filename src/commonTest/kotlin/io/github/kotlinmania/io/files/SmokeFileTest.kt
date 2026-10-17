@@ -5,8 +5,16 @@
 
 package io.github.kotlinmania.io.files
 
-import io.github.kotlinmania.io.*
-
+import io.github.kotlinmania.io.IOException
+import io.github.kotlinmania.io.Segment
+import io.github.kotlinmania.io.assertArrayEquals
+import io.github.kotlinmania.io.buffered
+import io.github.kotlinmania.io.readByteArray
+import io.github.kotlinmania.io.readLine
+import io.github.kotlinmania.io.readString
+import io.github.kotlinmania.io.repeat
+import io.github.kotlinmania.io.tempFileName
+import io.github.kotlinmania.io.writeString
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -172,7 +180,7 @@ class SmokeFileTest {
         assertTrue(SystemFileSystem.exists(p1))
 
         var pr = p1
-        for (i in 0..3) {
+        for (_ in 0..3) {
             SystemFileSystem.delete(pr)
             pr = pr.parent!!
         }

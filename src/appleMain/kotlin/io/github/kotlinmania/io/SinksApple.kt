@@ -63,7 +63,10 @@ private class SinkNSOutputStream(
     NSStreamDelegateProtocol {
     private val isClosed: () -> Boolean =
         when (sink) {
-            is RealSink -> sink::closed
+            is RealSink -> {
+                sink::closed
+            }
+
             is Buffer -> {
                 { false }
             }

@@ -5,8 +5,11 @@
 
 package io.github.kotlinmania.io.bytestring.samples
 
-import io.github.kotlinmania.io.bytestring.*
-
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.asReadOnlyByteBuffer
+import io.github.kotlinmania.io.bytestring.encodeToByteString
+import io.github.kotlinmania.io.bytestring.getByteString
+import io.github.kotlinmania.io.bytestring.putByteString
 import java.nio.ByteBuffer
 import java.nio.ReadOnlyBufferException
 import kotlin.test.Test

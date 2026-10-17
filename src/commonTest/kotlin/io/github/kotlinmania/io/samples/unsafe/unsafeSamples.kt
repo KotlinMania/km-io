@@ -5,11 +5,18 @@
 
 package io.github.kotlinmania.io.samples.unsafe
 
-import io.github.kotlinmania.io.*
+import io.github.kotlinmania.io.Buffer
+import io.github.kotlinmania.io.EOFException
+import io.github.kotlinmania.io.UnsafeIoApi
 import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.discardReturnValue
+import io.github.kotlinmania.io.readByteString
+import io.github.kotlinmania.io.readString
 import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
 import io.github.kotlinmania.io.unsafe.withData
-
+import io.github.kotlinmania.io.write
+import io.github.kotlinmania.io.writeString
+import io.github.kotlinmania.io.xor
 import kotlin.io.encoding.Base64
 import kotlin.math.min
 import kotlin.random.Random
@@ -232,7 +239,7 @@ class UnsafeBufferOperationsSamples {
                             // let's save as much succeeding small values as possible
                             val remainingDataLength = data.size - index
                             val remainingCapacity = seg.remainingCapacity - 1
-                            for (i in 0 until min(remainingDataLength, remainingCapacity)) {
+                            for (_ in 0 until min(remainingDataLength, remainingCapacity)) {
                                 val b = data[index]
                                 if (b >= 0x80u) break
                                 ctx.setUnchecked(seg, bytesWritten++, b.toByte())
@@ -260,7 +267,7 @@ class UnsafeBufferOperationsSamples {
             val table = UIntArray(256)
             for (idx in table.indices) {
                 table[idx] = idx.toUInt()
-                for (bit in 8 downTo 1) {
+                for (_ in 8 downTo 1) {
                     table[idx] =
                         if (table[idx] % 2U == 0U) {
                             table[idx].shr(1)
@@ -280,7 +287,7 @@ class UnsafeBufferOperationsSamples {
             var crc32 = 0xffffffffU
             // Iterate over segments starting from buffer's head
             UnsafeBufferOperations.forEachSegment(this) { ctx, segment ->
-                var currentSegment = segment
+                val currentSegment = segment
                 // Get data from a segment
                 ctx.withData(currentSegment) { data, startIndex, endIndex ->
                     for (idx in startIndex..<endIndex) {
@@ -304,7 +311,7 @@ class UnsafeBufferOperationsSamples {
             val table = UIntArray(256)
             for (idx in table.indices) {
                 table[idx] = idx.toUInt()
-                for (bit in 8 downTo 1) {
+                for (_ in 8 downTo 1) {
                     table[idx] =
                         if (table[idx] % 2U == 0U) {
                             table[idx].shr(1)

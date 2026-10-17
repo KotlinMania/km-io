@@ -5,9 +5,13 @@
 
 package io.github.kotlinmania.io.benchmarks
 
-import kotlinx.benchmark.*
 import io.github.kotlinmania.io.Buffer
 import io.github.kotlinmania.io.Source
+import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.Param
+import kotlinx.benchmark.Scope
+import kotlinx.benchmark.Setup
+import kotlinx.benchmark.State
 
 const val OFFSET_TO_LAST_BYTE_IN_SEGMENT = (SEGMENT_SIZE_IN_BYTES - 1).toString()
 

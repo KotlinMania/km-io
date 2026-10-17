@@ -269,7 +269,9 @@ internal inline fun ByteArray.process2Utf8Bytes(
     )
 
     when {
-        codePoint < 0x80 -> yield(REPLACEMENT_CODE_POINT) // Reject overlong code points.
+        codePoint < 0x80 -> yield(REPLACEMENT_CODE_POINT)
+
+        // Reject overlong code points.
         else -> yield(codePoint)
     }
     return 2

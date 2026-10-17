@@ -6,7 +6,6 @@
 package io.github.kotlinmania.io.files
 
 import io.github.kotlinmania.io.IOException
-
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
@@ -16,7 +15,21 @@ import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
-import platform.posix.*
+import platform.posix.ENOENT
+import platform.posix.S_IFDIR
+import platform.posix.S_IFMT
+import platform.posix.S_IFREG
+import platform.posix.__posix_basename
+import platform.posix.closedir
+import platform.posix.dirname
+import platform.posix.errno
+import platform.posix.free
+import platform.posix.getenv
+import platform.posix.mkdir
+import platform.posix.realpath
+import platform.posix.rename
+import platform.posix.stat
+import platform.posix.strerror
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun dirnameImpl(path: String): String {
@@ -27,22 +40,21 @@ internal actual fun dirnameImpl(path: String): String {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun basenameImpl(path: String): String {
-    return __posix_basename(path)?.toKString() ?: ""
-}
+internal actual fun basenameImpl(path: String): String = __posix_basename(path)?.toKString() ?: ""
 
 internal actual fun isAbsoluteImpl(path: String): Boolean = path.startsWith('/')
 
 @OptIn(ExperimentalForeignApi::class)
 public actual val SystemTemporaryDirectory: Path
-    get() = Path(
-        sequenceOf(
-            getenv("TMPDIR")?.toKString(),
-            getenv("TMP")?.toKString(),
-            getenv("TEMP")?.toKString(),
-            getenv("TEMPDIR")?.toKString(),
-        ).firstOrNull { !it.isNullOrEmpty() } ?: "/tmp",
-    )
+    get() =
+        Path(
+            sequenceOf(
+                getenv("TMPDIR")?.toKString(),
+                getenv("TMP")?.toKString(),
+                getenv("TEMP")?.toKString(),
+                getenv("TEMPDIR")?.toKString(),
+            ).firstOrNull { !it.isNullOrEmpty() } ?: "/tmp",
+        )
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 internal actual fun metadataOrNullImpl(path: Path): FileMetadata? {
@@ -88,7 +100,9 @@ internal actual fun realpathImpl(path: String): String {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual class OpaqueDirEntry(private val dir: CPointer<cnames.structs.DIR>) : AutoCloseable {
+internal actual class OpaqueDirEntry(
+    private val dir: CPointer<cnames.structs.DIR>,
+) : AutoCloseable {
     actual fun readdir(): String? {
         val entry = platform.posix.readdir(dir) ?: return null
         return entry[0].d_name.toKString()
