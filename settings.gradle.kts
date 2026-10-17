@@ -1,6 +1,4 @@
 pluginManagement {
-    includeBuild("build-logic")
-
     repositories {
         google()
         mavenCentral()
@@ -18,11 +16,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "km-io"
-
-include(":km-io-core")
-include(":km-io-benchmarks")
-include(":km-io-bytestring")
-
-project(":km-io-core").projectDir = file("./core")
-project(":km-io-benchmarks").projectDir = file("./benchmarks")
-project(":km-io-bytestring").projectDir = file("./bytestring")

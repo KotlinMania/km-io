@@ -5,6 +5,11 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.bytestring.ByteString
+import io.github.kotlinmania.io.bytestring.buildByteString
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
+
 /**
  * Creates a byte string containing a copy of all the data from this buffer.
  *

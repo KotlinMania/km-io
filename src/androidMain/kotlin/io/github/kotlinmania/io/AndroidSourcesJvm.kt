@@ -20,6 +20,8 @@
  */
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+
 import java.io.EOFException
 import java.io.InputStream
 import java.nio.ByteBuffer

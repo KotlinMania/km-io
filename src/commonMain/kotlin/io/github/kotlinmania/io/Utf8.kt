@@ -69,6 +69,10 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.internal.*
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+import io.github.kotlinmania.io.unsafe.withData
+
 import kotlin.math.min
 
 /**

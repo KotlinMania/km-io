@@ -21,6 +21,10 @@
 
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.internal.REPLACEMENT_CHARACTER
+import io.github.kotlinmania.io.internal.REPLACEMENT_CODE_POINT
+import io.github.kotlinmania.io.internal.processUtf8CodePoints
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

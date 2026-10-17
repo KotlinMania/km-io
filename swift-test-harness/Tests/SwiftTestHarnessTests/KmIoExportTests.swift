@@ -1,6 +1,5 @@
 import XCTest
 import KmIo
-import KmIoByteString
 
 final class KmIoExportTests: XCTestCase {
     func testBufferRoundTrip() throws {

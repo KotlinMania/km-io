@@ -20,6 +20,8 @@
  */
 package io.github.kotlinmania.io
 
+import io.github.kotlinmania.io.unsafe.UnsafeBufferOperations
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
