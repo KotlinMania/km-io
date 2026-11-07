@@ -72,10 +72,16 @@ public actual val SystemFileSystem: FileSystem =
         override fun createDirectories(path: Path, mustCreate: Boolean) {
             if (!path.file.mkdirs()) {
                 if (mustCreate) {
-                    throw IOException("Path already exist: $path")
+                    if (path.file.exists()) {
+                        throw IOException("Path already exist: $path")
+                    }
+                    throw IOException("Directory creation failed: $path")
                 }
-                if (path.file.isFile) {
-                    throw IOException("Path already exists and it's a file: $path")
+                if (!path.file.isDirectory) {
+                    if (path.file.isFile) {
+                        throw IOException("Path already exists and it's a file: $path")
+                    }
+                    throw IOException("Directory creation failed: $path")
                 }
             }
         }

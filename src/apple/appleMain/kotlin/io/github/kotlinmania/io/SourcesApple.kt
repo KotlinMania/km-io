@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-@file:OptIn(ExperimentalNativeApi::class, ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalNativeApi::class, ExperimentalForeignApi::class, ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.io
 
@@ -40,6 +40,8 @@ import platform.darwin.NSUInteger
 import platform.darwin.NSUIntegerVar
 import platform.posix.uint8_tVar
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 import kotlin.native.ref.WeakReference
 
 /**
@@ -55,8 +57,12 @@ import kotlin.native.ref.WeakReference
  * [NSInputStream.initWithFileAtPath](https://developer.apple.com/documentation/foundation/nsinputstream/1408976-initwithfileatpath)),
  * their use will result in a runtime error.
  *
+ * Hidden from Swift Export while `SirDeclarationNamerImpl` emits obsoleted
+ * `Foundation.NSInputStream` instead of `Foundation.InputStream` (Hermes Kanban `t_8e185cdc`).
+ *
  * @sample io.github.kotlinmania.io.KotlinxIoSamplesApple.asStream
  */
+@HiddenFromObjC
 public fun Source.asNSInputStream(): NSInputStream = SourceNSInputStream(this)
 
 @OptIn(InternalIoApi::class, UnsafeNumber::class)

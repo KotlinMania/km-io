@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
+@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class, ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.io
 
@@ -36,6 +36,8 @@ import platform.darwin.NSInteger
 import platform.darwin.NSUInteger
 import platform.posix.uint8_tVar
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 import kotlin.native.ref.WeakReference
 
 /**
@@ -52,8 +54,12 @@ import kotlin.native.ref.WeakReference
  * [NSOutputStream.initToFileAtPath](https://developer.apple.com/documentation/foundation/nsoutputstream/1416367-inittofileatpath)),
  * their use will result in a runtime error.
  *
+ * Hidden from Swift Export while `SirDeclarationNamerImpl` emits obsoleted
+ * `Foundation.NSOutputStream` instead of `Foundation.OutputStream` (Hermes Kanban `t_8e185cdc`).
+ *
  * @sample io.github.kotlinmania.io.KotlinxIoSamplesApple.asStream
  */
+@HiddenFromObjC
 public fun Sink.asNSOutputStream(): NSOutputStream = SinkNSOutputStream(this)
 
 @OptIn(UnsafeNumber::class)

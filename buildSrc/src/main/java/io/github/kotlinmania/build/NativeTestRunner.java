@@ -26,7 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Runs a linked native test executable on this host or an existing Parallels guest. */
+/**
+ * Runs an already linked Linux ARM64/x64 or Windows x64 test executable locally or in an existing
+ * selected Parallels guest. It checks architecture and binary hashes, executes real test cases,
+ * and writes runtime evidence/JUnit reports. It can copy/run files in the guest; it neither builds
+ * the product nor silently substitutes another platform.
+ */
 public final class NativeTestRunner {
     private static final Set<String> TARGETS = Set.of("linuxArm64", "linuxX64", "mingwX64");
     private static final Set<String> LINUX_GUESTS = Set.of(
@@ -37,6 +42,7 @@ public final class NativeTestRunner {
             "\\[\\s*(?:SKIPPED|FAILED|DISABLED)\\s*\\]|YOU HAVE \\d+ DISABLED");
     private static final Pattern GUEST_ARCH = Pattern.compile("(?m)^GUEST_ARCH=(\\S+)\\s*$");
     private static final Pattern GUEST_EXIT = Pattern.compile("(?m)^GUEST_TEST_EXIT=(-?\\d+)\\s*$");
+    private static final int DEFAULT_TIMEOUT_SECONDS = 900;
 
     private NativeTestRunner() {}
 
@@ -52,7 +58,7 @@ public final class NativeTestRunner {
     }
 
     private record Options(String target, Path binary, Path reportDirectory, String vm,
-                           Path scratchDirectory, boolean allowUnavailable) {}
+                           Path scratchDirectory, boolean allowUnavailable, int timeoutSeconds) {}
 
     private record ProcessResult(int exitCode, String output, boolean timedOut) {}
 
@@ -178,37 +184,53 @@ public final class NativeTestRunner {
 
     public static List<String> guestCommand(String target, String digest, String binary,
                                             String temporaryDirectory, String workingDirectory) {
+        return guestCommand(target, digest, binary, temporaryDirectory, workingDirectory, DEFAULT_TIMEOUT_SECONDS);
+    }
+
+    public static List<String> guestCommand(String target, String digest, String binary,
+                                            String temporaryDirectory, String workingDirectory,
+                                            int timeoutSeconds) {
         if (!digest.matches("[0-9a-f]{64}")) {
             throw new IllegalArgumentException("Invalid binary SHA-256 digest");
         }
+        if (timeoutSeconds <= 0) {
+            throw new IllegalArgumentException("Timeout must be positive");
+        }
         if (target.equals("mingwX64")) {
+            long timeoutMillis = (long) timeoutSeconds * 1000L;
             String script = """
                     $ErrorActionPreference = 'Stop'
                     $ProgressPreference = 'SilentlyContinue'
+                    $localDir = Join-Path ([System.IO.Path]::GetTempPath()) ("km-native-" + [Guid]::NewGuid().ToString("N"))
                     try {
                       $request = [Console]::ReadLine() | ConvertFrom-Json
                       $binary = $request.binary
                       $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant()
                       if ($hash -ne '@HASH@') { throw 'Shared binary hash mismatch' }
-                      Write-Output "BINARY_SHA256=$hash"
+                      New-Item -ItemType Directory -Path $localDir -Force | Out-Null
+                      $localBinary = Join-Path $localDir ([System.IO.Path]::GetFileName($binary))
+                      Copy-Item -LiteralPath $binary -Destination $localBinary -Force
+                      $localHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $localBinary).Hash.ToLowerInvariant()
+                      if ($localHash -ne '@HASH@') { throw 'Local binary hash mismatch' }
+                      Write-Output "BINARY_SHA256=$localHash"
                       Write-Output 'GUEST_OS=Windows'
                       Write-Output "GUEST_ARCH=$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)"
                       $start = New-Object System.Diagnostics.ProcessStartInfo
-                      $start.FileName = $binary
+                      $start.FileName = $localBinary
                       $start.Arguments = '--ktest_logger=GTEST'
                       $start.WorkingDirectory = $request.workingDirectory
                       $start.UseShellExecute = $false
                       $start.RedirectStandardOutput = $true
                       $start.RedirectStandardError = $true
-                      $start.EnvironmentVariables['TMPDIR'] = $request.temporaryDirectory
-                      $start.EnvironmentVariables['TMP'] = $request.temporaryDirectory
-                      $start.EnvironmentVariables['TEMP'] = $request.temporaryDirectory
+                      $start.EnvironmentVariables['TMPDIR'] = $localDir
+                      $start.EnvironmentVariables['TMP'] = $localDir
+                      $start.EnvironmentVariables['TEMP'] = $localDir
                       $process = New-Object System.Diagnostics.Process
                       $process.StartInfo = $start
                       if (-not $process.Start()) { throw 'Could not start native test executable' }
                       $stdout = $process.StandardOutput.ReadToEndAsync()
                       $stderr = $process.StandardError.ReadToEndAsync()
-                      $finished = $process.WaitForExit(240000)
+                      $finished = $process.WaitForExit(@TIMEOUT_MS@)
                       if (-not $finished) {
                         & taskkill.exe /PID $process.Id /T /F | Out-Null
                         $process.WaitForExit()
@@ -220,7 +242,13 @@ public final class NativeTestRunner {
                       Write-Output "GUEST_TEST_EXIT=$testExit"
                       exit $testExit
                     } catch { [Console]::Error.WriteLine($_); exit 1 }
-                    """.replace("@HASH@", digest);
+                    finally {
+                      if (Test-Path -LiteralPath $localDir) {
+                        Remove-Item -LiteralPath $localDir -Recurse -Force -ErrorAction SilentlyContinue
+                      }
+                    }
+                    """.replace("@HASH@", digest)
+                    .replace("@TIMEOUT_MS@", Long.toString(timeoutMillis));
             return List.of("powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand",
                     Base64.getEncoder().encodeToString(script.getBytes(StandardCharsets.UTF_16LE)));
         }
@@ -238,11 +266,12 @@ public final class NativeTestRunner {
                 printf 'GUEST_OS=Linux\\nGUEST_ARCH=%s\\n' "$(uname -m)"
                 cd "$working" || exit 1
                 export TMPDIR="$temporary" TMP="$temporary" TEMP="$temporary"
-                timeout --signal=TERM --kill-after=5s 240s "$binary" --ktest_logger=GTEST
+                timeout --signal=TERM --kill-after=5s @TIMEOUT_S@s "$binary" --ktest_logger=GTEST
                 test_exit=$?
                 printf 'GUEST_TEST_EXIT=%s\\n' "$test_exit"
                 exit "$test_exit"
                 """.replace("@HASH@", digest)
+                .replace("@TIMEOUT_S@", Integer.toString(timeoutSeconds))
                 .replace("@BINARY@", shellQuote(binary))
                 .replace("@TEMPORARY@", shellQuote(temporaryDirectory))
                 .replace("@WORKING@", shellQuote(workingDirectory));
@@ -252,7 +281,7 @@ public final class NativeTestRunner {
     public static int run(String... arguments) {
         if (List.of(arguments).contains("--help")) {
             System.out.println("NativeTestRunner --target linuxArm64|linuxX64|mingwX64 --binary FILE --report-dir DIR"
-                    + " [--vm NAME_OR_ID] [--scratch-dir DIR] [--allow-unavailable]");
+                    + " [--vm NAME_OR_ID] [--scratch-dir DIR] [--timeout-seconds SECONDS] [--allow-unavailable]");
             return 0;
         }
         Options options;
@@ -288,11 +317,12 @@ public final class NativeTestRunner {
             Path scratchRoot = options.scratchDirectory() == null ? binary.getParent() : options.scratchDirectory();
             Files.createDirectories(scratchRoot);
             temporary = Files.createTempDirectory(scratchRoot, "native-runtime-").toRealPath();
+            Duration hostTimeout = Duration.ofSeconds((long) options.timeoutSeconds() + 60L);
             ProcessResult result;
             if (hostOperatingSystem.equals(nativeOperatingSystem)) {
                 receipt.put("executionMode", "local-host");
                 result = execute(List.of(binary.toString(), "--ktest_logger=GTEST"), binary.getParent(),
-                        temporaryEnvironment(temporary), "", Duration.ofSeconds(300), options.reportDirectory());
+                        temporaryEnvironment(temporary), "", hostTimeout, options.reportDirectory());
             } else {
                 Path parallels = findExecutable("prlctl");
                 if (parallels == null) {
@@ -313,7 +343,8 @@ public final class NativeTestRunner {
                 receipt.put("guestName", guest.name());
                 receipt.put("guestBinary", guestBinary);
                 List<String> command = new ArrayList<>(List.of(parallels.toString(), "exec", guest.id(), "--current-user"));
-                List<String> launcher = guestCommand(options.target(), digest, guestBinary, guestTemporary, guestWorking);
+                List<String> launcher = guestCommand(
+                        options.target(), digest, guestBinary, guestTemporary, guestWorking, options.timeoutSeconds());
                 if (options.target().equals("mingwX64")) {
                     // Keep the Parallels command short: long encoded commands exceed its guest argument limit.
                     Path script = temporary.resolve("run-native-tests.ps1");
@@ -328,7 +359,7 @@ public final class NativeTestRunner {
                         ? Json.stringify(Map.of("binary", guestBinary, "temporaryDirectory", guestTemporary,
                                 "workingDirectory", guestWorking)) + "\n" : "";
                 result = execute(command, binary.getParent(), temporaryEnvironment(temporary), input,
-                        Duration.ofSeconds(300), options.reportDirectory());
+                        hostTimeout, options.reportDirectory());
                 output = result.output();
                 receipt.put("processExit", result.exitCode());
                 Matcher architecture = GUEST_ARCH.matcher(output);
@@ -412,6 +443,7 @@ public final class NativeTestRunner {
         Path scratch = null;
         String vm = null;
         boolean allowUnavailable = false;
+        int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
         for (int index = 0; index < arguments.length; index++) {
             String argument = arguments[index];
             if (argument.equals("--allow-unavailable")) {
@@ -428,13 +460,23 @@ public final class NativeTestRunner {
                 case "--report-dir" -> report = Path.of(value).toAbsolutePath().normalize();
                 case "--scratch-dir" -> scratch = Path.of(value).toAbsolutePath().normalize();
                 case "--vm" -> vm = value;
+                case "--timeout-seconds" -> {
+                    try {
+                        timeoutSeconds = Integer.parseInt(value);
+                    } catch (NumberFormatException exception) {
+                        throw new IllegalArgumentException("Invalid --timeout-seconds: " + value, exception);
+                    }
+                    if (timeoutSeconds <= 0) {
+                        throw new IllegalArgumentException("--timeout-seconds must be positive: " + value);
+                    }
+                }
                 default -> throw new IllegalArgumentException("Unknown option: " + argument);
             }
         }
         if (!TARGETS.contains(target == null ? "" : target) || binary == null || report == null) {
             throw new IllegalArgumentException("A valid --target, --binary and --report-dir are required");
         }
-        return new Options(target, binary, report, vm, scratch, allowUnavailable);
+        return new Options(target, binary, report, vm, scratch, allowUnavailable, timeoutSeconds);
     }
 
     private static ProcessResult execute(List<String> command, Path workingDirectory, Map<String, String> environment,

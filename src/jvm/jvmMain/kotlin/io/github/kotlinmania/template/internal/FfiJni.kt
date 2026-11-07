@@ -2,7 +2,7 @@
  * JVM JNI bridge for the project's native C bindings.
  *
  * Transliterated from the libc-kotlin pattern
- * (kotlinmania/libc-kotlin/src/jvm/jvmMain/kotlin/.../internal/LibcJni.kt),
+ * (kotlinmania/libc-kotlin/src/jvmMain/kotlin/.../internal/LibcJni.kt),
  * generalized and deliberately kept small.
  *
  * Three deliberate deviations from libc-kotlin's version:

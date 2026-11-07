@@ -2,7 +2,7 @@
 
 This directory holds the project's Kotlin/Native FFI surface: the `.def`
 cinterop definition and the C wrapper that backs it. It is only active when
-`project.ffi.native=true` in `gradle.properties`.
+`project.ffi.native=true` in `../../../../gradle.properties`.
 
 ## What's here
 
@@ -22,7 +22,7 @@ wiring is provably correct before any library surface is added.
 
 ## How the wiring works
 
-`build.gradle.kts` (around the `if (nativeFfiEnabled)` block) does the work:
+`../../../../build.gradle.kts` (around the `if (nativeFfiEnabled)` block) does the work:
 
 1. For every Kotlin/Native target, registers a
    `compile<Lib>WrapperFor<Target>` task that compiles

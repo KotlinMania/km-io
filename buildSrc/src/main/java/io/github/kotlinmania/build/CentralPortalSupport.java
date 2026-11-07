@@ -34,7 +34,7 @@ import org.gradle.plugins.signing.SigningExtension;
 public final class CentralPortalSupport {
     private CentralPortalSupport() {}
 
-    public static void configure(Project project, String publishProjectName, boolean hasAppleTargets) {
+    public static void configure(Project project, String publishProjectName, boolean jvmFfiEnabled, boolean hasAppleTargets) {
         Project rootProject = project.getRootProject();
         PublishingExtension publishing = project.getExtensions().getByType(PublishingExtension.class);
 
@@ -113,6 +113,9 @@ public final class CentralPortalSupport {
             task.setGroup("publishing");
             task.setDescription("Uploads the deployment bundle to the Sonatype Central Portal.");
             task.dependsOn(centralPortalBundle);
+            if (jvmFfiEnabled) {
+                task.dependsOn("verifyJniDistribution");
+            }
             task.doLast(t -> uploadToCentralPortal(project, publishProjectName, centralPortalBundle.get().getArchiveFile().get().getAsFile()));
         });
 

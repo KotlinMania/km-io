@@ -403,10 +403,20 @@ class SmokeFileTest {
 
         val cwd = SystemFileSystem.resolve(Path("."))
 
-        SystemFileSystem.createDirectories(Path("a"))
-        removeOnExit(Path("a"))
-
-        val childRel = Path("a", "..")
+        val childRel =
+            if (cwd == Path("/")) {
+                val tmpDir = createTempPath()
+                SystemFileSystem.createDirectories(tmpDir)
+                val resolvedTmp = SystemFileSystem.resolve(tmpDir)
+                val relToTmp = resolvedTmp.toString().removePrefix("/")
+                assertFalse(Path(relToTmp).isAbsolute)
+                assertEquals(resolvedTmp, SystemFileSystem.resolve(Path(relToTmp)))
+                Path(relToTmp.substringBefore(SystemPathSeparator), "..")
+            } else {
+                SystemFileSystem.createDirectories(Path("a"))
+                removeOnExit(Path("a"))
+                Path("a", "..")
+            }
         assertEquals(cwd, SystemFileSystem.resolve(childRel))
 
         assertEquals(

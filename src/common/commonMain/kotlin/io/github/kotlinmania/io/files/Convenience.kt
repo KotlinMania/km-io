@@ -121,8 +121,10 @@ internal fun pathComponents(path: String): List<String> {
 internal fun joinPathComponents(components: List<String>): String {
     if (components.isEmpty()) return "."
     val separator = SystemPathSeparator
-    val body = components.drop(if (components.first() == "/") 1 else 0)
-        .joinToString(separator.toString())
+    val body =
+        components
+            .drop(if (components.first() == "/") 1 else 0)
+            .joinToString(separator.toString())
     return if (components.first() == "/" && separator == '/') "/" + body else body
 }
 

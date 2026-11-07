@@ -1,4 +1,5 @@
 [versions]
+androidxTestRunner = "1.7.0"
 kotlin = "2.4.21"
 coroutines = "1.11.0"
 serialization = "1.11.0"
@@ -21,6 +22,7 @@ kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kot
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 
 [libraries]
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
@@ -35,6 +37,9 @@ km-io-commonMain = [
   "kotlinx-serialization-json",
   "kotlinx-datetime",
   "collections-immutable",
+]
+km-io-commonTest = [
+  "kotlinx-coroutines-core",
 ]
 km-io-benchmark = [
   "kotlinx-benchmark-runtime",

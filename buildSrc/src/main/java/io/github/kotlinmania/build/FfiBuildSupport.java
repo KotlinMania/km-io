@@ -88,10 +88,8 @@ public final class FfiBuildSupport {
                     String sdkName;
                     switch (konanTargetName) {
                         case "macos_arm64" -> { appleTriple = "arm64-apple-macos14.0"; sdkName = "macosx"; }
-                        case "macos_x64" -> { appleTriple = "x86_64-apple-macos14.0"; sdkName = "macosx"; }
                         case "ios_arm64" -> { appleTriple = "arm64-apple-ios14.0"; sdkName = "iphoneos"; }
                         case "ios_simulator_arm64" -> { appleTriple = "arm64-apple-ios14.0-simulator"; sdkName = "iphonesimulator"; }
-                        case "ios_x64" -> { appleTriple = "x86_64-apple-ios14.0-simulator"; sdkName = "iphonesimulator"; }
                         case "watchos_device_arm64" -> { appleTriple = "arm64-apple-watchos7.0"; sdkName = "watchos"; }
                         case "watchos_simulator_arm64" -> { appleTriple = "arm64-apple-watchos7.0-simulator"; sdkName = "watchsimulator"; }
                         case "tvos_arm64" -> { appleTriple = "arm64-apple-tvos14.0"; sdkName = "appletvos"; }

@@ -1,13 +1,13 @@
 /**
  * N-API native bindings for JS/WASM targets — Kotlin side.
  *
- * Loads the shared C++ N-API addon built from `src/js/node-ffi/dist/` (see that
+ * Loads the shared C++ N-API addon built from `src/js/node-ffi/` (see that
  * directory's README.md for the architecture). Both Kotlin/JS (nodeMain)
  * and Kotlin/WASM (wasmJsMain via Node.js) import the same compiled
  * `.node` binary.
  *
  * Transliterated from the libc-kotlin pattern
- * (kotlinmania/libc-kotlin/src/js/jsMain/kotlin/.../LibcNative.kt),
+ * (kotlinmania/libc-kotlin/src/jsMain/kotlin/.../LibcNative.kt),
  * generalized.
  *
  * The interface is `public` because Kotlin/JS `external` declarations are

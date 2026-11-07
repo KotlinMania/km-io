@@ -1,7 +1,7 @@
 # JVM JNI Bindings
 
 This directory holds the C source for the JVM-native bridge. It is only
-active when `project.ffi.jvm=true` in `gradle.properties`.
+active when `project.ffi.jvm=true` in `../../../../gradle.properties`.
 
 ## What's here
 
@@ -11,14 +11,14 @@ src/jvm/jvmMain/c/
 ```
 
 The matching Kotlin bridge class is
-`src/jvm/jvmMain/kotlin/<namespace>/internal/<Lib>Jni.kt`, an `internal object`
+`..`, an `internal object`
 declaring `external fun`s with `@JvmStatic`. The build wires the compiled
 library into `jvmTest`'s `java.library.path`, so `System.loadLibrary(...)`
 in the bridge's `init` resolves without any environment setup.
 
 ## How the wiring works
 
-`build.gradle.kts`'s `if (jvmFfiEnabled)` block registers
+`../../../../build.gradle.kts`'s `if (jvmFfiEnabled)` block registers
 `compile<Lib>Jni`, which:
 
 1. Compiles `<lowername>_jni.c` with the host `clang` (`-shared -O2`,
@@ -80,7 +80,7 @@ Use fixed-width JNI types for parameters and returns (`jint`, `jlong`,
 `jstring`, `jbyteArray`). There is no pointer-sized primitive in the JNI
 type set, so C pointers cross as `jlong` handles. The libc-kotlin version
 of this file
-(`kotlinmania/libc-kotlin/src/jvm/jvmMain/c/libc_jni.c`) is the worked example
+(`kotlinmania/libc-kotlin/src/jvmMain/c/libc_jni.c`) is the worked example
 for every common edge case: string conversion with `GetStringUTFChars` /
 `ReleaseStringUTFChars`, `ByteArray` ↔ `void*` bridging, Windows-specific
 replacements, and the per-OS `#ifdef _WIN32` pattern.

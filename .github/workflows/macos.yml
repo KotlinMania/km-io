@@ -32,6 +32,21 @@ jobs:
           macosArm64Test
           --no-configuration-cache
 
+      - name: Stage the real KMP root on its Apple-capable host
+        run: |
+          ./gradlew publishKotlinMultiplatformPublicationToCentralPortalStagingRepository --no-configuration-cache
+          git rev-parse HEAD > build/staging-deploy.source-head
+
+      - name: Preserve the same-head root publication
+        uses: actions/upload-artifact@v7
+        with:
+          name: kmp-root-publication-${{ github.sha }}
+          path: |
+            build/staging-deploy/
+            build/staging-deploy.source-head
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Upload test reports (macOS)
         if: success() || failure()
         uses: actions/upload-artifact@v7

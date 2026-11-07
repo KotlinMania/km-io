@@ -46,8 +46,9 @@ class ByteStringAndroidTest {
                     0x6f,
                 ),
             ),
-            str.encodeToByteString(Charsets.UTF_32),
+            str.encodeToByteString(Charsets.UTF_32BE),
         )
+        assertEquals(ByteString(str.toByteArray(Charsets.UTF_32)), str.encodeToByteString(Charsets.UTF_32))
     }
 
     @Test

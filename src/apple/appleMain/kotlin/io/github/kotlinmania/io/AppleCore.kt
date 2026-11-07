@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENCE file.
  */
 
-@file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class)
+@file:OptIn(UnsafeNumber::class, ExperimentalForeignApi::class, ExperimentalObjCRefinement::class)
 
 package io.github.kotlinmania.io
 
@@ -20,14 +20,20 @@ import platform.Foundation.NSOutputStream
 import platform.Foundation.NSStreamStatusClosed
 import platform.Foundation.NSStreamStatusNotOpen
 import platform.posix.uint8_tVar
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 /**
  * Returns [RawSink] that writes to an output stream.
  *
  * Use [RawSink.buffered] to create a buffered sink from it.
  *
+ * Hidden from Swift Export while `SirDeclarationNamerImpl` emits obsoleted
+ * `Foundation.NSOutputStream` instead of `Foundation.OutputStream` (Hermes Kanban `t_8e185cdc`).
+ *
  * @sample io.github.kotlinmania.io.KotlinxIoSamplesApple.outputStreamAsSink
  */
+@HiddenFromObjC
 public fun NSOutputStream.asSink(): RawSink = OutputStreamSink(this)
 
 private open class OutputStreamSink(
@@ -80,8 +86,12 @@ private open class OutputStreamSink(
  *
  * Use [RawSource.buffered] to create a buffered source from it.
  *
+ * Hidden from Swift Export while `SirDeclarationNamerImpl` emits obsoleted
+ * `Foundation.NSInputStream` instead of `Foundation.InputStream` (Hermes Kanban `t_8e185cdc`).
+ *
  * @sample io.github.kotlinmania.io.KotlinxIoSamplesApple.inputStreamAsSource
  */
+@HiddenFromObjC
 public fun NSInputStream.asSource(): RawSource = NSInputStreamSource(this)
 
 private open class NSInputStreamSource(
