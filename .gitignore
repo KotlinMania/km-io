@@ -77,6 +77,21 @@ node_modules/
 package-lock.json
 !src/js/node-ffi/dist/package-lock.json
 
+# Sensitive credentials and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.keystore
+credentials*.json
+.claude/
+build-logic/
+.gradle-tmp/
+.gradle-user-home/
+.konan/
+
 # Repo-specific
 build
 bin
