@@ -2,7 +2,7 @@
 
 [![Kotlin Alpha](https://kotl.in/badges/alpha.svg)](https://kotlinlang.org/docs/components-stability.html)
 [![GitHub license](https://img.shields.io/github/license/KotlinMania/km-io)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.3-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FKotlinMania%2Fkm-io%2Fmain%2Fgradle%2Flibs.versions.toml&query=%24.versions.kotlin&label=kotlin&color=blue&logo=kotlin)](https://kotlinlang.org)
 
 A multiplatform Kotlin library providing basic IO primitives. `km-io` is a fork of
 [kotlinx-io](https://github.com/Kotlin/kotlinx-io), which is in turn based on
@@ -78,8 +78,7 @@ Add the library to dependencies:
 
 ### Android
 
-`km-io` is not tested on Android on a regular basis,
-but the library is compatible with Android 7.0+ (API level 24+).
+`km-io` is compatible with Android 7.0+ (API level 24+, compiled against API level 34) and ships both an Android KMP library target and Android Native (`androidNativeArm64` and `androidNativeX64`) targets, verified against hardware-accelerated Android emulators and host unit tests in CI and before every release.
 
 ### Segment pooling
 
