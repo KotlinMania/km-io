@@ -190,26 +190,24 @@ class WasiFsTest {
     fun multilevelSymlinks() {
         val src = Path("/tmp/result/a/z")
 
-        // /tmp/x/y/z -> /tmp/foo/a/z -> /tmp/result/a/z
-        val finalLink = Path("/tmp/x/y/z")
+        // /tmp/x/z -> /tmp/foo/a/z -> /tmp/result/a/z
+        val finalLink = Path("/tmp/x/z")
 
         try {
             SystemFileSystem.createDirectories(Path("/tmp/result/a"))
-            SystemFileSystem.createDirectories(Path("/tmp/x"))
             // create a file
             SystemFileSystem.sink(src).close()
 
             WasiFileSystem.symlink(Path("result"), Path("/tmp/foo"))
-            WasiFileSystem.symlink(Path("../foo/a"), Path("/tmp/x/y"))
+            WasiFileSystem.symlink(Path("foo/a"), Path("/tmp/x"))
 
             assertEquals(src, WasiFileSystem.resolve(Path(finalLink)))
         } finally {
-            SystemFileSystem.delete(Path("/tmp/x/y"))
-            SystemFileSystem.delete(Path("/tmp/x"))
-            SystemFileSystem.delete(Path("/tmp/foo"))
-            SystemFileSystem.delete(Path("/tmp/result/a/z"))
-            SystemFileSystem.delete(Path("/tmp/result/a"))
-            SystemFileSystem.delete(Path("/tmp/result"))
+            SystemFileSystem.delete(Path("/tmp/x"), false)
+            SystemFileSystem.delete(Path("/tmp/foo"), false)
+            SystemFileSystem.delete(Path("/tmp/result/a/z"), false)
+            SystemFileSystem.delete(Path("/tmp/result/a"), false)
+            SystemFileSystem.delete(Path("/tmp/result"), false)
         }
     }
 
