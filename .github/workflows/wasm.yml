@@ -38,61 +38,33 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build and Test (WASM - ${{ matrix.platform }})
-    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == matrix.platform }}
-    runs-on: ${{ matrix.runner }}
+  macosArm64:
+    name: Build and Test (WASM - macosArm64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'macosArm64' }}
+    runs-on: macos-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: macosArm64
-            runner: macos-latest
-            browser: true
-          - platform: linuxX64
-            runner: ubuntu-latest
-            browser: true
-          - platform: linuxArm64
-            runner: ubuntu-24.04-arm
-            browser: false
-          - platform: mingwX64
-            runner: windows-latest
-            browser: false
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-
       - name: Set up JDK 21
         uses: actions/setup-java@v6.1.0
         with:
           distribution: zulu
           java-version: '21'
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.4.0
-
       - name: Set up Node.js
         uses: actions/setup-node@v7.1.0
         with:
           node-version: '24'
           check-latest: true
-
       - name: Set up Yarn
         shell: bash
         run: |
           corepack enable
           corepack prepare yarn@1.22.22 --activate
-
-      - name: Check JavaScript toolchain
-        shell: bash
-        run: |
-          node --version
-          npm --version
-          yarn --version
-
-      - name: Build WASM targets and N-API / WASI bindings (${{ matrix.platform }})
+      - name: Build WASM targets and N-API / WASI bindings (macosArm64)
         if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
         shell: bash
         env:
@@ -108,24 +80,196 @@ jobs:
           wasmWasiMainClasses
           wasmWasiTestClasses
           --no-configuration-cache
-
-      - name: Test WASM targets and N-API / WASI bindings (${{ matrix.platform }})
+      - name: Test WASM targets and N-API / WASI bindings (macosArm64)
         if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: ./gradlew wasmJsNodeTest wasmWasiNodeTest wasmJsBrowserTest --no-configuration-cache
+      - name: Upload test reports (WASM - macosArm64)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-wasm-macosArm64
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  linuxX64:
+    name: Build and Test (WASM - linuxX64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxX64' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: zulu
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          check-latest: true
+      - name: Set up Yarn
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+      - name: Build WASM targets and N-API / WASI bindings (linuxX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
         shell: bash
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
-          wasmJsNodeTest
-          wasmWasiNodeTest
-          ${{ matrix.browser && 'wasmJsBrowserTest' || '' }}
+          compileDevelopmentLibraryKotlinWasmJs
+          compileProductionLibraryKotlinWasmJs
+          wasmJsMainClasses
+          wasmJsTestClasses
+          compileDevelopmentLibraryKotlinWasmWasi
+          compileProductionLibraryKotlinWasmWasi
+          wasmWasiMainClasses
+          wasmWasiTestClasses
           --no-configuration-cache
-
-      - name: Upload test reports (WASM - ${{ matrix.platform }})
+      - name: Test WASM targets and N-API / WASI bindings (linuxX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: ./gradlew wasmJsNodeTest wasmWasiNodeTest wasmJsBrowserTest --no-configuration-cache
+      - name: Upload test reports (WASM - linuxX64)
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-wasm-${{ matrix.platform }}
+          name: test-reports-wasm-linuxX64
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  linuxArm64:
+    name: Build and Test (WASM - linuxArm64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxArm64' }}
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: zulu
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          check-latest: true
+      - name: Set up Yarn
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+      - name: Build WASM targets and N-API / WASI bindings (linuxArm64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: >
+          ./gradlew
+          compileDevelopmentLibraryKotlinWasmJs
+          compileProductionLibraryKotlinWasmJs
+          wasmJsMainClasses
+          wasmJsTestClasses
+          compileDevelopmentLibraryKotlinWasmWasi
+          compileProductionLibraryKotlinWasmWasi
+          wasmWasiMainClasses
+          wasmWasiTestClasses
+          --no-configuration-cache
+      - name: Test WASM targets and N-API / WASI bindings (linuxArm64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: ./gradlew wasmJsNodeTest wasmWasiNodeTest --no-configuration-cache
+      - name: Upload test reports (WASM - linuxArm64)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-wasm-linuxArm64
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  mingwX64:
+    name: Build and Test (WASM - mingwX64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'mingwX64' }}
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: zulu
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+        with:
+          cache-provider: basic
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          check-latest: true
+      - name: Set up Yarn
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+      - name: Build WASM targets and N-API / WASI bindings (mingwX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: >
+          ./gradlew
+          compileDevelopmentLibraryKotlinWasmJs
+          compileProductionLibraryKotlinWasmJs
+          wasmJsMainClasses
+          wasmJsTestClasses
+          compileDevelopmentLibraryKotlinWasmWasi
+          compileProductionLibraryKotlinWasmWasi
+          wasmWasiMainClasses
+          wasmWasiTestClasses
+          --no-configuration-cache
+      - name: Test WASM targets and N-API / WASI bindings (mingwX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: ./gradlew wasmJsNodeTest wasmWasiNodeTest --no-configuration-cache
+      - name: Upload test reports (WASM - mingwX64)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-wasm-mingwX64
           path: |
             build/reports/tests/
             build/test-results/

@@ -38,60 +38,142 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build and Test (JVM - ${{ matrix.platform }})
-    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == matrix.platform }}
-    runs-on: ${{ matrix.runner }}
+  macosArm64:
+    name: Build and Test (JVM - macosArm64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'macosArm64' }}
+    runs-on: macos-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: macosArm64
-            runner: macos-latest
-          - platform: linuxX64
-            runner: ubuntu-latest
-          - platform: linuxArm64
-            runner: ubuntu-24.04-arm
-          - platform: mingwX64
-            runner: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-
       - name: Set up JDK 21
         uses: actions/setup-java@v6.1.0
         with:
           distribution: zulu
           java-version: '21'
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.4.0
-
-      - name: Build JVM target and platform JNI bindings (${{ matrix.platform }})
+      - name: Build JVM target and platform JNI bindings (macosArm64)
         if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
         shell: bash
-        run: >
-          ./gradlew
-          jvmMainClasses
-          jvmTestClasses
-          jvmJar
-          --no-configuration-cache
-
-      - name: Test JVM target and platform JNI bindings (${{ matrix.platform }})
+        run: ./gradlew jvmMainClasses jvmTestClasses jvmJar --no-configuration-cache
+      - name: Test JVM target and platform JNI bindings (macosArm64)
         if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
         shell: bash
-        run: >
-          ./gradlew
-          jvmTest
-          --no-configuration-cache
-
-      - name: Upload test reports (JVM - ${{ matrix.platform }})
+        run: ./gradlew jvmTest --no-configuration-cache
+      - name: Upload test reports (JVM - macosArm64)
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-jvm-${{ matrix.platform }}
+          name: test-reports-jvm-macosArm64
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  linuxX64:
+    name: Build and Test (JVM - linuxX64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxX64' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: zulu
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+      - name: Build JVM target and platform JNI bindings (linuxX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
+        run: ./gradlew jvmMainClasses jvmTestClasses jvmJar --no-configuration-cache
+      - name: Test JVM target and platform JNI bindings (linuxX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        run: ./gradlew jvmTest --no-configuration-cache
+      - name: Upload test reports (JVM - linuxX64)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-jvm-linuxX64
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  linuxArm64:
+    name: Build and Test (JVM - linuxArm64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxArm64' }}
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: zulu
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+      - name: Build JVM target and platform JNI bindings (linuxArm64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
+        run: ./gradlew jvmMainClasses jvmTestClasses jvmJar --no-configuration-cache
+      - name: Test JVM target and platform JNI bindings (linuxArm64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        run: ./gradlew jvmTest --no-configuration-cache
+      - name: Upload test reports (JVM - linuxArm64)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-jvm-linuxArm64
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  mingwX64:
+    name: Build and Test (JVM - mingwX64)
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'mingwX64' }}
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: zulu
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.0
+        with:
+          cache-provider: basic
+      - name: Build JVM target and platform JNI bindings (mingwX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
+        run: ./gradlew jvmMainClasses jvmTestClasses jvmJar --no-configuration-cache
+      - name: Test JVM target and platform JNI bindings (mingwX64)
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        run: ./gradlew jvmTest --no-configuration-cache
+      - name: Upload test reports (JVM - mingwX64)
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-jvm-mingwX64
           path: |
             build/reports/tests/
             build/test-results/
