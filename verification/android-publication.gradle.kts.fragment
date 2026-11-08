@@ -13,7 +13,7 @@ val androidPublicationBundle =
         val externalRoot = providers.gradleProperty("project.publication.android.rootStagingDirectory").orNull
         val root = androidPublicationRoot.get()
         val coordinatePath = "${root.groupId.replace('.', '/')}/${root.artifactId}"
-        dependsOn(tasks.named<PublishToMavenRepository>("publishAndroidPublicationToCentralPortalStagingRepository"))
+        dependsOn(tasks.matching { it.name == "publishAndroidPublicationToCentralPortalStagingRepository" })
         from(layout.buildDirectory.dir("staging-deploy")) {
             include("$coordinatePath-android/${root.version}/**")
         }
@@ -22,12 +22,17 @@ val androidPublicationBundle =
                 kotlin.targets
                     .withType<KotlinNativeTarget>()
                     .any { it.konanTarget.family.isAppleFamily }
-            check(!hasAppleTargets || providers.systemProperty("os.name").get().startsWith("Mac")) {
-                "Stage the real KMP root on macOS, then set project.publication.android.rootStagingDirectory and expectedRootHead"
-            }
-            dependsOn(tasks.named<PublishToMavenRepository>("publishKotlinMultiplatformPublicationToCentralPortalStagingRepository"))
-            from(layout.buildDirectory.dir("staging-deploy")) {
-                include("$coordinatePath/${root.version}/**")
+            if (hasAppleTargets && !providers.systemProperty("os.name").get().startsWith("Mac")) {
+                doFirst {
+                    throw GradleException(
+                        "Stage the real KMP root on macOS, then set project.publication.android.rootStagingDirectory and expectedRootHead",
+                    )
+                }
+            } else {
+                dependsOn(tasks.matching { it.name == "publishKotlinMultiplatformPublicationToCentralPortalStagingRepository" })
+                from(layout.buildDirectory.dir("staging-deploy")) {
+                    include("$coordinatePath/${root.version}/**")
+                }
             }
         } else {
             val rootDirectory = file(externalRoot)
