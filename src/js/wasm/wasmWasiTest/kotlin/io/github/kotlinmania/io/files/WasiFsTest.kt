@@ -10,7 +10,6 @@ import io.github.kotlinmania.io.buffered
 import io.github.kotlinmania.io.isWindows
 import io.github.kotlinmania.io.readLine
 import io.github.kotlinmania.io.writeString
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -110,18 +109,14 @@ class WasiFsTest {
         }
     }
 
-    @Ignore // Cross-pre-open symlinks are not supported by (at least) NodeJs
+    // Cross-pre-open / absolute-target symlinks are rejected by WASI path_symlink (UVWASI_ENOTCAPABLE)
     @Test
     fun resolveCrossPreOpenSymLinks() {
         val src = Path("/tmp/src")
         val tgt = Path("/var/log/tgt")
 
-        try {
+        assertFailsWith<IOException> {
             WasiFileSystem.symlink(tgt, src)
-            SystemFileSystem.sink(tgt).close()
-            assertEquals(tgt, SystemFileSystem.resolve(src))
-        } finally {
-            SystemFileSystem.delete(src)
         }
     }
 
@@ -191,7 +186,6 @@ class WasiFsTest {
         }
     }
 
-    @Ignore // Due to unsupported links to absolute paths, the test does not make a lot of sense
     @Test
     fun multilevelSymlinks() {
         val src = Path("/tmp/result/a/z")
@@ -205,8 +199,8 @@ class WasiFsTest {
             // create a file
             SystemFileSystem.sink(src).close()
 
-            WasiFileSystem.symlink(Path("/tmp/result"), Path("/tmp/foo"))
-            WasiFileSystem.symlink(Path("/tmp/foo/a"), Path("/tmp/x/y"))
+            WasiFileSystem.symlink(Path("result"), Path("/tmp/foo"))
+            WasiFileSystem.symlink(Path("../foo/a"), Path("/tmp/x/y"))
 
             assertEquals(src, WasiFileSystem.resolve(Path(finalLink)))
         } finally {
