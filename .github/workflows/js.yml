@@ -2,16 +2,64 @@ name: Build (JS)
 
 on:
   workflow_call:
+    inputs:
+      platform:
+        type: string
+        required: false
+        default: "all"
+      phase:
+        type: string
+        required: false
+        default: "build-and-test"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Host platform runner for JS + N-API C bindings"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - macosArm64
+          - linuxX64
+          - linuxArm64
+          - mingwX64
+      phase:
+        description: "Execution phase"
+        required: false
+        default: "build-and-test"
+        type: choice
+        options:
+          - build-and-test
+          - build-only
+          - test-only
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Build and Test (JS)
-    runs-on: ubuntu-latest
+    name: Build and Test (JS - ${{ matrix.platform }})
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == matrix.platform }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macosArm64
+            runner: macos-latest
+            browser: true
+          - platform: linuxX64
+            runner: ubuntu-latest
+            browser: true
+          - platform: linuxArm64
+            runner: ubuntu-24.04-arm
+            browser: false
+          - platform: mingwX64
+            runner: windows-latest
+            browser: false
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -32,30 +80,47 @@ jobs:
           check-latest: true
 
       - name: Set up Yarn
+        shell: bash
         run: |
           corepack enable
           corepack prepare yarn@1.22.22 --activate
 
       - name: Check JavaScript toolchain
+        shell: bash
         run: |
           node --version
           npm --version
           yarn --version
 
-      - name: Build and test JS targets
+      - name: Build JS targets and N-API bindings (${{ matrix.platform }})
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
-          jsBrowserTest
-          jsNodeTest
+          compileDevelopmentLibraryKotlinJs
+          compileProductionLibraryKotlinJs
+          jsMainClasses
+          jsTestClasses
           --no-configuration-cache
 
-      - name: Upload test reports (JS)
+      - name: Test JS targets and N-API bindings (${{ matrix.platform }})
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: >
+          ./gradlew
+          jsNodeTest
+          ${{ matrix.browser && 'jsBrowserTest' || '' }}
+          --no-configuration-cache
+
+      - name: Upload test reports (JS - ${{ matrix.platform }})
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-js
+          name: test-reports-js-${{ matrix.platform }}
           path: |
             build/reports/tests/
             build/test-results/

@@ -2,16 +2,64 @@ name: Build (WASM)
 
 on:
   workflow_call:
+    inputs:
+      platform:
+        type: string
+        required: false
+        default: "all"
+      phase:
+        type: string
+        required: false
+        default: "build-and-test"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Host platform runner for WASM + N-API / WASI C bindings"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - macosArm64
+          - linuxX64
+          - linuxArm64
+          - mingwX64
+      phase:
+        description: "Execution phase"
+        required: false
+        default: "build-and-test"
+        type: choice
+        options:
+          - build-and-test
+          - build-only
+          - test-only
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Build and Test (WASM)
-    runs-on: ubuntu-latest
+    name: Build and Test (WASM - ${{ matrix.platform }})
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == matrix.platform }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macosArm64
+            runner: macos-latest
+            browser: true
+          - platform: linuxX64
+            runner: ubuntu-latest
+            browser: true
+          - platform: linuxArm64
+            runner: ubuntu-24.04-arm
+            browser: false
+          - platform: mingwX64
+            runner: windows-latest
+            browser: false
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -32,36 +80,52 @@ jobs:
           check-latest: true
 
       - name: Set up Yarn
+        shell: bash
         run: |
           corepack enable
           corepack prepare yarn@1.22.22 --activate
 
       - name: Check JavaScript toolchain
+        shell: bash
         run: |
           node --version
           npm --version
           yarn --version
 
-      - name: Build and test WASM targets
-        # wasmJs runs under both Chrome (browser) and Node; wasmWasi runs
-        # under Node with the wasi-preview1 shim. The generated
-        # wasmWasiNodeTest runner calls `wasi.finalizeBindings(...)` which
-        # only exists on Node 24+ — that's why build.gradle.kts pins
-        # `kotlinWasmNodeJsSpec` to 24.22.0 (Active LTS "Krypton").
+      - name: Build WASM targets and N-API / WASI bindings (${{ matrix.platform }})
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
         env:
           ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
         run: >
           ./gradlew
-          wasmJsBrowserTest
-          wasmJsNodeTest
-          wasmWasiNodeTest
+          compileDevelopmentLibraryKotlinWasmJs
+          compileProductionLibraryKotlinWasmJs
+          wasmJsMainClasses
+          wasmJsTestClasses
+          compileDevelopmentLibraryKotlinWasmWasi
+          compileProductionLibraryKotlinWasmWasi
+          wasmWasiMainClasses
+          wasmWasiTestClasses
           --no-configuration-cache
 
-      - name: Upload test reports (WASM)
+      - name: Test WASM targets and N-API / WASI bindings (${{ matrix.platform }})
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_kotlin_js_yarn_download: "false"
+        run: >
+          ./gradlew
+          wasmJsNodeTest
+          wasmWasiNodeTest
+          ${{ matrix.browser && 'wasmJsBrowserTest' || '' }}
+          --no-configuration-cache
+
+      - name: Upload test reports (WASM - ${{ matrix.platform }})
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-wasm
+          name: test-reports-wasm-${{ matrix.platform }}
           path: |
             build/reports/tests/
             build/test-results/

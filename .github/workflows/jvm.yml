@@ -2,16 +2,60 @@ name: Build (JVM)
 
 on:
   workflow_call:
+    inputs:
+      platform:
+        type: string
+        required: false
+        default: "all"
+      phase:
+        type: string
+        required: false
+        default: "build-and-test"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Host platform runner for JVM + JNI C bindings"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - macosArm64
+          - linuxX64
+          - linuxArm64
+          - mingwX64
+      phase:
+        description: "Execution phase"
+        required: false
+        default: "build-and-test"
+        type: choice
+        options:
+          - build-and-test
+          - build-only
+          - test-only
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Build and Test (JVM)
-    runs-on: ubuntu-latest
+    name: Build and Test (JVM - ${{ matrix.platform }})
+    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == matrix.platform }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macosArm64
+            runner: macos-latest
+          - platform: linuxX64
+            runner: ubuntu-latest
+          - platform: linuxArm64
+            runner: ubuntu-24.04-arm
+          - platform: mingwX64
+            runner: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -25,19 +69,29 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.4.0
 
-      - name: Build and test JVM target
+      - name: Build JVM target and platform JNI bindings (${{ matrix.platform }})
+        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
+        shell: bash
         run: >
           ./gradlew
           jvmMainClasses
           jvmTestClasses
+          jvmJar
+          --no-configuration-cache
+
+      - name: Test JVM target and platform JNI bindings (${{ matrix.platform }})
+        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
+        shell: bash
+        run: >
+          ./gradlew
           jvmTest
           --no-configuration-cache
 
-      - name: Upload test reports (JVM)
+      - name: Upload test reports (JVM - ${{ matrix.platform }})
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-jvm
+          name: test-reports-jvm-${{ matrix.platform }}
           path: |
             build/reports/tests/
             build/test-results/

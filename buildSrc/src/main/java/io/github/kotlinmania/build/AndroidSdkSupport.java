@@ -1,6 +1,7 @@
 package io.github.kotlinmania.build;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,11 +28,14 @@ import org.gradle.process.ExecOperations;
 import org.gradle.process.ExecResult;
 
 /**
- * Idempotent project-local Android SDK installer for Kotlin Multiplatform builds.
+ * Idempotent project-local Android SDK installer and headless emulator bootstrapper
+ * for Kotlin Multiplatform builds.
  */
 public final class AndroidSdkSupport {
     private static final Set<String> ANDROID_LIFECYCLE_TASKS = Set.of(
         "build",
+        "buildAllTargets",
+        "compileAllTargets",
         "assemble",
         "check",
         "test",
@@ -40,7 +44,13 @@ public final class AndroidSdkSupport {
         "testClasses",
         "allTests",
         "assembleUnitTest",
-        "assembleAndroidTest"
+        "assembleAndroidTest",
+        "checkPublicationPoms",
+        "verifyPublicationRuntimes",
+        "publicationCheck",
+        "publish",
+        "publishToMavenLocal",
+        "publishToCentralPortal"
     );
 
     private AndroidSdkSupport() {}
@@ -135,17 +145,39 @@ public final class AndroidSdkSupport {
             task.dependsOn(ensureAndroidSdk);
         });
 
+        TaskProvider<ExecHolder> ensureAndroidEmulator = project.getTasks().register("ensureAndroidEmulator", ExecHolder.class, task -> {
+            task.setGroup("setup");
+            task.setDescription("Ensures a connected Android device or headless emulator is online before connectedAndroidDeviceTest.");
+            task.dependsOn(ensureAndroidSdk);
+            task.doLast(t -> ensureEmulatorBooted(
+                task.getExecOperations(),
+                sdkDir,
+                sdkManager,
+                compileSdk,
+                isWindows
+            ));
+        });
+
         project.getTasks().matching(task -> {
             String name = task.getName();
-            if ("ensureAndroidSdk".equals(name) || "setupAndroidSdk".equals(name) || "__androidSdkBootstrapExecHolder".equals(name)) {
+            if ("ensureAndroidSdk".equals(name) || "setupAndroidSdk".equals(name)
+                || "ensureAndroidEmulator".equals(name) || "__androidSdkBootstrapExecHolder".equals(name)) {
                 return false;
             }
             String lower = name.toLowerCase(Locale.ROOT);
             if (lower.contains("androidnative")) {
                 return false;
             }
-            return lower.contains("android") || "assembleUnitTest".equals(name) || "assembleAndroidTest".equals(name);
+            return lower.contains("android")
+                || lower.contains("unittest")
+                || lower.contains("publish")
+                || lower.contains("publication");
         }).configureEach(task -> task.dependsOn(ensureAndroidSdk));
+
+        project.getTasks().matching(task -> {
+            String lower = task.getName().toLowerCase(Locale.ROOT);
+            return lower.contains("connected") && lower.contains("android") && lower.contains("test");
+        }).configureEach(task -> task.dependsOn(ensureAndroidEmulator));
     }
 
     private static boolean requestedTaskWantsAndroid(String rawTaskName) {
@@ -155,7 +187,8 @@ public final class AndroidSdkSupport {
         if (lower.contains("androidnative")) {
             return false;
         }
-        if (lower.contains("android")) {
+        if (lower.contains("android") || lower.contains("unittest")
+            || lower.contains("publish") || lower.contains("publication")) {
             return true;
         }
         return ANDROID_LIFECYCLE_TASKS.contains(taskName);
@@ -315,6 +348,156 @@ public final class AndroidSdkSupport {
         } catch (IOException e) {
             throw new GradleException("Failed to install Android SDK packages", e);
         }
+    }
+
+    private static void ensureEmulatorBooted(
+        ExecOperations execOperations,
+        File sdkDir,
+        File sdkManager,
+        String compileSdk,
+        boolean isWindows
+    ) {
+        File adb = new File(sdkDir, isWindows ? "platform-tools/adb.exe" : "platform-tools/adb");
+        if (hasOnlineAdbDevice(execOperations, adb)) {
+            System.out.println("ensure-android-emulator: using already-connected Android device");
+            return;
+        }
+        String osName = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        if (osName.contains("linux")) {
+            File kvm = new File("/dev/kvm");
+            if (kvm.exists() && !kvm.canWrite()) {
+                execOperations.exec(spec -> {
+                    spec.commandLine("sudo", "-n", "chmod", "0666", "/dev/kvm");
+                    spec.setIgnoreExitValue(true);
+                });
+            }
+        }
+        String arch = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
+        String abi = ("aarch64".equals(arch) || "arm64".equals(arch)) ? "arm64-v8a" : "x86_64";
+        String systemImagePkg = "system-images;android-" + compileSdk + ";default;" + abi;
+        File emulatorBin = new File(sdkDir, isWindows ? "emulator/emulator.exe" : "emulator/emulator");
+        File systemImageDir = new File(sdkDir, "system-images/android-" + compileSdk + "/default/" + abi);
+        if (!emulatorBin.exists() || !systemImageDir.exists()) {
+            System.out.println("ensure-android-emulator: installing emulator and " + systemImagePkg);
+            byte[] answers = "y\n".repeat(200).getBytes(StandardCharsets.UTF_8);
+            execOperations.exec(spec -> {
+                spec.commandLine(sdkManagerCommand(sdkManager, isWindows, "--sdk_root=" + sdkDir.getAbsolutePath(), "--licenses"));
+                spec.setStandardInput(new ByteArrayInputStream(answers));
+                spec.setIgnoreExitValue(true);
+            });
+            ExecResult pkgResult = execOperations.exec(spec -> {
+                spec.commandLine(sdkManagerCommand(
+                    sdkManager,
+                    isWindows,
+                    "--sdk_root=" + sdkDir.getAbsolutePath(),
+                    "emulator",
+                    systemImagePkg
+                ));
+                spec.setStandardInput(new ByteArrayInputStream(answers));
+                spec.setIgnoreExitValue(true);
+            });
+            if (pkgResult.getExitValue() != 0) {
+                throw new GradleException("Failed to install Android emulator / system image (" + systemImagePkg + ")");
+            }
+        }
+        File avdManager = new File(
+            sdkDir,
+            isWindows ? "cmdline-tools/latest/bin/avdmanager.bat" : "cmdline-tools/latest/bin/avdmanager"
+        );
+        File avdHome = new File(sdkDir, "avd");
+        avdHome.mkdirs();
+        String avdName = "km_ci_api" + compileSdk + "_" + abi.replace('-', '_');
+        System.out.println("ensure-android-emulator: creating AVD " + avdName + " (" + systemImagePkg + ")");
+        ExecResult avdResult = execOperations.exec(spec -> {
+            spec.environment("ANDROID_HOME", sdkDir.getAbsolutePath());
+            spec.environment("ANDROID_SDK_ROOT", sdkDir.getAbsolutePath());
+            spec.environment("ANDROID_AVD_HOME", avdHome.getAbsolutePath());
+            spec.commandLine(sdkManagerCommand(
+                avdManager,
+                isWindows,
+                "create", "avd", "-f",
+                "-n", avdName,
+                "-k", systemImagePkg,
+                "-d", "pixel"
+            ));
+            spec.setStandardInput(new ByteArrayInputStream("no\n".getBytes(StandardCharsets.UTF_8)));
+            spec.setIgnoreExitValue(true);
+        });
+        if (avdResult.getExitValue() != 0) {
+            throw new GradleException("Failed to create AVD " + avdName + " (exit " + avdResult.getExitValue() + ")");
+        }
+        File bootLog = new File(sdkDir, "emulator-boot.log");
+        System.out.println("ensure-android-emulator: booting headless AVD " + avdName);
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                emulatorBin.getAbsolutePath(),
+                "-avd", avdName,
+                "-no-window",
+                "-no-audio",
+                "-no-boot-anim",
+                "-no-snapshot",
+                "-gpu", "swiftshader_indirect"
+            );
+            pb.environment().put("ANDROID_HOME", sdkDir.getAbsolutePath());
+            pb.environment().put("ANDROID_SDK_ROOT", sdkDir.getAbsolutePath());
+            pb.environment().put("ANDROID_AVD_HOME", avdHome.getAbsolutePath());
+            pb.redirectErrorStream(true);
+            pb.redirectOutput(bootLog);
+            pb.start();
+        } catch (IOException e) {
+            throw new GradleException("Failed to start Android emulator process", e);
+        }
+        long deadline = System.currentTimeMillis() + 240_000L;
+        while (System.currentTimeMillis() < deadline) {
+            if (isBootCompleted(execOperations, adb)) {
+                execOperations.exec(spec -> {
+                    spec.commandLine(adb.getAbsolutePath(), "shell", "input", "keyevent", "82");
+                    spec.setIgnoreExitValue(true);
+                });
+                System.out.println("ensure-android-emulator: emulator " + avdName + " booted and ready");
+                return;
+            }
+            try {
+                Thread.sleep(2_000L);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new GradleException("Interrupted while waiting for Android emulator to boot", ie);
+            }
+        }
+        throw new GradleException("Timed out waiting 240s for Android emulator " + avdName + " to boot");
+    }
+
+    private static boolean hasOnlineAdbDevice(ExecOperations execOperations, File adb) {
+        if (!adb.exists()) {
+            return false;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExecResult res = execOperations.exec(spec -> {
+            spec.commandLine(adb.getAbsolutePath(), "devices");
+            spec.setStandardOutput(out);
+            spec.setIgnoreExitValue(true);
+        });
+        if (res.getExitValue() != 0) {
+            return false;
+        }
+        String text = out.toString(StandardCharsets.UTF_8);
+        for (String rawLine : text.split("\\R")) {
+            String line = rawLine.trim();
+            if (!line.startsWith("List of devices") && line.endsWith("\tdevice")) {
+                return isBootCompleted(execOperations, adb);
+            }
+        }
+        return false;
+    }
+
+    private static boolean isBootCompleted(ExecOperations execOperations, File adb) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExecResult res = execOperations.exec(spec -> {
+            spec.commandLine(adb.getAbsolutePath(), "shell", "getprop", "sys.boot_completed");
+            spec.setStandardOutput(out);
+            spec.setIgnoreExitValue(true);
+        });
+        return res.getExitValue() == 0 && "1".equals(out.toString(StandardCharsets.UTF_8).trim());
     }
 
     private static void deleteRecursively(File file) {
