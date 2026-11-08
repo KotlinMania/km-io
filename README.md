@@ -48,7 +48,7 @@ repositories {
 Add the library to dependencies:
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:km-io:0.3.0")
+    implementation("io.github.kotlinmania:km-io:0.4.0")
 }
 ```
 
@@ -58,7 +58,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.kotlinmania:km-io:0.3.0")
+                implementation("io.github.kotlinmania:km-io:0.4.0")
             }
         }
     }
@@ -72,7 +72,7 @@ Add the library to dependencies:
 <dependency>
     <groupId>io.github.kotlinmania</groupId>
     <artifactId>km-io-jvm</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -82,20 +82,17 @@ Add the library to dependencies:
 
 ### Segment pooling
 
-As an optimization, on some platforms `Buffer`'s segments are pooled,
+As an optimization, `Buffer`'s segments are pooled across all supported platforms (JVM, Android, Native, JS, and Wasm),
 meaning that everytime a buffer needs a new segment,
 an attempt will be made to take a pre-allocated segment from a pool,
 and if the pool is empty, only then a new segment will be created.
-Everytime a segment is no longer needed, it will be placed back into a pool (unless the pool is already full).
+Everytime a segment is no longer needed, it will be placed back into a pool (unless the pool is already full), with reference-counted copy tracking so shared segments are recycled once all copies are released.
 
-Currently, the pooling is only supported on JVM (and Android).
-
-The segment pool has a two-level structure, with a smaller first-level pool aimed to serve requests as quickly as possible,
-and a larger second-level pool. While the first-level pool sizing could not be configured at the moment,
-the size of the second-level pool could be adjusted using the `io.github.kotlinmania.io.pool.size.bytes` system property.
+On JVM, Android, and Native, the segment pool has a two-level lock-free structure with per-thread striped first-level buckets (64 KiB per bucket) and a larger second-level backup pool (on JS and Wasm, a single-threaded 64 KiB first-level pool is used). While the first-level pool sizing is fixed,
+the size of the second-level pool on JVM and Android can be adjusted using the `io.github.kotlinmania.io.pool.size.bytes` system property.
 The property accepts numeric values only.
-On Android, the second-level pool size is `0` by default,
-for all other JVM environments it is `4194304` (4 megabytes) by default.
+On Android, the second-level pool size is `0` by default;
+for all other JVM and Native environments it is `4194304` (4 megabytes) by default.
 
 While the size could be changed using the system property, it is necessary to note that its value will be read during
 the pool initialization, and later changes of the property will not affect the pool size.

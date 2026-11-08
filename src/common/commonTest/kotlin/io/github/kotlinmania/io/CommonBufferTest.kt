@@ -25,6 +25,7 @@ import io.github.kotlinmania.io.bytestring.encodeToByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 private const val SEGMENT_SIZE = Segment.SIZE
@@ -103,6 +104,7 @@ class CommonBufferTest {
 
     @Test
     fun fillAndDrainPool() {
+        assertTrue(SegmentPool.MAX_SIZE > 0)
         val buffer = Buffer()
 
         // Take 2 * MAX_SIZE segments. This will drain the pool, even if other tests filled it.
@@ -125,6 +127,31 @@ class CommonBufferTest {
         // Take MAX_SIZE more segments. The pool is drained so these will need to be allocated.
         buffer.write(ByteArray(SegmentPool.MAX_SIZE))
         assertEquals(0, SegmentPool.byteCount)
+    }
+
+    @Test
+    fun segmentPoolTrackerAndSharing() {
+        val tracker = SegmentPool.tracker()
+        assertFalse(tracker.shared)
+        assertFalse(tracker.removeCopy())
+        assertFalse(tracker.shared)
+
+        tracker.addCopy()
+        assertTrue(tracker.shared)
+        assertTrue(tracker.removeCopy())
+        assertFalse(tracker.shared)
+
+        val drain = Buffer()
+        drain.write(ByteArray(SegmentPool.MAX_SIZE))
+        drain.write(ByteArray(SegmentPool.MAX_SIZE))
+
+        val buffer = Buffer()
+        buffer.writeByte(1)
+        val poolSizeBefore = SegmentPool.byteCount
+        val copy = buffer.copy()
+        buffer.clear()
+        copy.clear()
+        assertTrue(poolSizeBefore < SegmentPool.byteCount)
     }
 
     @Test
