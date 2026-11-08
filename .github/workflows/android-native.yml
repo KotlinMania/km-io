@@ -39,7 +39,7 @@ jobs:
   androidNativeArm64:
     name: Build (Android Native - androidNativeArm64)
     if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'androidNativeArm64' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -59,7 +59,7 @@ jobs:
   androidNativeX64:
     name: Build (Android Native - androidNativeX64)
     if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'androidNativeX64' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:

@@ -100,7 +100,7 @@ jobs:
   linuxX64:
     name: Build and Test (WASM - linuxX64)
     if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxX64' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -159,7 +159,7 @@ jobs:
   linuxArm64:
     name: Build and Test (WASM - linuxArm64)
     if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxArm64' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
     steps:

@@ -335,6 +335,14 @@ val browserTestExcludes =
         .map { it.trim() }
         .filter { it.isNotEmpty() }
 
+val wasmWasiWindowsTestExcludes =
+    providers
+        .gradleProperty("project.wasmWasi.windowsTestExcludes")
+        .getOrElse("")
+        .split(',')
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+
 val extraKotlinCompilerArgs =
     providers
         .gradleProperty("project.kotlin.freeCompilerArgs")
@@ -538,7 +546,13 @@ kotlin {
     wasmWasi {
         configureBenchmarkCompilation()
         binaries.library()
-        nodejs()
+        nodejs {
+            testTask {
+                if (System.getProperty("os.name", "").startsWith("Windows")) {
+                    wasmWasiWindowsTestExcludes.forEach { filter.excludeTestsMatching(it) }
+                }
+            }
+        }
     }
 
     swiftExport {

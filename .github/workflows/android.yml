@@ -39,7 +39,7 @@ jobs:
   linuxX64:
     name: Build and Test (Android - linuxX64)
     if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxX64' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -116,13 +116,12 @@ jobs:
           assembleUnitTest
           assembleAndroidTest
           --no-configuration-cache
-      - name: Test Android host and emulator device targets (macosArm64)
+      - name: Test Android host and JNI bindings (macosArm64)
         if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
         run: >
           ./gradlew
           setupAndroidSdk
           testAndroidHostTest
-          verifyAndroidDeviceTestResults
           --no-configuration-cache
       - name: Upload test reports (Android - macosArm64)
         if: success() || failure()

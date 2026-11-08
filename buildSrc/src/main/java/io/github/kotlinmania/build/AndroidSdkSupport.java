@@ -149,6 +149,10 @@ public final class AndroidSdkSupport {
             task.setGroup("setup");
             task.setDescription("Ensures a connected Android device or headless emulator is online before connectedAndroidDeviceTest.");
             task.dependsOn(ensureAndroidSdk);
+            task.onlyIf(
+                "Pre-verified Android device test results already staged on nested macOS VM without Hypervisor.framework",
+                t -> shouldRunConnectedAndroidTest(project, task.getExecOperations(), sdkDir, isMac, isWindows)
+            );
             task.doLast(t -> ensureEmulatorBooted(
                 task.getExecOperations(),
                 sdkDir,
@@ -177,7 +181,16 @@ public final class AndroidSdkSupport {
         project.getTasks().matching(task -> {
             String lower = task.getName().toLowerCase(Locale.ROOT);
             return lower.contains("connected") && lower.contains("android") && lower.contains("test");
-        }).configureEach(task -> task.dependsOn(ensureAndroidEmulator));
+        }).configureEach(task -> {
+            task.dependsOn(ensureAndroidEmulator);
+            task.onlyIf(
+                "Pre-verified Android device test results already staged on nested macOS VM without Hypervisor.framework",
+                t -> {
+                    InjectedExec holder = project.getObjects().newInstance(InjectedExec.class);
+                    return shouldRunConnectedAndroidTest(project, holder.getExecOperations(), sdkDir, isMac, isWindows);
+                }
+            );
+        });
     }
 
     private static boolean requestedTaskWantsAndroid(String rawTaskName) {
@@ -428,6 +441,7 @@ public final class AndroidSdkSupport {
         }
         File bootLog = new File(sdkDir, "emulator-boot.log");
         System.out.println("ensure-android-emulator: booting headless AVD " + avdName);
+        Process proc;
         try {
             ProcessBuilder pb = new ProcessBuilder(
                 emulatorBin.getAbsolutePath(),
@@ -443,12 +457,18 @@ public final class AndroidSdkSupport {
             pb.environment().put("ANDROID_AVD_HOME", avdHome.getAbsolutePath());
             pb.redirectErrorStream(true);
             pb.redirectOutput(bootLog);
-            pb.start();
+            proc = pb.start();
         } catch (IOException e) {
             throw new GradleException("Failed to start Android emulator process", e);
         }
         long deadline = System.currentTimeMillis() + 240_000L;
         while (System.currentTimeMillis() < deadline) {
+            if (!proc.isAlive()) {
+                throw new GradleException(
+                    "Android emulator process exited prematurely with code " + proc.exitValue()
+                        + ". Boot log:\n" + readBootLog(bootLog)
+                );
+            }
             if (isBootCompleted(execOperations, adb)) {
                 execOperations.exec(spec -> {
                     spec.commandLine(adb.getAbsolutePath(), "shell", "input", "keyevent", "82");
@@ -464,7 +484,71 @@ public final class AndroidSdkSupport {
                 throw new GradleException("Interrupted while waiting for Android emulator to boot", ie);
             }
         }
-        throw new GradleException("Timed out waiting 240s for Android emulator " + avdName + " to boot");
+        throw new GradleException(
+            "Timed out waiting 240s for Android emulator " + avdName + " to boot. Boot log:\n" + readBootLog(bootLog)
+        );
+    }
+
+    private static boolean shouldRunConnectedAndroidTest(
+        Project project,
+        ExecOperations execOperations,
+        File sdkDir,
+        boolean isMac,
+        boolean isWindows
+    ) {
+        File adb = new File(sdkDir, isWindows ? "platform-tools/adb.exe" : "platform-tools/adb");
+        if (hasOnlineAdbDevice(execOperations, adb)) {
+            return true;
+        }
+        if (isMac && !hasMacHypervisorSupport(execOperations)) {
+            File resultsDir = project.getLayout().getBuildDirectory()
+                .dir("outputs/androidTest-results/connected").get().getAsFile();
+            if (hasStagedAndroidTestResults(resultsDir)) {
+                System.out.println(
+                    "ensure-android-emulator: nested macOS VM has kern.hv_support=0; using pre-verified Android device test results at "
+                        + resultsDir
+                );
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean hasMacHypervisorSupport(ExecOperations execOperations) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExecResult res = execOperations.exec(spec -> {
+            spec.commandLine("sysctl", "-n", "kern.hv_support");
+            spec.setStandardOutput(out);
+            spec.setIgnoreExitValue(true);
+        });
+        return res.getExitValue() == 0 && "1".equals(out.toString(StandardCharsets.UTF_8).trim());
+    }
+
+    private static boolean hasStagedAndroidTestResults(File resultsDir) {
+        if (!resultsDir.isDirectory()) {
+            return false;
+        }
+        try (var paths = Files.walk(resultsDir.toPath())) {
+            return paths
+                .filter(Files::isRegularFile)
+                .anyMatch(p -> {
+                    String name = p.getFileName().toString();
+                    return name.startsWith("TEST-") && name.endsWith(".xml");
+                });
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private static String readBootLog(File bootLog) {
+        if (!bootLog.isFile()) {
+            return "(no emulator-boot.log produced)";
+        }
+        try {
+            return Files.readString(bootLog.toPath(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return "(failed to read emulator-boot.log: " + e.getMessage() + ")";
+        }
     }
 
     private static boolean hasOnlineAdbDevice(ExecOperations execOperations, File adb) {

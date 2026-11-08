@@ -39,7 +39,7 @@ jobs:
   linuxX64:
     name: Build and Test (Linux - linuxX64)
     if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxX64' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -69,10 +69,10 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-  linuxArm64:
-    name: Build and Test (Linux - linuxArm64)
-    if: ${{ (inputs.platform || 'all') == 'all' || inputs.platform == 'linuxArm64' }}
-    runs-on: ubuntu-24.04-arm
+  build-linuxArm64:
+    name: Build (Linux - linuxArm64 cross-compile on x64)
+    if: ${{ ((inputs.platform || 'all') == 'all' || inputs.platform == 'linuxArm64') && (inputs.phase || 'build-and-test') != 'test-only' }}
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -86,18 +86,31 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.4.0
       - name: Build Linux target and C wrapper (linuxArm64)
-        if: ${{ (inputs.phase || 'build-and-test') != 'test-only' }}
         run: ./gradlew compileKotlinLinuxArm64 linuxArm64TestBinaries --no-configuration-cache
-      - name: Test Linux target (linuxArm64)
-        if: ${{ (inputs.phase || 'build-and-test') != 'build-only' }}
-        run: ./gradlew linuxArm64Test --no-configuration-cache
-      - name: Upload test reports (Linux - linuxArm64)
-        if: success() || failure()
+      - name: Upload linuxArm64 test binary
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-linux-linuxArm64
-          path: |
-            build/reports/tests/
-            build/test-results/
-          retention-days: 7
-          if-no-files-found: warn
+          name: linuxArm64-test-binary
+          path: build/bin/linuxArm64/debugTest/test.kexe
+          retention-days: 1
+          if-no-files-found: error
+
+  linuxArm64:
+    name: Test (Linux - linuxArm64 native execution)
+    needs: [build-linuxArm64]
+    if: ${{ ((inputs.platform || 'all') == 'all' || inputs.platform == 'linuxArm64') && (inputs.phase || 'build-and-test') != 'build-only' }}
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download linuxArm64 test binary
+        uses: actions/download-artifact@v8
+        with:
+          name: linuxArm64-test-binary
+          path: build/bin/linuxArm64/debugTest
+      - name: Execute Linux target tests natively (linuxArm64)
+        run: |
+          chmod +x build/bin/linuxArm64/debugTest/test.kexe
+          ./build/bin/linuxArm64/debugTest/test.kexe

@@ -132,21 +132,28 @@ public final class CentralPortalSupport {
             String coordinatePath = groupPath + "/" + publishProjectName;
             String version = project.getVersion().toString();
 
-            task.dependsOn(project.getTasks().named("publishAndroidPublicationToCentralPortalStagingRepository"));
+            task.dependsOn(project.getTasks().matching(t ->
+                t.getName().equals("publishAndroidPublicationToCentralPortalStagingRepository")
+            ));
             task.from(project.getLayout().getBuildDirectory().dir("staging-deploy"), spec ->
                 spec.include(coordinatePath + "-android/" + version + "/**")
             );
 
             if (externalRoot == null) {
                 if (hasAppleTargets && !System.getProperty("os.name", "").startsWith("Mac")) {
-                    throw new GradleException(
-                        "Stage the real KMP root on macOS, then set project.publication.android.rootStagingDirectory and expectedRootHead"
+                    task.doFirst(t -> {
+                        throw new GradleException(
+                            "Stage the real KMP root on macOS, then set project.publication.android.rootStagingDirectory and expectedRootHead"
+                        );
+                    });
+                } else {
+                    task.dependsOn(project.getTasks().matching(t ->
+                        t.getName().equals("publishKotlinMultiplatformPublicationToCentralPortalStagingRepository")
+                    ));
+                    task.from(project.getLayout().getBuildDirectory().dir("staging-deploy"), spec ->
+                        spec.include(coordinatePath + "/" + version + "/**")
                     );
                 }
-                task.dependsOn(project.getTasks().named("publishKotlinMultiplatformPublicationToCentralPortalStagingRepository"));
-                task.from(project.getLayout().getBuildDirectory().dir("staging-deploy"), spec ->
-                    spec.include(coordinatePath + "/" + version + "/**")
-                );
             } else {
                 File rootDirectory = rootProject.file(externalRoot);
                 File sourceReceipt = rootProject.file(externalRoot + ".source-head");
