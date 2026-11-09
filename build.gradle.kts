@@ -603,6 +603,12 @@ kotlin {
         check(nativeFfiTargetNames.all { it in configuredNativeTargets }) {
             "Unknown project.ffi.native.targets: ${nativeFfiTargetNames - configuredNativeTargets}"
         }
+        val discoveredDefFiles =
+            project
+                .fileTree("src/native/interop/cinterop") { include("*.def") }
+                .files
+                .sortedBy { it.name }
+                .ifEmpty { listOf(project.file(ffiDefFile)) }
         targets
             .withType<KotlinNativeTarget>()
             .matching {
@@ -626,26 +632,51 @@ kotlin {
 
                 compilations.getByName("main") {
                     cinterops {
-                        create(ffiNameLower) {
-                            defFile(project.file(ffiDefFile))
-                            packageName("$ffiNameLower.cinterop")
-                            if (wrapperTask != null) {
-                                extraOpts(
-                                    "-libraryPath",
-                                    layout.buildDirectory
-                                        .dir("cinterop-targets/$konanTargetName")
-                                        .get()
-                                        .asFile.absolutePath,
-                                )
+                        discoveredDefFiles.forEach { currentDefFile ->
+                            val defBaseName = currentDefFile.nameWithoutExtension
+                            val cinteropName =
+                                if (discoveredDefFiles.size == 1 && currentDefFile == project.file(ffiDefFile)) {
+                                    ffiNameLower
+                                } else {
+                                    defBaseName.replaceFirstChar { it.lowercase() }
+                                }
+                            val explicitPkg =
+                                if (currentDefFile.isFile) {
+                                    currentDefFile
+                                        .useLines { lines ->
+                                            lines
+                                                .map { it.trim() }
+                                                .firstOrNull { it.startsWith("package") && '=' in it }
+                                                ?.substringAfter('=')
+                                                ?.trim()
+                                                ?.takeIf { it.isNotEmpty() }
+                                        }
+                                } else {
+                                    null
+                                }
+                            create(cinteropName) {
+                                defFile(currentDefFile)
+                                packageName(explicitPkg ?: "$ffiNameLower.cinterop")
+                                if (wrapperTask != null) {
+                                    extraOpts(
+                                        "-libraryPath",
+                                        layout.buildDirectory
+                                            .dir("cinterop-targets/$konanTargetName")
+                                            .get()
+                                            .asFile.absolutePath,
+                                    )
+                                }
                             }
                         }
                     }
                 }
                 if (wrapperTask != null) {
-                    tasks.matching { it.name == "cinterop${ffiName}$targetCapitalized" }.configureEach {
-                        dependsOn(wrapperTask)
-                        inputs.files(wrapperTask)
-                    }
+                    tasks
+                        .matching { it.name.startsWith("cinterop") && it.name.endsWith(targetCapitalized) }
+                        .configureEach {
+                            dependsOn(wrapperTask)
+                            inputs.files(wrapperTask)
+                        }
                 }
             }
     }
@@ -1194,8 +1225,78 @@ val fullTargetBuildTaskNames =
             add("${target}Binaries")
             add("${target}TestBinaries")
         }
-        if (jvmFfiEnabled) add("compile${ffiName}Jni")
-        if (napiFfiEnabled) add("buildNode$ffiName")
+        if (jvmFfiEnabled) {
+            add("compile${ffiName}JniDebug")
+            add("compile${ffiName}JniRelease")
+            add("compile${ffiName}Jni")
+        }
+        if (napiFfiEnabled) {
+            add("buildNode${ffiName}Debug")
+            add("buildNode${ffiName}Release")
+            add("buildNode$ffiName")
+        }
+    }
+
+val debugBuildTaskNames =
+    buildSet {
+        addAll(
+            listOf(
+                "compileAndroidMain",
+                "compileAndroidHostTest",
+                "compileAndroidDeviceTest",
+                "assembleAndroidMain",
+                "jvmMainClasses",
+                "jvmTestClasses",
+                "compileDevelopmentLibraryKotlinJs",
+                "jsMainClasses",
+                "jsTestClasses",
+                "compileDevelopmentLibraryKotlinWasmJs",
+                "wasmJsMainClasses",
+                "wasmJsTestClasses",
+                "compileDevelopmentLibraryKotlinWasmWasi",
+                "wasmWasiMainClasses",
+                "wasmWasiTestClasses",
+                "assemble${frameworkName}DebugXCFramework",
+            ),
+        )
+        for (target in nativeTargetNames) {
+            val targetCap = target.replaceFirstChar { it.uppercase() }
+            add("compileKotlin$targetCap")
+            add("${target}TestBinaries")
+            if (nativeFfiEnabled && nativeFfiCompileWrapper && (nativeFfiTargetNames.isEmpty() || target in nativeFfiTargetNames)) {
+                add("compile${ffiName}WrapperDebugFor$targetCap")
+            }
+        }
+        if (jvmFfiEnabled) add("compile${ffiName}JniDebug")
+        if (napiFfiEnabled) add("buildNode${ffiName}Debug")
+    }
+
+val releaseBuildTaskNames =
+    buildSet {
+        addAll(
+            listOf(
+                "compileAndroidMain",
+                "assembleAndroidMain",
+                "jvmMainClasses",
+                "jvmJar",
+                "compileProductionLibraryKotlinJs",
+                "jsMainClasses",
+                "compileProductionLibraryKotlinWasmJs",
+                "wasmJsMainClasses",
+                "compileProductionLibraryKotlinWasmWasi",
+                "wasmWasiMainClasses",
+                "assemble${frameworkName}ReleaseXCFramework",
+            ),
+        )
+        for (target in nativeTargetNames) {
+            val targetCap = target.replaceFirstChar { it.uppercase() }
+            add("compileKotlin$targetCap")
+            if (nativeFfiEnabled && nativeFfiCompileWrapper && (nativeFfiTargetNames.isEmpty() || target in nativeFfiTargetNames)) {
+                add("compile${ffiName}WrapperReleaseFor$targetCap")
+            }
+        }
+        if (jvmFfiEnabled) add("compile${ffiName}JniRelease")
+        if (napiFfiEnabled) add("buildNode${ffiName}Release")
     }
 
 val verifierProperties =
@@ -1296,8 +1397,23 @@ tasks.named("check") {
     dependsOn("test")
 }
 
+tasks.register("debug") {
+    group = "build"
+    description = "Builds debug artifacts and FFI bindings across all enabled targets."
+    dependsOn(rootYarnLockTasks)
+    dependsOn(debugBuildTaskNames)
+}
+
+tasks.register("release") {
+    group = "build"
+    description = "Builds release artifacts and symbol-hidden FFI bindings across all enabled targets."
+    dependsOn(rootYarnLockTasks)
+    dependsOn(releaseBuildTaskNames)
+}
+
 tasks.named("build") {
     dependsOn(rootYarnLockTasks)
+    dependsOn("debug", "release")
     dependsOn(fullTargetBuildTaskNames)
 }
 
