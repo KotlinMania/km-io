@@ -455,7 +455,7 @@ public final class NodeFfiBuilder {
             if (text.contains("km_napi_registrar_head")) {
                 usesRegistrarHead = true;
             }
-            if (text.contains("NODE_API_MODULE(") || text.contains("NAPI_MODULE(")) {
+            if (text.contains("NAPI_MODULE(") || (text.contains("NODE_API_MODULE(") && !text.contains("#ifdef KM_NAPI_STANDALONE_MODULE"))) {
                 definesAddonEntry = true;
             }
         }
@@ -463,19 +463,21 @@ public final class NodeFfiBuilder {
             Path syntheticEntry = temporary.resolve("km_napi_entry.cpp");
             Files.writeString(syntheticEntry,
                 "#include <napi.h>\n" +
-                "typedef Napi::Object (*km_napi_registrar_fn)(Napi::Env, Napi::Object);\n" +
-                "struct km_napi_registrar_node { km_napi_registrar_fn fn; km_napi_registrar_node* next; };\n" +
+                "struct KmNapiRegistrarNode {\n" +
+                "    void (*register_fn)(Napi::Env, Napi::Object);\n" +
+                "    KmNapiRegistrarNode* next;\n" +
+                "};\n" +
                 "#if defined(__GNUC__) || defined(__clang__)\n" +
                 "__attribute__((visibility(\"hidden\")))\n" +
                 "#endif\n" +
-                "km_napi_registrar_node* km_napi_registrar_head = nullptr;\n" +
-                "static Napi::Object InitAll(Napi::Env env, Napi::Object exports) {\n" +
-                "    for (km_napi_registrar_node* cur = km_napi_registrar_head; cur != nullptr; cur = cur->next) {\n" +
-                "        cur->fn(env, exports);\n" +
+                "KmNapiRegistrarNode* km_napi_registrar_head = nullptr;\n" +
+                "static Napi::Object KmNapiInitAll(Napi::Env env, Napi::Object exports) {\n" +
+                "    for (KmNapiRegistrarNode* cur = km_napi_registrar_head; cur != nullptr; cur = cur->next) {\n" +
+                "        cur->register_fn(env, exports);\n" +
                 "    }\n" +
                 "    return exports;\n" +
                 "}\n" +
-                "NODE_API_MODULE(NODE_GYP_MODULE_NAME, InitAll)\n",
+                "NODE_API_MODULE(NODE_GYP_MODULE_NAME, KmNapiInitAll)\n",
                 StandardCharsets.UTF_8
             );
             resolvedSources.add(syntheticEntry.toRealPath());
