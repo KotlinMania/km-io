@@ -280,9 +280,9 @@ The full pattern (not just the task name):
 
 1. Delete tracked `setup-android-sdk.sh` / `setup-android-sdk.bat`.
 2. Add imports to `build.gradle.kts`: `ByteArrayInputStream`, `URI`, `Files`, `StandardCopyOption`, `ZipInputStream`, `GradleException`.
-3. Pin SDK versions exactly:
+3. Pin SDK versions (note: command-line tools revisions `>= 16000000` such as `16111833` require `AndroidSdkSupport.resolveSdkOsName(...)` to fetch `mac_arm64` / `mac_x86_64` archives instead of `mac`):
    ```kotlin
-   val androidCommandLineToolsRevision = "14742923"
+   val androidCommandLineToolsRevision = "16111833"
    val projectCompileSdk = "34"
    val projectAndroidBuildTools = "36.0.0"
    ```

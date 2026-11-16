@@ -67,22 +67,15 @@ public final class AndroidSdkSupport {
 
     public static void configure(Project project) {
         Project rootProject = project.getRootProject();
-        String revision = prop(project, "android.commandLineTools.revision", "14742923");
+        String revision = prop(project, "android.commandLineTools.revision", "16111833");
         String compileSdk = prop(project, "android.compileSdk", "34");
         String buildTools = prop(project, "android.buildTools", "36.0.0");
         String osName = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        String osArch = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
         boolean isWindows = osName.contains("windows");
         boolean isMac = osName.contains("mac");
-        String sdkOsName;
-        if (isWindows) {
-            sdkOsName = "win";
-        } else if (isMac) {
-            sdkOsName = "mac";
-        } else if (osName.contains("linux")) {
-            sdkOsName = "linux";
-        } else {
-            throw new GradleException("Unsupported Android SDK setup OS: " + System.getProperty("os.name"));
-        }
+        String sdkOsName = resolveSdkOsName(osName, osArch, revision);
+        String expectedStamp = formatInstallStamp(sdkOsName, revision, compileSdk, buildTools);
 
         File sdkDir = new File(rootProject.getProjectDir(), ".android-sdk");
         File sdkManager = new File(
@@ -100,7 +93,7 @@ public final class AndroidSdkSupport {
 
         boolean wantsAndroid = project.getGradle().getStartParameter().getTaskNames().stream()
             .anyMatch(AndroidSdkSupport::requestedTaskWantsAndroid);
-        if (wantsAndroid && !isInstalled(installMarker, sdkManager, requiredDirs)) {
+        if (wantsAndroid && !isInstalled(sdkDir, installMarker, expectedStamp, sdkManager, requiredDirs)) {
             InjectedExec holder = project.getObjects().newInstance(InjectedExec.class);
             installSdk(
                 holder.getExecOperations(),
@@ -108,6 +101,7 @@ public final class AndroidSdkSupport {
                 sdkDir,
                 sdkManager,
                 installMarker,
+                expectedStamp,
                 requiredDirs,
                 sdkOsName,
                 revision,
@@ -119,10 +113,10 @@ public final class AndroidSdkSupport {
 
         TaskProvider<ExecHolder> ensureAndroidSdk = project.getTasks().register("ensureAndroidSdk", ExecHolder.class, task -> {
             task.setGroup("setup");
-            task.setDescription("Ensures the project-local Android SDK is installed (idempotent).");
+            task.setDescription("Ensures the project-local Android SDK is installed and matches pinned versions (idempotent).");
             task.onlyIf(
-                "Android SDK already installed at " + sdkDir,
-                t -> !isInstalled(installMarker, sdkManager, requiredDirs)
+                "Android SDK already installed with matching pins at " + sdkDir,
+                t -> !isInstalled(sdkDir, installMarker, expectedStamp, sdkManager, requiredDirs)
             );
             task.doLast(t -> installSdk(
                 task.getExecOperations(),
@@ -130,6 +124,7 @@ public final class AndroidSdkSupport {
                 sdkDir,
                 sdkManager,
                 installMarker,
+                expectedStamp,
                 requiredDirs,
                 sdkOsName,
                 revision,
@@ -169,7 +164,7 @@ public final class AndroidSdkSupport {
                 return false;
             }
             String lower = name.toLowerCase(Locale.ROOT);
-            if (lower.contains("androidnative")) {
+            if (lower.contains("androidnative") && !lower.startsWith("validateandroidnative")) {
                 return false;
             }
             return lower.contains("android")
@@ -191,13 +186,18 @@ public final class AndroidSdkSupport {
                 }
             );
         });
+
+        project.getTasks().matching(task -> {
+            String lower = task.getName().toLowerCase(Locale.ROOT);
+            return lower.startsWith("validateandroidnative");
+        }).configureEach(task -> task.dependsOn(ensureAndroidEmulator));
     }
 
     private static boolean requestedTaskWantsAndroid(String rawTaskName) {
         int colon = rawTaskName.lastIndexOf(':');
         String taskName = colon >= 0 ? rawTaskName.substring(colon + 1) : rawTaskName;
         String lower = taskName.toLowerCase(Locale.ROOT);
-        if (lower.contains("androidnative")) {
+        if (lower.contains("androidnative") && !lower.startsWith("validateandroidnative")) {
             return false;
         }
         if (lower.contains("android") || lower.contains("unittest")
@@ -207,8 +207,58 @@ public final class AndroidSdkSupport {
         return ANDROID_LIFECYCLE_TASKS.contains(taskName);
     }
 
-    private static boolean isInstalled(File installMarker, File sdkManager, List<File> requiredDirs) {
-        if (!installMarker.exists() || !sdkManager.exists()) {
+    private static String resolveSdkOsName(String osName, String osArch, String revision) {
+        if (osName.contains("windows")) {
+            return "win";
+        }
+        if (osName.contains("mac")) {
+            boolean archSplitRevision = !revision.isEmpty()
+                && revision.chars().allMatch(Character::isDigit)
+                && Long.parseLong(revision) >= 16_000_000L;
+            if (!archSplitRevision) {
+                return "mac";
+            }
+            return ("aarch64".equals(osArch) || "arm64".equals(osArch)) ? "mac_arm64" : "mac_x86_64";
+        }
+        if (osName.contains("linux")) {
+            return "linux";
+        }
+        throw new GradleException("Unsupported Android SDK setup OS: " + System.getProperty("os.name"));
+    }
+
+    private static String formatInstallStamp(
+        String sdkOsName,
+        String revision,
+        String compileSdk,
+        String buildTools
+    ) {
+        return "sdkOs=" + sdkOsName
+            + "\nrevision=" + revision
+            + "\ncompileSdk=" + compileSdk
+            + "\nbuildTools=" + buildTools + "\n";
+    }
+
+    private static boolean hasMatchingInstallStamp(File installMarker, String expectedStamp) {
+        if (!installMarker.isFile()) {
+            return false;
+        }
+        try {
+            return expectedStamp.equals(Files.readString(installMarker.toPath(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new GradleException("Failed to read Android SDK install marker at " + installMarker, e);
+        }
+    }
+
+    private static boolean isInstalled(
+        File sdkDir,
+        File installMarker,
+        String expectedStamp,
+        File sdkManager,
+        List<File> requiredDirs
+    ) {
+        if (!hasMatchingInstallStamp(installMarker, expectedStamp)
+            || !sdkManager.exists()
+            || !new File(sdkDir, "cmdline-tools/latest/source.properties").isFile()) {
             return false;
         }
         for (File dir : requiredDirs) {
@@ -259,6 +309,8 @@ public final class AndroidSdkSupport {
         try {
             try (InputStream in = URI.create(url).toURL().openStream()) {
                 Files.copy(in, zipFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new GradleException("Failed to download Android command-line tools from " + url + ": " + e.getMessage(), e);
             }
             deleteRecursively(latestDir);
             latestDir.mkdirs();
@@ -290,12 +342,12 @@ public final class AndroidSdkSupport {
                     }
                     zis.closeEntry();
                 }
+            } catch (IOException e) {
+                throw new GradleException("Failed to extract Android command-line tools archive " + zipFile + " (from " + url + "): " + e.getMessage(), e);
             }
             if (!isWindows) {
                 sdkManager.setExecutable(true);
             }
-        } catch (IOException e) {
-            throw new GradleException("Failed to download or extract Android command-line tools", e);
         } finally {
             deleteRecursively(tmpDir);
         }
@@ -307,6 +359,7 @@ public final class AndroidSdkSupport {
         File sdkDir,
         File sdkManager,
         File installMarker,
+        String expectedStamp,
         List<File> requiredDirs,
         String sdkOsName,
         String revision,
@@ -314,12 +367,16 @@ public final class AndroidSdkSupport {
         String buildTools,
         boolean isWindows
     ) {
-        if (isInstalled(installMarker, sdkManager, requiredDirs)) {
+        if (isInstalled(sdkDir, installMarker, expectedStamp, sdkManager, requiredDirs)) {
             writeLocalProperties(rootProject, sdkDir);
             System.out.println("setup-android-sdk: SDK already installed at " + sdkDir);
             return;
         }
-        if (!sdkManager.exists()) {
+        boolean needsCommandLineToolsRefresh = !hasMatchingInstallStamp(installMarker, expectedStamp)
+            || !sdkManager.exists()
+            || !new File(sdkDir, "cmdline-tools/latest/source.properties").isFile();
+        if (needsCommandLineToolsRefresh) {
+            System.out.println("setup-android-sdk: refreshing command-line tools to revision " + revision + " (" + sdkOsName + ")");
             downloadCommandLineTools(sdkDir, sdkManager, sdkOsName, revision, isWindows);
         }
         System.out.println("setup-android-sdk: accepting licenses");
@@ -356,7 +413,7 @@ public final class AndroidSdkSupport {
                 );
             }
             writeLocalProperties(rootProject, sdkDir);
-            Files.writeString(installMarker.toPath(), "", StandardCharsets.UTF_8);
+            Files.writeString(installMarker.toPath(), expectedStamp, StandardCharsets.UTF_8);
             System.out.println("setup-android-sdk: done; SDK at " + sdkDir);
         } catch (IOException e) {
             throw new GradleException("Failed to install Android SDK packages", e);
