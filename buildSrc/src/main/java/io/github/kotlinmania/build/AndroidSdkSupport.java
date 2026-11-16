@@ -314,8 +314,8 @@ public final class AndroidSdkSupport {
             }
             deleteRecursively(latestDir);
             latestDir.mkdirs();
-            Path canonicalLatest = latestDir.getCanonicalFile().toPath();
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+                Path canonicalLatest = latestDir.getCanonicalFile().toPath();
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
                     String name = entry.getName();
